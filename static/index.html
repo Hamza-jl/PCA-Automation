@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIA Automatique — Devoteam</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold:    '#C5A059',
+            'gold-d':'#a8863e',
+            dark:    '#080810',
+            surface: '#0f0f1a',
+            panel:   '#13131f',
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+            sans:  ['Montserrat', 'system-ui', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* ── Base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #080810; color: #F0EEE8; font-family: 'Montserrat', sans-serif;
+           overflow-x: hidden; }
+
+    /* ── Loader ───────────────────────────────────────────────── */
+    #loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #080810;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #loader-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 300; letter-spacing: 0.3em;
+      color: #C5A059; opacity: 0; transform: translateY(20px);
+    }
+
+    /* ── Background orbs ──────────────────────────────────────── */
+    .orb {
+      position: fixed; border-radius: 50%; filter: blur(120px);
+      pointer-events: none; z-index: 0;
+    }
+    .orb-gold  { width: 600px; height: 600px; background: rgba(197,160,89,.07);
+                 top: -200px; right: -150px; animation: pulse-orb 8s ease-in-out infinite; }
+    .orb-blue  { width: 500px; height: 500px; background: rgba(80,60,200,.06);
+                 bottom: -150px; left: -100px; animation: pulse-orb 10s ease-in-out infinite reverse; }
+    @keyframes pulse-orb {
+      0%,100% { transform: scale(1) translate(0,0); }
+      50%      { transform: scale(1.12) translate(20px,-20px); }
+    }
+
+    /* ── Navbar ───────────────────────────────────────────────── */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.25rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .4s, backdrop-filter .4s;
+    }
+    #navbar.scrolled {
+      background: rgba(8,8,16,.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 600; letter-spacing: .1em;
+      color: #C5A059;
+    }
+    .nav-logo span { color: #F0EEE8; font-weight: 300; }
+    .nav-link {
+      font-size: .72rem; font-weight: 500; letter-spacing: .2em;
+      text-transform: uppercase; color: rgba(240,238,232,.55);
+      text-decoration: none; transition: color .25s;
+    }
+    .nav-link:hover { color: #C5A059; }
+
+    /* ── Glass panel ──────────────────────────────────────────── */
+    .glass {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+    }
+    .glass-gold {
+      background: rgba(197,160,89,.06);
+      border: 1px solid rgba(197,160,89,.2);
+      backdrop-filter: blur(12px);
+      border-radius: 1rem;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 7rem 1.5rem 5rem; position: relative; z-index: 1;
+    }
+    .hero-label {
+      font-size: .7rem; font-weight: 600; letter-spacing: .4em;
+      text-transform: uppercase; color: #C5A059; margin-bottom: 1.5rem;
+    }
+    .hero-h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.2rem, 8vw, 7rem);
+      font-weight: 300; line-height: 1.08; letter-spacing: -.01em;
+    }
+    .hero-h1 em { font-style: italic; color: #C5A059; }
+    .hero-sub {
+      max-width: 520px; margin: 1.8rem auto 0;
+      font-size: .82rem; font-weight: 300; line-height: 1.9;
+      color: rgba(240,238,232,.55); letter-spacing: .04em;
+    }
+
+    /* ── CTA Button (sliding fill) ────────────────────────────── */
+    .btn-gold {
+      position: relative; display: inline-flex; align-items: center;
+      gap: .6rem; overflow: hidden; cursor: pointer;
+      padding: .85rem 2.2rem; border: 1px solid #C5A059;
+      border-radius: .5rem; font-size: .78rem; font-weight: 600;
+      letter-spacing: .15em; text-transform: uppercase;
+      color: #C5A059; background: transparent;
+      transition: color .35s; text-decoration: none;
+    }
+    .btn-gold::before {
+      content: ''; position: absolute;
+      bottom: 0; left: 0; width: 150%; height: 200%;
+      background: #C5A059;
+      transform: translateX(-110%) translateY(60%) rotate(15deg);
+      transition: transform .45s cubic-bezier(.4,0,.2,1);
+    }
+    .btn-gold:hover { color: #080810; }
+    .btn-gold:hover::before { transform: translateX(-5%) translateY(10%) rotate(15deg); }
+    .btn-gold > * { position: relative; z-index: 1; }
+    .btn-gold:disabled { opacity: .35; cursor: not-allowed; }
+    .btn-gold:disabled:hover { color: #C5A059; }
+    .btn-gold:disabled::before { transform: none !important; }
+
+    .btn-ghost {
+      background: transparent; border: 1px solid rgba(255,255,255,.15);
+      color: rgba(240,238,232,.6); border-radius: .5rem;
+      padding: .75rem 1.8rem; font-size: .75rem; font-weight: 500;
+      letter-spacing: .12em; text-transform: uppercase;
+      cursor: pointer; transition: all .25s;
+    }
+    .btn-ghost:hover { border-color: rgba(197,160,89,.5); color: #C5A059; }
+
+    /* ── Drop zones ───────────────────────────────────────────── */
+    .drop-zone {
+      position: relative; cursor: pointer;
+      border: 1.5px dashed rgba(255,255,255,.12);
+      border-radius: .875rem;
+      background: rgba(255,255,255,.025);
+      padding: 2.5rem 2rem;
+      transition: border-color .25s, background .25s, transform .2s;
+      user-select: none;
+    }
+    .drop-zone:hover {
+      border-color: rgba(197,160,89,.5);
+      background: rgba(197,160,89,.04);
+    }
+    .drop-zone.drag-over {
+      border-color: #C5A059;
+      background: rgba(197,160,89,.08);
+      transform: scale(1.015);
+    }
+    .drop-zone.has-files {
+      border-color: rgba(197,160,89,.6);
+      background: rgba(197,160,89,.05);
+    }
+    .drop-zone-icon {
+      font-size: 2rem; color: rgba(197,160,89,.5);
+      transition: color .25s, transform .3s;
+    }
+    .drop-zone.has-files .drop-zone-icon  { color: #C5A059; transform: scale(1.05); }
+    .drop-zone.drag-over .drop-zone-icon  { transform: scale(1.15) translateY(-4px); }
+    .drop-zone-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.35rem; font-weight: 600; letter-spacing: .04em;
+      margin-top: .75rem;
+    }
+    .drop-zone-sub {
+      font-size: .7rem; font-weight: 400; letter-spacing: .1em;
+      color: rgba(240,238,232,.4); text-transform: uppercase; margin-top: .3rem;
+    }
+    .drop-zone-instruction {
+      font-size: .72rem; color: rgba(240,238,232,.35);
+      margin-top: 1.2rem; line-height: 1.6;
+    }
+    .file-badge {
+      display: none; margin-top: 1rem;
+      background: rgba(197,160,89,.15); border: 1px solid rgba(197,160,89,.3);
+      border-radius: 2rem; padding: .35rem .9rem;
+      font-size: .68rem; font-weight: 600; letter-spacing: .1em;
+      color: #C5A059; text-transform: uppercase;
+    }
+    .drop-zone.has-files .file-badge { display: inline-flex; align-items: center; gap: .4rem; }
+
+    /* ── Step connector ───────────────────────────────────────── */
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem; font-weight: 300;
+      color: rgba(197,160,89,.15); line-height: 1;
+    }
+
+    /* ── Spinner ──────────────────────────────────────────────── */
+    .spinner-ring {
+      width: 64px; height: 64px; border-radius: 50%;
+      border: 2px solid rgba(197,160,89,.15);
+      border-top-color: #C5A059;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .spinner-orbit {
+      width: 100px; height: 100px; border-radius: 50%;
+      border: 1px solid rgba(197,160,89,.1);
+      animation: spin 2s linear infinite reverse;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Success checkmark ────────────────────────────────────── */
+    .check-circle {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(197,160,89,.1); border: 1px solid rgba(197,160,89,.35);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    /* ── How-it-works timeline ────────────────────────────────── */
+    .how-step {
+      position: relative; flex: 1;
+    }
+    .how-step:not(:last-child)::after {
+      content: '';
+      position: absolute; top: 1.5rem; left: calc(50% + 2rem);
+      width: calc(100% - 4rem); height: 1px;
+      background: linear-gradient(90deg, rgba(197,160,89,.3), rgba(197,160,89,.05));
+    }
+    .how-icon-wrap {
+      width: 3rem; height: 3rem; border-radius: 50%;
+      background: rgba(197,160,89,.08); border: 1px solid rgba(197,160,89,.2);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto .75rem; font-size: .9rem; color: #C5A059;
+    }
+
+    /* ── Divider line ─────────────────────────────────────────── */
+    .gold-line {
+      width: 3rem; height: 1px; background: #C5A059; margin: 0 auto;
+    }
+
+    /* ── Scroll indicator ─────────────────────────────────────── */
+    .scroll-indicator {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: .4rem;
+      animation: bounce-gentle 2.5s ease-in-out infinite;
+    }
+    .scroll-indicator span {
+      font-size: .62rem; letter-spacing: .25em; text-transform: uppercase;
+      color: rgba(240,238,232,.3);
+    }
+    @keyframes bounce-gentle {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ── Reveal classes (GSAP targets) ───────────────────────── */
+    .reveal-on-load { opacity: 0; transform: translateY(24px); }
+    .reveal-scroll  { opacity: 0; transform: translateY(32px); }
+
+    /* ── Section labels ───────────────────────────────────────── */
+    .section-label {
+      font-size: .65rem; font-weight: 600; letter-spacing: .4em;
+      text-transform: uppercase; color: rgba(197,160,89,.7);
+    }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 300;
+      line-height: 1.15;
+    }
+
+    /* ── Toast ────────────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 200;
+      padding: .85rem 1.5rem; border-radius: .6rem;
+      font-size: .75rem; font-weight: 500; letter-spacing: .05em;
+      background: rgba(231,76,60,.15); border: 1px solid rgba(231,76,60,.4);
+      color: #e74c3c; max-width: 380px;
+      transform: translateY(120%); opacity: 0;
+      transition: transform .35s, opacity .35s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- ─── LOADER ────────────────────────────────────────────────── -->
+<div id="loader">
+  <div id="loader-text">BIA &nbsp;·&nbsp; Automatique</div>
+</div>
+
+<!-- ─── BACKGROUND ORBS ───────────────────────────────────────── -->
+<div class="orb orb-gold"></div>
+<div class="orb orb-blue"></div>
+
+<!-- ─── NAVBAR ────────────────────────────────────────────────── -->
+<nav id="navbar">
+  <div class="nav-logo">BIA <span>Automatique</span></div>
+  <div class="flex items-center gap-8">
+    <a href="#tool" class="nav-link">Outil</a>
+    <a href="#how"  class="nav-link">Comment ça marche</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ──────────────────────────────────────────────────── -->
+<section id="hero" class="relative z-10">
+  <p class="hero-label reveal-on-load">Devoteam &nbsp;/&nbsp; Business Impact Analysis</p>
+  <h1 class="hero-h1 reveal-on-load">
+    Synthèse BIA<br><em>automatisée</em>
+  </h1>
+  <p class="hero-sub reveal-on-load">
+    Importez vos fiches BIA et votre template de synthèse.
+    Notre pipeline ETL extrait, calcule et renseigne chaque onglet
+    en quelques secondes — sans aucune saisie manuelle.
+  </p>
+  <div class="mt-10 flex items-center gap-4 justify-center reveal-on-load">
+    <a href="#tool" class="btn-gold">
+      <span>Lancer l'outil</span>
+      <span><i class="fa-solid fa-arrow-down text-xs"></i></span>
+    </a>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator reveal-on-load">
+    <span>Défiler</span>
+    <i class="fa-solid fa-chevron-down text-gold text-xs opacity-40"></i>
+  </div>
+</section>
+
+<!-- ─── TOOL SECTION ──────────────────────────────────────────── -->
+<section id="tool" class="relative z-10 py-28 px-4">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Section header -->
+    <div class="text-center mb-14 reveal-scroll">
+      <p class="section-label mb-3">01 / Outil</p>
+      <h2 class="section-title">Générez votre synthèse</h2>
+      <div class="gold-line mt-4"></div>
+    </div>
+
+    <!-- Tool card -->
+    <div class="glass p-8 md:p-10 reveal-scroll">
+
+      <!-- ── STATE: UPLOAD ──────────────────────────────────── -->
+      <div id="state-upload">
+
+        <!-- Step indicator -->
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-6 h-6 rounded-full border border-gold flex items-center justify-center
+                      text-gold text-xs font-semibold" id="step1-dot">1</div>
+          <div class="h-px flex-1 bg-gradient-to-r from-gold/30 to-transparent"></div>
+          <div class="w-6 h-6 rounded-full border border-white/15 flex items-center justify-center
+                      text-white/30 text-xs font-semibold" id="step2-dot">2</div>
+          <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+          <div class="w-6 h-6 rounded-full border border-white/15 flex items-center justify-center
+                      text-white/30 text-xs font-semibold" id="step3-dot">3</div>
+        </div>
+
+        <!-- Drop zones grid -->
+        <div class="grid md:grid-cols-2 gap-5 mb-8">
+
+          <!-- Zone 1: Fiches BIA (multiple DOCX) -->
+          <div class="drop-zone text-center" id="zone-fiches"
+               role="button" aria-label="Sélectionner les fiches BIA">
+            <div class="drop-zone-icon">
+              <i class="fa-regular fa-file-word"></i>
+            </div>
+            <div class="drop-zone-title">Fiches BIA</div>
+            <div class="drop-zone-sub">.docx — fichiers multiples</div>
+            <p class="drop-zone-instruction">
+              Glissez vos fiches ici<br>ou cliquez pour sélectionner
+            </p>
+            <div class="file-badge" id="badge-fiches">
+              <i class="fa-solid fa-check text-xs"></i>
+              <span id="badge-fiches-text">0 fichier(s)</span>
+            </div>
+          </div>
+
+          <!-- Zone 2: Synthèse template (single XLSX) -->
+          <div class="drop-zone text-center" id="zone-synthese"
+               role="button" aria-label="Sélectionner la synthèse BIA">
+            <div class="drop-zone-icon">
+              <i class="fa-regular fa-file-excel"></i>
+            </div>
+            <div class="drop-zone-title">Synthèse BIA</div>
+            <div class="drop-zone-sub">.xlsx — template vierge</div>
+            <p class="drop-zone-instruction">
+              Glissez votre synthèse ici<br>ou cliquez pour sélectionner
+            </p>
+            <div class="file-badge" id="badge-synthese">
+              <i class="fa-solid fa-check text-xs"></i>
+              <span id="badge-synthese-text">—</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Generate button -->
+        <div class="flex justify-center">
+          <button class="btn-gold" id="btn-process" disabled
+                  onclick="processFiles()">
+            <span><i class="fa-solid fa-bolt-lightning"></i></span>
+            <span>Générer la synthèse</span>
+          </button>
+        </div>
+
+        <!-- Info note -->
+        <p class="text-center mt-5 text-xs text-white/25 tracking-wide">
+          Les fiches sont traitées séquentiellement — chaque département est injecté dans la même synthèse.
+        </p>
+      </div>
+      <!-- / STATE: UPLOAD -->
+
+      <!-- ── STATE: PROCESSING ──────────────────────────────── -->
+      <div id="state-processing" style="display:none;">
+        <div class="flex flex-col items-center justify-center py-12 gap-6">
+          <!-- Nested spinner rings -->
+          <div class="relative w-24 h-24 flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border border-gold/10
+                        animate-[spin_3s_linear_infinite_reverse]"></div>
+            <div class="absolute inset-2 rounded-full border border-gold/20
+                        animate-[spin_2s_linear_infinite]"></div>
+            <div class="absolute inset-4 rounded-full border-t border-gold
+                        animate-[spin_1s_linear_infinite]"></div>
+            <i class="fa-solid fa-gear text-gold/40 text-sm animate-[spin_4s_linear_infinite]"></i>
+          </div>
+          <!-- Cycling status text -->
+          <div class="text-center">
+            <p class="font-serif text-xl font-light text-white/80 mb-2">Traitement en cours</p>
+            <p class="text-xs tracking-widest text-gold/60 uppercase" id="status-text">
+              Lecture des fiches BIA...
+            </p>
+          </div>
+          <!-- Animated progress dots -->
+          <div class="flex gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:0s]"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.15s]"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.3s]"></span>
+          </div>
+        </div>
+      </div>
+      <!-- / STATE: PROCESSING -->
+
+      <!-- ── STATE: SUCCESS ─────────────────────────────────── -->
+      <div id="state-success" style="display:none;">
+        <div class="flex flex-col items-center py-12 gap-5" id="success-card">
+          <!-- Check icon -->
+          <div class="check-circle">
+            <i class="fa-solid fa-check text-gold text-2xl"></i>
+          </div>
+          <div class="text-center">
+            <h3 class="font-serif text-2xl font-light text-white mb-2">
+              Synthèse générée&nbsp;!
+            </h3>
+            <p class="text-sm text-white/40">
+              <span id="success-count" class="text-gold font-semibold">0</span>
+              fiche(s) intégrée(s) avec succès
+            </p>
+          </div>
+          <!-- Warnings (if any) -->
+          <div id="success-warnings" style="display:none;"
+               class="glass-gold px-4 py-3 text-xs text-gold/80 max-w-md text-center tracking-wide">
+          </div>
+          <!-- Action buttons -->
+          <div class="flex flex-wrap gap-3 justify-center mt-2">
+            <button class="btn-gold" onclick="downloadResult()">
+              <span><i class="fa-solid fa-download"></i></span>
+              <span>Télécharger le fichier</span>
+            </button>
+            <button class="btn-ghost" onclick="resetUI()">
+              <i class="fa-solid fa-rotate-left mr-2 text-xs"></i>
+              Nouveau traitement
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- / STATE: SUCCESS -->
+
+      <!-- ── STATE: ERROR ───────────────────────────────────── -->
+      <div id="state-error" style="display:none;">
+        <div class="flex flex-col items-center py-12 gap-5">
+          <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30
+                      flex items-center justify-center">
+            <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl"></i>
+          </div>
+          <div class="text-center">
+            <h3 class="font-serif text-2xl font-light text-white mb-2">Erreur de traitement</h3>
+            <p id="error-text" class="text-sm text-red-400/80 max-w-md"></p>
+          </div>
+          <button class="btn-ghost" onclick="resetUI()">
+            <i class="fa-solid fa-rotate-left mr-2 text-xs"></i> Réessayer
+          </button>
+        </div>
+      </div>
+      <!-- / STATE: ERROR -->
+
+    </div>
+    <!-- / tool card -->
+
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ──────────────────────────────────────────── -->
+<section id="how" class="relative z-10 py-28 px-4">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="text-center mb-16 reveal-scroll">
+      <p class="section-label mb-3">02 / Processus</p>
+      <h2 class="section-title">Comment ça marche</h2>
+      <div class="gold-line mt-4"></div>
+    </div>
+
+    <!-- Steps -->
+    <div class="grid md:grid-cols-3 gap-8 text-center">
+
+      <div class="glass p-8 reveal-scroll">
+        <div class="step-num">01</div>
+        <div class="how-icon-wrap mt-3">
+          <i class="fa-regular fa-folder-open"></i>
+        </div>
+        <h3 class="font-serif text-xl font-semibold mt-1 mb-3">Importez les fiches</h3>
+        <p class="text-xs text-white/40 leading-relaxed tracking-wide">
+          Chargez une ou plusieurs fiches BIA <code class="text-gold/70">.docx</code>
+          issues des ateliers client. Tous les départements peuvent être traités en une seule passe.
+        </p>
+      </div>
+
+      <div class="glass p-8 reveal-scroll" style="animation-delay:.1s">
+        <div class="step-num">02</div>
+        <div class="how-icon-wrap mt-3">
+          <i class="fa-solid fa-gears"></i>
+        </div>
+        <h3 class="font-serif text-xl font-semibold mt-1 mb-3">Le pipeline ETL</h3>
+        <p class="text-xs text-white/40 leading-relaxed tracking-wide">
+          Le moteur extrait les tableaux Word (activités, impacts, DMIA, échanges, applications IT,
+          collaborateurs clés…), calcule les scores pondérés et mappe chaque champ
+          vers le bon onglet de la synthèse.
+        </p>
+      </div>
+
+      <div class="glass p-8 reveal-scroll" style="animation-delay:.2s">
+        <div class="step-num">03</div>
+        <div class="how-icon-wrap mt-3">
+          <i class="fa-regular fa-circle-check"></i>
+        </div>
+        <h3 class="font-serif text-xl font-semibold mt-1 mb-3">Téléchargez</h3>
+        <p class="text-xs text-white/40 leading-relaxed tracking-wide">
+          La synthèse <code class="text-gold/70">.xlsx</code> est remplie automatiquement,
+          structurée par département. Prête à être présentée au client ou archivée.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Sheets covered -->
+    <div class="mt-14 glass p-6 md:p-8 reveal-scroll">
+      <p class="section-label text-center mb-6">Onglets renseignés automatiquement</p>
+      <div class="flex flex-wrap gap-3 justify-center">
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Activités</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Impact DMIA</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Applications IT</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Échanges internes</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Échanges externes</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Montée en charge</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Collaborateurs clés</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Autres équipements</span>
+        <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Documents critiques</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────────── -->
+<footer class="relative z-10 border-t border-white/06 py-10 px-6">
+  <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="nav-logo text-sm">BIA <span>Automatique</span></div>
+    <p class="text-xs text-white/25 tracking-wider">
+      Devoteam &nbsp;·&nbsp; <span data-year></span>
+    </p>
+  </div>
+</footer>
+
+<!-- ─── TOAST ─────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ─── JAVASCRIPT ────────────────────────────────────────────── -->
+<script>
+(function () {
+  "use strict";
+
+  /* ── State ─────────────────────────────────────────────────── */
+  const STATES = ['upload','processing','success','error'];
+  let selectedFiches  = [];
+  let selectedSynthese = null;
+  let downloadBlob    = null;
+  let statusInterval  = null;
+
+  const STATUS_MESSAGES = [
+    "Lecture des fiches BIA...",
+    "Extraction des activités...",
+    "Calcul des scores d'impact...",
+    "Génération de la synthèse...",
+    "Finalisation du fichier...",
+  ];
+
+  /* ── Helpers ────────────────────────────────────────────────── */
+  function setState(name) {
+    STATES.forEach(s => {
+      const el = document.getElementById(`state-${s}`);
+      if (el) el.style.display = s === name ? '' : 'none';
+    });
+    if (name === 'success') {
+      gsap.fromTo('#success-card',
+        { opacity: 0, scale: .92, y: 16 },
+        { opacity: 1, scale: 1,   y: 0, duration: .55, ease: 'back.out(1.6)' }
+      );
+    }
+  }
+
+  function showToast(msg, duration = 5000) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+  }
+
+  function updateProcessButton() {
+    const btn = document.getElementById('btn-process');
+    btn.disabled = !(selectedFiches.length > 0 && selectedSynthese);
+
+    // Animate step dots
+    const s1 = document.getElementById('step1-dot');
+    const s2 = document.getElementById('step2-dot');
+    const s3 = document.getElementById('step3-dot');
+    const activeCls   = ['border-gold','text-gold'];
+    const inactiveCls = ['border-white/15','text-white/30'];
+
+    if (selectedFiches.length > 0) {
+      s1.classList.add(...activeCls); s1.classList.remove(...inactiveCls);
+    }
+    if (selectedSynthese) {
+      s2.classList.add(...activeCls); s2.classList.remove(...inactiveCls);
+    }
+    if (selectedFiches.length > 0 && selectedSynthese) {
+      s3.classList.add(...activeCls); s3.classList.remove(...inactiveCls);
+      gsap.fromTo('#btn-process',{scale:.97},{scale:1,duration:.35,ease:'back.out(2)'});
+    }
+  }
+
+  /* ── Drop zone setup ────────────────────────────────────────── */
+  function setupDropZone(zoneId, accept, multiple, onFiles) {
+    const zone = document.getElementById(zoneId);
+
+    // Drag events
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave', e => {
+      if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const files = Array.from(e.dataTransfer.files)
+        .filter(f => f.name.toLowerCase().endsWith(accept));
+      if (files.length) onFiles(multiple ? files : [files[0]]);
+      else showToast(`Format attendu : *${accept}`);
+    });
+
+    // Click to open file picker
+    zone.addEventListener('click', () => {
+      const inp = document.createElement('input');
+      inp.type = 'file';
+      inp.accept = accept;
+      inp.multiple = multiple;
+      inp.onchange = e => {
+        const files = Array.from(e.target.files);
+        if (files.length) onFiles(multiple ? files : [files[0]]);
+      };
+      inp.click();
+    });
+  }
+
+  /* ── Fiches zone ────────────────────────────────────────────── */
+  setupDropZone('zone-fiches', '.docx', true, files => {
+    selectedFiches = files;
+    const zone  = document.getElementById('zone-fiches');
+    const badge = document.getElementById('badge-fiches');
+    const text  = document.getElementById('badge-fiches-text');
+    zone.classList.add('has-files');
+    text.textContent = `${files.length} fiche${files.length > 1 ? 's' : ''} sélectionnée${files.length > 1 ? 's' : ''}`;
+    gsap.fromTo(badge, {scale:.8,opacity:0}, {scale:1,opacity:1,duration:.3,ease:'back.out(2)'});
+    updateProcessButton();
+  });
+
+  /* ── Synthèse zone ──────────────────────────────────────────── */
+  setupDropZone('zone-synthese', '.xlsx', false, files => {
+    selectedSynthese = files[0];
+    const zone  = document.getElementById('zone-synthese');
+    const badge = document.getElementById('badge-synthese');
+    const text  = document.getElementById('badge-synthese-text');
+    zone.classList.add('has-files');
+    // Truncate filename if too long
+    const name = files[0].name.length > 28
+      ? files[0].name.slice(0,25) + '...'
+      : files[0].name;
+    text.textContent = name;
+    gsap.fromTo(badge, {scale:.8,opacity:0}, {scale:1,opacity:1,duration:.3,ease:'back.out(2)'});
+    updateProcessButton();
+  });
+
+  /* ── Process ────────────────────────────────────────────────── */
+  window.processFiles = async function () {
+    if (!selectedFiches.length || !selectedSynthese) return;
+
+    setState('processing');
+
+    // Cycle status messages during processing
+    let msgIdx = 0;
+    const statusEl = document.getElementById('status-text');
+    statusInterval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % STATUS_MESSAGES.length;
+      gsap.to(statusEl, {
+        opacity: 0, y: -6, duration: .2,
+        onComplete: () => {
+          statusEl.textContent = STATUS_MESSAGES[msgIdx];
+          gsap.to(statusEl, { opacity: 1, y: 0, duration: .2 });
+        }
+      });
+    }, 1800);
+
+    const form = new FormData();
+    selectedFiches.forEach(f => form.append('fiches', f));
+    form.append('synthese', selectedSynthese);
+
+    try {
+      const res = await fetch('/api/process', { method: 'POST', body: form });
+
+      clearInterval(statusInterval);
+
+      if (!res.ok) {
+        let detail = 'Erreur serveur';
+        try {
+          const err = await res.json();
+          detail = Array.isArray(err.detail)
+            ? err.detail.join('\n')
+            : String(err.detail);
+        } catch (_) {}
+        setState('error');
+        document.getElementById('error-text').textContent = detail;
+        return;
+      }
+
+      downloadBlob = await res.blob();
+      const count  = parseInt(res.headers.get('X-Processed-Count') || '0');
+      const errors = res.headers.get('X-Errors') || '';
+
+      document.getElementById('success-count').textContent = count;
+
+      const warnEl = document.getElementById('success-warnings');
+      if (errors) {
+        warnEl.style.display = '';
+        warnEl.textContent = 'Avertissements : ' + errors;
+      } else {
+        warnEl.style.display = 'none';
+      }
+
+      setState('success');
+
+    } catch (err) {
+      clearInterval(statusInterval);
+      setState('error');
+      document.getElementById('error-text').textContent =
+        err.message || 'Impossible de contacter le serveur.';
+    }
+  };
+
+  /* ── Download ───────────────────────────────────────────────── */
+  window.downloadResult = function () {
+    if (!downloadBlob) return;
+    const url = URL.createObjectURL(downloadBlob);
+    const a   = document.createElement('a');
+    a.href = url;
+    a.download = 'Synthese_BIA_filled.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  /* ── Reset ──────────────────────────────────────────────────── */
+  window.resetUI = function () {
+    selectedFiches   = [];
+    selectedSynthese = null;
+    downloadBlob     = null;
+    clearInterval(statusInterval);
+
+    // Reset zones
+    ['zone-fiches','zone-synthese'].forEach(id => {
+      document.getElementById(id).classList.remove('has-files','drag-over');
+    });
+
+    // Reset step dots
+    ['step1-dot','step2-dot','step3-dot'].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove('border-gold','text-gold');
+      el.classList.add('border-white/15','text-white/30');
+    });
+    // step1 stays active (first step)
+    const s1 = document.getElementById('step1-dot');
+    s1.classList.add('border-gold','text-gold');
+    s1.classList.remove('border-white/15','text-white/30');
+
+    document.getElementById('btn-process').disabled = true;
+
+    setState('upload');
+    gsap.fromTo('#state-upload', {opacity:0,y:10},{opacity:1,y:0,duration:.4});
+  };
+
+  /* ── Navbar scroll ──────────────────────────────────────────── */
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar')
+      .classList.toggle('scrolled', window.scrollY > 50);
+  }, { passive: true });
+
+  /* ── Footer year ────────────────────────────────────────────── */
+  document.querySelectorAll('[data-year]').forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
+
+  /* ── GSAP Animations ────────────────────────────────────────── */
+  const prefersReduced = window.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches;
+  const hasGSAP = typeof gsap !== 'undefined';
+
+  if (!prefersReduced && hasGSAP) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Loader reveal
+    gsap.timeline()
+      .to('#loader-text', { opacity: 1, y: 0, duration: .8, ease: 'power2.out' })
+      .to('#loader',      { y: '-100%', delay: .4, duration: .85, ease: 'power4.inOut' })
+      .to('.reveal-on-load', {
+          opacity: 1, y: 0, duration: .65, stagger: .12, ease: 'power2.out'
+        }, '-=.2');
+
+    // Scroll reveals
+    gsap.utils.toArray('.reveal-scroll').forEach(el => {
+      gsap.to(el, {
+        scrollTrigger: { trigger: el, start: 'top 82%', toggleActions: 'play none none none' },
+        opacity: 1, y: 0, duration: .7, ease: 'power2.out',
+      });
+    });
+
+  } else {
+    // Fallback: show everything immediately
+    document.getElementById('loader').style.display = 'none';
+    document.querySelectorAll('.reveal-on-load, .reveal-scroll').forEach(el => {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
