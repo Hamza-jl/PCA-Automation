@@ -196,18 +196,21 @@ def _replace_in_cell(cell, old: str, new: str) -> None:
 
 def _replace_header_logo(doc: Document, logo_bytes: bytes) -> None:
     """
-    Replaces the client logo (rId2 in each non-linked header) with *logo_bytes*.
-    The Devoteam logo (rId1) is left untouched.
+    Replaces the client/STAR logo (rId1) in each non-linked header with *logo_bytes*.
+    The Devoteam logo (rId2) is left untouched.
+
+    Mapping confirmed from the template:
+      rId1 → image1.png (8 790 B)  = STAR / client logo  ← replace this
+      rId2 → image2.png (11 955 B) = Devoteam logo        ← keep this
     """
     for section in doc.sections:
         if section.header.is_linked_to_previous:
             continue
         hdr = section.header
         part = hdr.part
-        if "rId2" not in part.rels:
+        if "rId1" not in part.rels:
             continue
-        old_rel = part.rels["rId2"]
-        target_part = old_rel._target
+        target_part = part.rels["rId1"]._target
         # Overwrite the embedded image bytes in-place.
         # content_type is read-only on ImagePart, so only replace the blob.
         target_part._blob = logo_bytes
