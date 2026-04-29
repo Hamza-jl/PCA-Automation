@@ -129,7 +129,7 @@
     }
     .hero-h1 em { font-style: italic; color: #C5A059; }
     .hero-sub {
-      max-width: 520px; margin: 1.8rem auto 0;
+      max-width: 560px; margin: 1.8rem auto 0;
       font-size: .82rem; font-weight: 300; line-height: 1.9;
       color: rgba(240,238,232,.55); letter-spacing: .04em;
     }
@@ -166,6 +166,36 @@
       cursor: pointer; transition: all .25s;
     }
     .btn-ghost:hover { border-color: rgba(197,160,89,.5); color: #C5A059; }
+
+    /* ── Workflow tabs ────────────────────────────────────────── */
+    .wf-tabs {
+      display: flex; gap: 0; margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,.08); border-radius: .75rem;
+      overflow: hidden;
+    }
+    .wf-tab {
+      flex: 1; padding: .85rem 1rem; cursor: pointer; border: none;
+      background: transparent; color: rgba(240,238,232,.4);
+      font-family: 'Montserrat', sans-serif;
+      font-size: .7rem; font-weight: 600; letter-spacing: .15em;
+      text-transform: uppercase; transition: all .3s;
+      display: flex; flex-direction: column; align-items: center; gap: .4rem;
+    }
+    .wf-tab i { font-size: 1rem; }
+    .wf-tab:first-child { border-right: 1px solid rgba(255,255,255,.08); }
+    .wf-tab.active {
+      background: rgba(197,160,89,.08);
+      color: #C5A059;
+      border-bottom: 2px solid #C5A059;
+    }
+    .wf-tab:not(.active):hover {
+      background: rgba(255,255,255,.03);
+      color: rgba(240,238,232,.7);
+    }
+
+    /* ── Workflow panels ──────────────────────────────────────── */
+    .wf-panel { display: none; }
+    .wf-panel.active { display: block; }
 
     /* ── Drop zones ───────────────────────────────────────────── */
     .drop-zone {
@@ -218,13 +248,6 @@
     }
     .drop-zone.has-files .file-badge { display: inline-flex; align-items: center; gap: .4rem; }
 
-    /* ── Step connector ───────────────────────────────────────── */
-    .step-num {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 3.5rem; font-weight: 300;
-      color: rgba(197,160,89,.15); line-height: 1;
-    }
-
     /* ── Spinner ──────────────────────────────────────────────── */
     .spinner-ring {
       width: 64px; height: 64px; border-radius: 50%;
@@ -234,13 +257,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .spinner-orbit {
-      width: 100px; height: 100px; border-radius: 50%;
-      border: 1px solid rgba(197,160,89,.1);
-      animation: spin 2s linear infinite reverse;
-      display: flex; align-items: center; justify-content: center;
-    }
-
     /* ── Success checkmark ────────────────────────────────────── */
     .check-circle {
       width: 72px; height: 72px; border-radius: 50%;
@@ -249,21 +265,11 @@
       margin: 0 auto 1.5rem;
     }
 
-    /* ── How-it-works timeline ────────────────────────────────── */
-    .how-step {
-      position: relative; flex: 1;
-    }
-    .how-step:not(:last-child)::after {
-      content: '';
-      position: absolute; top: 1.5rem; left: calc(50% + 2rem);
-      width: calc(100% - 4rem); height: 1px;
-      background: linear-gradient(90deg, rgba(197,160,89,.3), rgba(197,160,89,.05));
-    }
-    .how-icon-wrap {
-      width: 3rem; height: 3rem; border-radius: 50%;
-      background: rgba(197,160,89,.08); border: 1px solid rgba(197,160,89,.2);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto .75rem; font-size: .9rem; color: #C5A059;
+    /* ── How-it-works ─────────────────────────────────────────── */
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem; font-weight: 300;
+      color: rgba(197,160,89,.15); line-height: 1;
     }
 
     /* ── Divider line ─────────────────────────────────────────── */
@@ -286,7 +292,7 @@
       50%      { transform: translateX(-50%) translateY(6px); }
     }
 
-    /* ── Reveal classes (GSAP targets) ───────────────────────── */
+    /* ── Reveal classes ───────────────────────────────────────── */
     .reveal-on-load { opacity: 0; transform: translateY(24px); }
     .reveal-scroll  { opacity: 0; transform: translateY(32px); }
 
@@ -329,7 +335,7 @@
 <nav id="navbar">
   <div class="nav-logo">BIA <span>Automatique</span></div>
   <div class="flex items-center gap-8">
-    <a href="#tool" class="nav-link">Outil</a>
+    <a href="#tool" class="nav-link">Outils</a>
     <a href="#how"  class="nav-link">Comment ça marche</a>
   </div>
 </nav>
@@ -338,21 +344,19 @@
 <section id="hero" class="relative z-10">
   <p class="hero-label reveal-on-load">Devoteam &nbsp;/&nbsp; Business Impact Analysis</p>
   <h1 class="hero-h1 reveal-on-load">
-    Synthèse BIA<br><em>automatisée</em>
+    BIA<br><em>automatisé</em>
   </h1>
   <p class="hero-sub reveal-on-load">
-    Importez vos fiches BIA et votre template de synthèse.
-    Notre pipeline ETL extrait, calcule et renseigne chaque onglet
-    en quelques secondes — sans aucune saisie manuelle.
+    Deux outils en un — générez vos fiches BIA par département depuis
+    le fichier de recensement, ou renseignez automatiquement la synthèse
+    à partir des fiches validées.
   </p>
   <div class="mt-10 flex items-center gap-4 justify-center reveal-on-load">
     <a href="#tool" class="btn-gold">
-      <span>Lancer l'outil</span>
+      <span>Accéder aux outils</span>
       <span><i class="fa-solid fa-arrow-down text-xs"></i></span>
     </a>
   </div>
-
-  <!-- Scroll indicator -->
   <div class="scroll-indicator reveal-on-load">
     <span>Défiler</span>
     <i class="fa-solid fa-chevron-down text-gold text-xs opacity-40"></i>
@@ -363,171 +367,280 @@
 <section id="tool" class="relative z-10 py-28 px-4">
   <div class="max-w-4xl mx-auto">
 
-    <!-- Section header -->
     <div class="text-center mb-14 reveal-scroll">
-      <p class="section-label mb-3">01 / Outil</p>
-      <h2 class="section-title">Générez votre synthèse</h2>
+      <p class="section-label mb-3">01 / Outils</p>
+      <h2 class="section-title">Choisissez votre workflow</h2>
       <div class="gold-line mt-4"></div>
     </div>
 
-    <!-- Tool card -->
+    <!-- Main card -->
     <div class="glass p-8 md:p-10 reveal-scroll">
 
-      <!-- ── STATE: UPLOAD ──────────────────────────────────── -->
-      <div id="state-upload">
+      <!-- ── WORKFLOW TABS ──────────────────────────────────── -->
+      <div class="wf-tabs mb-8">
+        <button class="wf-tab active" id="tab-synthese" onclick="switchTab('synthese')">
+          <i class="fa-regular fa-file-excel"></i>
+          Synthèse BIA
+        </button>
+        <button class="wf-tab" id="tab-generate" onclick="switchTab('generate')">
+          <i class="fa-solid fa-layer-group"></i>
+          Générer les fiches
+        </button>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════ -->
+      <!-- WORKFLOW 1 — Fill the Synthèse BIA                  -->
+      <!-- ═══════════════════════════════════════════════════ -->
+      <div class="wf-panel active" id="panel-synthese">
 
         <!-- Step indicator -->
         <div class="flex items-center gap-3 mb-8">
           <div class="w-6 h-6 rounded-full border border-gold flex items-center justify-center
-                      text-gold text-xs font-semibold" id="step1-dot">1</div>
+                      text-gold text-xs font-semibold" id="s1-dot1">1</div>
           <div class="h-px flex-1 bg-gradient-to-r from-gold/30 to-transparent"></div>
           <div class="w-6 h-6 rounded-full border border-white/15 flex items-center justify-center
-                      text-white/30 text-xs font-semibold" id="step2-dot">2</div>
+                      text-white/30 text-xs font-semibold" id="s1-dot2">2</div>
           <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
           <div class="w-6 h-6 rounded-full border border-white/15 flex items-center justify-center
-                      text-white/30 text-xs font-semibold" id="step3-dot">3</div>
+                      text-white/30 text-xs font-semibold" id="s1-dot3">3</div>
         </div>
 
-        <!-- Drop zones grid -->
-        <div class="grid md:grid-cols-2 gap-5 mb-8">
+        <!-- STATE: UPLOAD -->
+        <div id="s1-upload">
+          <div class="grid md:grid-cols-2 gap-5 mb-8">
 
-          <!-- Zone 1: Fiches BIA (multiple DOCX) -->
-          <div class="drop-zone text-center" id="zone-fiches"
-               role="button" aria-label="Sélectionner les fiches BIA">
-            <div class="drop-zone-icon">
-              <i class="fa-regular fa-file-word"></i>
+            <div class="drop-zone text-center" id="s1-zone-fiches"
+                 role="button" aria-label="Fiches BIA (.docx)">
+              <div class="drop-zone-icon"><i class="fa-regular fa-file-word"></i></div>
+              <div class="drop-zone-title">Fiches BIA</div>
+              <div class="drop-zone-sub">.docx — fichiers multiples</div>
+              <p class="drop-zone-instruction">Glissez vos fiches ici<br>ou cliquez pour sélectionner</p>
+              <div class="file-badge" id="s1-badge-fiches">
+                <i class="fa-solid fa-check text-xs"></i>
+                <span id="s1-badge-fiches-text">0 fichier(s)</span>
+              </div>
             </div>
-            <div class="drop-zone-title">Fiches BIA</div>
-            <div class="drop-zone-sub">.docx — fichiers multiples</div>
-            <p class="drop-zone-instruction">
-              Glissez vos fiches ici<br>ou cliquez pour sélectionner
-            </p>
-            <div class="file-badge" id="badge-fiches">
-              <i class="fa-solid fa-check text-xs"></i>
-              <span id="badge-fiches-text">0 fichier(s)</span>
-            </div>
-          </div>
 
-          <!-- Zone 2: Synthèse template (single XLSX) -->
-          <div class="drop-zone text-center" id="zone-synthese"
-               role="button" aria-label="Sélectionner la synthèse BIA">
-            <div class="drop-zone-icon">
-              <i class="fa-regular fa-file-excel"></i>
-            </div>
-            <div class="drop-zone-title">Synthèse BIA</div>
-            <div class="drop-zone-sub">.xlsx — template vierge</div>
-            <p class="drop-zone-instruction">
-              Glissez votre synthèse ici<br>ou cliquez pour sélectionner
-            </p>
-            <div class="file-badge" id="badge-synthese">
-              <i class="fa-solid fa-check text-xs"></i>
-              <span id="badge-synthese-text">—</span>
+            <div class="drop-zone text-center" id="s1-zone-synthese"
+                 role="button" aria-label="Synthèse BIA template (.xlsx)">
+              <div class="drop-zone-icon"><i class="fa-regular fa-file-excel"></i></div>
+              <div class="drop-zone-title">Synthèse BIA</div>
+              <div class="drop-zone-sub">.xlsx — template vierge</div>
+              <p class="drop-zone-instruction">Glissez votre synthèse ici<br>ou cliquez pour sélectionner</p>
+              <div class="file-badge" id="s1-badge-synthese">
+                <i class="fa-solid fa-check text-xs"></i>
+                <span id="s1-badge-synthese-text">—</span>
+              </div>
             </div>
           </div>
 
-        </div>
-
-        <!-- Generate button -->
-        <div class="flex justify-center">
-          <button class="btn-gold" id="btn-process" disabled
-                  onclick="processFiles()">
-            <span><i class="fa-solid fa-bolt-lightning"></i></span>
-            <span>Générer la synthèse</span>
-          </button>
-        </div>
-
-        <!-- Info note -->
-        <p class="text-center mt-5 text-xs text-white/25 tracking-wide">
-          Les fiches sont traitées séquentiellement — chaque département est injecté dans la même synthèse.
-        </p>
-      </div>
-      <!-- / STATE: UPLOAD -->
-
-      <!-- ── STATE: PROCESSING ──────────────────────────────── -->
-      <div id="state-processing" style="display:none;">
-        <div class="flex flex-col items-center justify-center py-12 gap-6">
-          <!-- Nested spinner rings -->
-          <div class="relative w-24 h-24 flex items-center justify-center">
-            <div class="absolute inset-0 rounded-full border border-gold/10
-                        animate-[spin_3s_linear_infinite_reverse]"></div>
-            <div class="absolute inset-2 rounded-full border border-gold/20
-                        animate-[spin_2s_linear_infinite]"></div>
-            <div class="absolute inset-4 rounded-full border-t border-gold
-                        animate-[spin_1s_linear_infinite]"></div>
-            <i class="fa-solid fa-gear text-gold/40 text-sm animate-[spin_4s_linear_infinite]"></i>
-          </div>
-          <!-- Cycling status text -->
-          <div class="text-center">
-            <p class="font-serif text-xl font-light text-white/80 mb-2">Traitement en cours</p>
-            <p class="text-xs tracking-widest text-gold/60 uppercase" id="status-text">
-              Lecture des fiches BIA...
-            </p>
-          </div>
-          <!-- Animated progress dots -->
-          <div class="flex gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:0s]"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.15s]"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.3s]"></span>
-          </div>
-        </div>
-      </div>
-      <!-- / STATE: PROCESSING -->
-
-      <!-- ── STATE: SUCCESS ─────────────────────────────────── -->
-      <div id="state-success" style="display:none;">
-        <div class="flex flex-col items-center py-12 gap-5" id="success-card">
-          <!-- Check icon -->
-          <div class="check-circle">
-            <i class="fa-solid fa-check text-gold text-2xl"></i>
-          </div>
-          <div class="text-center">
-            <h3 class="font-serif text-2xl font-light text-white mb-2">
-              Synthèse générée&nbsp;!
-            </h3>
-            <p class="text-sm text-white/40">
-              <span id="success-count" class="text-gold font-semibold">0</span>
-              fiche(s) intégrée(s) avec succès
-            </p>
-          </div>
-          <!-- Warnings (if any) -->
-          <div id="success-warnings" style="display:none;"
-               class="glass-gold px-4 py-3 text-xs text-gold/80 max-w-md text-center tracking-wide">
-          </div>
-          <!-- Action buttons -->
-          <div class="flex flex-wrap gap-3 justify-center mt-2">
-            <button class="btn-gold" onclick="downloadResult()">
-              <span><i class="fa-solid fa-download"></i></span>
-              <span>Télécharger le fichier</span>
+          <div class="flex justify-center">
+            <button class="btn-gold" id="s1-btn-process" disabled onclick="processSynthese()">
+              <span><i class="fa-solid fa-bolt-lightning"></i></span>
+              <span>Générer la synthèse</span>
             </button>
-            <button class="btn-ghost" onclick="resetUI()">
-              <i class="fa-solid fa-rotate-left mr-2 text-xs"></i>
-              Nouveau traitement
+          </div>
+          <p class="text-center mt-5 text-xs text-white/25 tracking-wide">
+            Chaque fiche est injectée séquentiellement dans le même fichier de synthèse.
+          </p>
+        </div>
+
+        <!-- STATE: PROCESSING -->
+        <div id="s1-processing" style="display:none;">
+          <div class="flex flex-col items-center justify-center py-12 gap-6">
+            <div class="relative w-24 h-24 flex items-center justify-center">
+              <div class="absolute inset-0 rounded-full border border-gold/10 animate-[spin_3s_linear_infinite_reverse]"></div>
+              <div class="absolute inset-2 rounded-full border border-gold/20 animate-[spin_2s_linear_infinite]"></div>
+              <div class="absolute inset-4 rounded-full border-t border-gold animate-[spin_1s_linear_infinite]"></div>
+              <i class="fa-solid fa-gear text-gold/40 text-sm animate-[spin_4s_linear_infinite]"></i>
+            </div>
+            <div class="text-center">
+              <p class="font-serif text-xl font-light text-white/80 mb-2">Traitement en cours</p>
+              <p class="text-xs tracking-widest text-gold/60 uppercase" id="s1-status">Lecture des fiches BIA...</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:0s]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.15s]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.3s]"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE: SUCCESS -->
+        <div id="s1-success" style="display:none;">
+          <div class="flex flex-col items-center py-12 gap-5" id="s1-success-card">
+            <div class="check-circle"><i class="fa-solid fa-check text-gold text-2xl"></i></div>
+            <div class="text-center">
+              <h3 class="font-serif text-2xl font-light text-white mb-2">Synthèse générée&nbsp;!</h3>
+              <p class="text-sm text-white/40">
+                <span id="s1-count" class="text-gold font-semibold">0</span> fiche(s) intégrée(s) avec succès
+              </p>
+            </div>
+            <div id="s1-warnings" style="display:none;"
+                 class="glass-gold px-4 py-3 text-xs text-gold/80 max-w-md text-center tracking-wide"></div>
+            <div class="flex flex-wrap gap-3 justify-center mt-2">
+              <button class="btn-gold" onclick="downloadResult('s1')">
+                <span><i class="fa-solid fa-download"></i></span>
+                <span>Télécharger la synthèse (.xlsx)</span>
+              </button>
+              <button class="btn-ghost" onclick="resetWorkflow('s1')">
+                <i class="fa-solid fa-rotate-left mr-2 text-xs"></i> Nouveau traitement
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE: ERROR -->
+        <div id="s1-error" style="display:none;">
+          <div class="flex flex-col items-center py-12 gap-5">
+            <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30
+                        flex items-center justify-center">
+              <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl"></i>
+            </div>
+            <div class="text-center">
+              <h3 class="font-serif text-2xl font-light text-white mb-2">Erreur de traitement</h3>
+              <p id="s1-error-text" class="text-sm text-red-400/80 max-w-md"></p>
+            </div>
+            <button class="btn-ghost" onclick="resetWorkflow('s1')">
+              <i class="fa-solid fa-rotate-left mr-2 text-xs"></i> Réessayer
             </button>
           </div>
         </div>
-      </div>
-      <!-- / STATE: SUCCESS -->
 
-      <!-- ── STATE: ERROR ───────────────────────────────────── -->
-      <div id="state-error" style="display:none;">
-        <div class="flex flex-col items-center py-12 gap-5">
-          <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30
-                      flex items-center justify-center">
-            <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl"></i>
-          </div>
-          <div class="text-center">
-            <h3 class="font-serif text-2xl font-light text-white mb-2">Erreur de traitement</h3>
-            <p id="error-text" class="text-sm text-red-400/80 max-w-md"></p>
-          </div>
-          <button class="btn-ghost" onclick="resetUI()">
-            <i class="fa-solid fa-rotate-left mr-2 text-xs"></i> Réessayer
-          </button>
-        </div>
       </div>
-      <!-- / STATE: ERROR -->
+      <!-- / panel-synthese -->
+
+      <!-- ═══════════════════════════════════════════════════ -->
+      <!-- WORKFLOW 2 — Generate BIA fiches per department      -->
+      <!-- ═══════════════════════════════════════════════════ -->
+      <div class="wf-panel" id="panel-generate">
+
+        <!-- Workflow description badge -->
+        <div class="glass-gold px-4 py-3 mb-6 rounded-xl text-xs text-gold/80 tracking-wide text-center">
+          <i class="fa-solid fa-circle-info mr-2 opacity-70"></i>
+          Importez le fichier de recensement et le modèle de fiche BIA.
+          Un fichier <code>.docx</code> sera généré pour chaque structure recensée.
+        </div>
+
+        <!-- Step indicator -->
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-6 h-6 rounded-full border border-gold flex items-center justify-center
+                      text-gold text-xs font-semibold" id="s2-dot1">1</div>
+          <div class="h-px flex-1 bg-gradient-to-r from-gold/30 to-transparent"></div>
+          <div class="w-6 h-6 rounded-full border border-white/15 flex items-center justify-center
+                      text-white/30 text-xs font-semibold" id="s2-dot2">2</div>
+          <div class="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+          <div class="w-6 h-6 rounded-full border border-white/15 flex items-center justify-center
+                      text-white/30 text-xs font-semibold" id="s2-dot3">3</div>
+        </div>
+
+        <!-- STATE: UPLOAD -->
+        <div id="s2-upload">
+          <div class="grid md:grid-cols-2 gap-5 mb-8">
+
+            <div class="drop-zone text-center" id="s2-zone-recens"
+                 role="button" aria-label="Fichier de recensement (.xlsx)">
+              <div class="drop-zone-icon"><i class="fa-regular fa-file-excel"></i></div>
+              <div class="drop-zone-title">Fiche de recensement</div>
+              <div class="drop-zone-sub">.xlsx — Suivi projet</div>
+              <p class="drop-zone-instruction">Glissez le fichier ici<br>ou cliquez pour sélectionner</p>
+              <div class="file-badge" id="s2-badge-recens">
+                <i class="fa-solid fa-check text-xs"></i>
+                <span id="s2-badge-recens-text">—</span>
+              </div>
+            </div>
+
+            <div class="drop-zone text-center" id="s2-zone-tmpl"
+                 role="button" aria-label="Modèle de fiche BIA (.docx)">
+              <div class="drop-zone-icon"><i class="fa-regular fa-file-word"></i></div>
+              <div class="drop-zone-title">Modèle BIA</div>
+              <div class="drop-zone-sub">.docx — template vierge</div>
+              <p class="drop-zone-instruction">Glissez le modèle ici<br>ou cliquez pour sélectionner</p>
+              <div class="file-badge" id="s2-badge-tmpl">
+                <i class="fa-solid fa-check text-xs"></i>
+                <span id="s2-badge-tmpl-text">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-center">
+            <button class="btn-gold" id="s2-btn-process" disabled onclick="processGenerate()">
+              <span><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+              <span>Générer les fiches</span>
+            </button>
+          </div>
+          <p class="text-center mt-5 text-xs text-white/25 tracking-wide">
+            Le logo client est extrait du fichier de recensement et intégré dans chaque fiche générée.
+          </p>
+        </div>
+
+        <!-- STATE: PROCESSING -->
+        <div id="s2-processing" style="display:none;">
+          <div class="flex flex-col items-center justify-center py-12 gap-6">
+            <div class="relative w-24 h-24 flex items-center justify-center">
+              <div class="absolute inset-0 rounded-full border border-gold/10 animate-[spin_3s_linear_infinite_reverse]"></div>
+              <div class="absolute inset-2 rounded-full border border-gold/20 animate-[spin_2s_linear_infinite]"></div>
+              <div class="absolute inset-4 rounded-full border-t border-gold animate-[spin_1s_linear_infinite]"></div>
+              <i class="fa-solid fa-wand-magic-sparkles text-gold/40 text-sm animate-[spin_6s_linear_infinite_reverse]"></i>
+            </div>
+            <div class="text-center">
+              <p class="font-serif text-xl font-light text-white/80 mb-2">Génération en cours</p>
+              <p class="text-xs tracking-widest text-gold/60 uppercase" id="s2-status">Lecture du recensement...</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:0s]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.15s]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-gold/40 animate-bounce [animation-delay:.3s]"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE: SUCCESS -->
+        <div id="s2-success" style="display:none;">
+          <div class="flex flex-col items-center py-12 gap-5" id="s2-success-card">
+            <div class="check-circle"><i class="fa-solid fa-check text-gold text-2xl"></i></div>
+            <div class="text-center">
+              <h3 class="font-serif text-2xl font-light text-white mb-2">Fiches générées&nbsp;!</h3>
+              <p class="text-sm text-white/40">
+                <span id="s2-count" class="text-gold font-semibold">0</span> fiche(s) créée(s) avec succès
+              </p>
+            </div>
+            <div id="s2-warnings" style="display:none;"
+                 class="glass-gold px-4 py-3 text-xs text-gold/80 max-w-md text-center tracking-wide"></div>
+            <div class="flex flex-wrap gap-3 justify-center mt-2">
+              <button class="btn-gold" onclick="downloadResult('s2')">
+                <span><i class="fa-solid fa-download"></i></span>
+                <span>Télécharger le ZIP (.docx)</span>
+              </button>
+              <button class="btn-ghost" onclick="resetWorkflow('s2')">
+                <i class="fa-solid fa-rotate-left mr-2 text-xs"></i> Nouveau traitement
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATE: ERROR -->
+        <div id="s2-error" style="display:none;">
+          <div class="flex flex-col items-center py-12 gap-5">
+            <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30
+                        flex items-center justify-center">
+              <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl"></i>
+            </div>
+            <div class="text-center">
+              <h3 class="font-serif text-2xl font-light text-white mb-2">Erreur de génération</h3>
+              <p id="s2-error-text" class="text-sm text-red-400/80 max-w-md"></p>
+            </div>
+            <button class="btn-ghost" onclick="resetWorkflow('s2')">
+              <i class="fa-solid fa-rotate-left mr-2 text-xs"></i> Réessayer
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <!-- / panel-generate -->
 
     </div>
-    <!-- / tool card -->
+    <!-- / main card -->
 
   </div>
 </section>
@@ -542,51 +655,93 @@
       <div class="gold-line mt-4"></div>
     </div>
 
-    <!-- Steps -->
-    <div class="grid md:grid-cols-3 gap-8 text-center">
-
+    <!-- Workflow 1 steps -->
+    <p class="section-label text-center mb-8 reveal-scroll">
+      <i class="fa-regular fa-file-excel mr-2"></i>Synthèse BIA
+    </p>
+    <div class="grid md:grid-cols-3 gap-8 text-center mb-14">
       <div class="glass p-8 reveal-scroll">
         <div class="step-num">01</div>
-        <div class="how-icon-wrap mt-3">
+        <div class="w-12 h-12 rounded-full bg-gold/08 border border-gold/20 flex items-center justify-center mx-auto mt-3 mb-2 text-gold">
           <i class="fa-regular fa-folder-open"></i>
         </div>
-        <h3 class="font-serif text-xl font-semibold mt-1 mb-3">Importez les fiches</h3>
+        <h3 class="font-serif text-xl font-semibold mb-3">Importez les fiches</h3>
         <p class="text-xs text-white/40 leading-relaxed tracking-wide">
           Chargez une ou plusieurs fiches BIA <code class="text-gold/70">.docx</code>
-          issues des ateliers client. Tous les départements peuvent être traités en une seule passe.
+          issues des ateliers client avec le template de synthèse vierge.
         </p>
       </div>
-
-      <div class="glass p-8 reveal-scroll" style="animation-delay:.1s">
+      <div class="glass p-8 reveal-scroll">
         <div class="step-num">02</div>
-        <div class="how-icon-wrap mt-3">
+        <div class="w-12 h-12 rounded-full bg-gold/08 border border-gold/20 flex items-center justify-center mx-auto mt-3 mb-2 text-gold">
           <i class="fa-solid fa-gears"></i>
         </div>
-        <h3 class="font-serif text-xl font-semibold mt-1 mb-3">Le pipeline ETL</h3>
+        <h3 class="font-serif text-xl font-semibold mb-3">Pipeline ETL</h3>
         <p class="text-xs text-white/40 leading-relaxed tracking-wide">
-          Le moteur extrait les tableaux Word (activités, impacts, DMIA, échanges, applications IT,
-          collaborateurs clés…), calcule les scores pondérés et mappe chaque champ
-          vers le bon onglet de la synthèse.
+          Le moteur extrait les tableaux Word, calcule les scores d'impact pondérés
+          et mappe chaque champ vers le bon onglet de la synthèse.
         </p>
       </div>
-
-      <div class="glass p-8 reveal-scroll" style="animation-delay:.2s">
+      <div class="glass p-8 reveal-scroll">
         <div class="step-num">03</div>
-        <div class="how-icon-wrap mt-3">
+        <div class="w-12 h-12 rounded-full bg-gold/08 border border-gold/20 flex items-center justify-center mx-auto mt-3 mb-2 text-gold">
           <i class="fa-regular fa-circle-check"></i>
         </div>
-        <h3 class="font-serif text-xl font-semibold mt-1 mb-3">Téléchargez</h3>
+        <h3 class="font-serif text-xl font-semibold mb-3">Téléchargez</h3>
         <p class="text-xs text-white/40 leading-relaxed tracking-wide">
-          La synthèse <code class="text-gold/70">.xlsx</code> est remplie automatiquement,
-          structurée par département. Prête à être présentée au client ou archivée.
+          La synthèse <code class="text-gold/70">.xlsx</code> est remplie et structurée par département —
+          prête à être présentée au client.
         </p>
       </div>
+    </div>
 
+    <!-- Divider -->
+    <div class="gold-line mb-14 reveal-scroll"></div>
+
+    <!-- Workflow 2 steps -->
+    <p class="section-label text-center mb-8 reveal-scroll">
+      <i class="fa-solid fa-layer-group mr-2"></i>Génération des fiches
+    </p>
+    <div class="grid md:grid-cols-3 gap-8 text-center mb-14">
+      <div class="glass p-8 reveal-scroll">
+        <div class="step-num">01</div>
+        <div class="w-12 h-12 rounded-full bg-gold/08 border border-gold/20 flex items-center justify-center mx-auto mt-3 mb-2 text-gold">
+          <i class="fa-regular fa-file-excel"></i>
+        </div>
+        <h3 class="font-serif text-xl font-semibold mb-3">Recensement</h3>
+        <p class="text-xs text-white/40 leading-relaxed tracking-wide">
+          Chargez le fichier de recensement des structures
+          <code class="text-gold/70">.xlsx</code> et le modèle de fiche BIA.
+        </p>
+      </div>
+      <div class="glass p-8 reveal-scroll">
+        <div class="step-num">02</div>
+        <div class="w-12 h-12 rounded-full bg-gold/08 border border-gold/20 flex items-center justify-center mx-auto mt-3 mb-2 text-gold">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <h3 class="font-serif text-xl font-semibold mb-3">Génération</h3>
+        <p class="text-xs text-white/40 leading-relaxed tracking-wide">
+          Pour chaque structure, le modèle est cloné et renseigné (entité, date,
+          responsable) et le logo client est extrait et intégré à l'en-tête.
+        </p>
+      </div>
+      <div class="glass p-8 reveal-scroll">
+        <div class="step-num">03</div>
+        <div class="w-12 h-12 rounded-full bg-gold/08 border border-gold/20 flex items-center justify-center mx-auto mt-3 mb-2 text-gold">
+          <i class="fa-solid fa-file-zipper"></i>
+        </div>
+        <h3 class="font-serif text-xl font-semibold mb-3">Archive ZIP</h3>
+        <p class="text-xs text-white/40 leading-relaxed tracking-wide">
+          Toutes les fiches sont livrées en un seul
+          <code class="text-gold/70">.zip</code> — une fiche <code class="text-gold/70">.docx</code>
+          par département, prête à être envoyée.
+        </p>
+      </div>
     </div>
 
     <!-- Sheets covered -->
-    <div class="mt-14 glass p-6 md:p-8 reveal-scroll">
-      <p class="section-label text-center mb-6">Onglets renseignés automatiquement</p>
+    <div class="glass p-6 md:p-8 reveal-scroll">
+      <p class="section-label text-center mb-6">Données extraites automatiquement (Synthèse BIA)</p>
       <div class="flex flex-wrap gap-3 justify-center">
         <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Activités</span>
         <span class="glass-gold px-3 py-1.5 text-xs text-gold/80 tracking-widest uppercase rounded-full">Impact DMIA</span>
@@ -621,35 +776,49 @@
 (function () {
   "use strict";
 
-  /* ── State ─────────────────────────────────────────────────── */
-  const STATES = ['upload','processing','success','error'];
-  let selectedFiches  = [];
-  let selectedSynthese = null;
-  let downloadBlob    = null;
-  let statusInterval  = null;
+  /* ── Per-workflow state ─────────────────────────────────────── */
+  const wf = {
+    s1: {
+      fiches:    [],
+      synthese:  null,
+      blob:      null,
+      interval:  null,
+      filename:  'Synthese_BIA_filled.xlsx',
+      statusMsgs: [
+        "Lecture des fiches BIA...",
+        "Extraction des activités...",
+        "Calcul des scores d'impact...",
+        "Génération de la synthèse...",
+        "Finalisation du fichier...",
+      ],
+    },
+    s2: {
+      recens:   null,
+      tmpl:     null,
+      blob:     null,
+      interval: null,
+      filename: 'Fiches_BIA.zip',
+      statusMsgs: [
+        "Lecture du recensement...",
+        "Extraction du logo client...",
+        "Génération des fiches...",
+        "Remplissage des entités...",
+        "Création de l'archive ZIP...",
+      ],
+    },
+  };
 
-  const STATUS_MESSAGES = [
-    "Lecture des fiches BIA...",
-    "Extraction des activités...",
-    "Calcul des scores d'impact...",
-    "Génération de la synthèse...",
-    "Finalisation du fichier...",
-  ];
+  /* ── Tab switcher ───────────────────────────────────────────── */
+  window.switchTab = function (name) {
+    document.querySelectorAll('.wf-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.wf-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+    gsap.fromTo('#panel-' + name,
+      { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .3, ease: 'power2.out' });
+  };
 
-  /* ── Helpers ────────────────────────────────────────────────── */
-  function setState(name) {
-    STATES.forEach(s => {
-      const el = document.getElementById(`state-${s}`);
-      if (el) el.style.display = s === name ? '' : 'none';
-    });
-    if (name === 'success') {
-      gsap.fromTo('#success-card',
-        { opacity: 0, scale: .92, y: 16 },
-        { opacity: 1, scale: 1,   y: 0, duration: .55, ease: 'back.out(1.6)' }
-      );
-    }
-  }
-
+  /* ── Generic helpers ────────────────────────────────────────── */
   function showToast(msg, duration = 5000) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -657,56 +826,53 @@
     setTimeout(() => t.classList.remove('show'), duration);
   }
 
-  function updateProcessButton() {
-    const btn = document.getElementById('btn-process');
-    btn.disabled = !(selectedFiches.length > 0 && selectedSynthese);
-
-    // Animate step dots
-    const s1 = document.getElementById('step1-dot');
-    const s2 = document.getElementById('step2-dot');
-    const s3 = document.getElementById('step3-dot');
-    const activeCls   = ['border-gold','text-gold'];
-    const inactiveCls = ['border-white/15','text-white/30'];
-
-    if (selectedFiches.length > 0) {
-      s1.classList.add(...activeCls); s1.classList.remove(...inactiveCls);
-    }
-    if (selectedSynthese) {
-      s2.classList.add(...activeCls); s2.classList.remove(...inactiveCls);
-    }
-    if (selectedFiches.length > 0 && selectedSynthese) {
-      s3.classList.add(...activeCls); s3.classList.remove(...inactiveCls);
-      gsap.fromTo('#btn-process',{scale:.97},{scale:1,duration:.35,ease:'back.out(2)'});
+  function setWfState(prefix, state) {
+    ['upload','processing','success','error'].forEach(s => {
+      const el = document.getElementById(prefix + '-' + s);
+      if (el) el.style.display = (s === state) ? '' : 'none';
+    });
+    if (state === 'success') {
+      const card = document.getElementById(prefix + '-success-card');
+      if (card) gsap.fromTo(card,
+        { opacity: 0, scale: .92, y: 16 },
+        { opacity: 1, scale: 1, y: 0, duration: .55, ease: 'back.out(1.6)' });
     }
   }
 
-  /* ── Drop zone setup ────────────────────────────────────────── */
+  function cycleDots(prefix, dotIds, active) {
+    dotIds.forEach((id, i) => {
+      const el = document.getElementById(prefix + id);
+      if (!el) return;
+      if (active.includes(i)) {
+        el.classList.add('border-gold','text-gold');
+        el.classList.remove('border-white/15','text-white/30');
+      } else {
+        el.classList.remove('border-gold','text-gold');
+        el.classList.add('border-white/15','text-white/30');
+      }
+    });
+  }
+
+  /* ── Generic drop zone ──────────────────────────────────────── */
   function setupDropZone(zoneId, accept, multiple, onFiles) {
     const zone = document.getElementById(zoneId);
-
-    // Drag events
+    if (!zone) return;
     zone.addEventListener('dragover', e => {
-      e.preventDefault();
-      zone.classList.add('drag-over');
+      e.preventDefault(); zone.classList.add('drag-over');
     });
     zone.addEventListener('dragleave', e => {
       if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
     });
     zone.addEventListener('drop', e => {
-      e.preventDefault();
-      zone.classList.remove('drag-over');
+      e.preventDefault(); zone.classList.remove('drag-over');
       const files = Array.from(e.dataTransfer.files)
         .filter(f => f.name.toLowerCase().endsWith(accept));
       if (files.length) onFiles(multiple ? files : [files[0]]);
-      else showToast(`Format attendu : *${accept}`);
+      else showToast('Format attendu : *' + accept);
     });
-
-    // Click to open file picker
     zone.addEventListener('click', () => {
       const inp = document.createElement('input');
-      inp.type = 'file';
-      inp.accept = accept;
-      inp.multiple = multiple;
+      inp.type = 'file'; inp.accept = accept; inp.multiple = multiple;
       inp.onchange = e => {
         const files = Array.from(e.target.files);
         if (files.length) onFiles(multiple ? files : [files[0]]);
@@ -715,182 +881,228 @@
     });
   }
 
-  /* ── Fiches zone ────────────────────────────────────────────── */
-  setupDropZone('zone-fiches', '.docx', true, files => {
-    selectedFiches = files;
-    const zone  = document.getElementById('zone-fiches');
-    const badge = document.getElementById('badge-fiches');
-    const text  = document.getElementById('badge-fiches-text');
+  function setBadge(zoneId, badgeId, textId, label) {
+    const zone  = document.getElementById(zoneId);
+    const badge = document.getElementById(badgeId);
+    const text  = document.getElementById(textId);
+    if (!zone || !badge || !text) return;
     zone.classList.add('has-files');
-    text.textContent = `${files.length} fiche${files.length > 1 ? 's' : ''} sélectionnée${files.length > 1 ? 's' : ''}`;
-    gsap.fromTo(badge, {scale:.8,opacity:0}, {scale:1,opacity:1,duration:.3,ease:'back.out(2)'});
-    updateProcessButton();
+    text.textContent = label;
+    gsap.fromTo(badge, { scale: .8, opacity: 0 }, { scale: 1, opacity: 1, duration: .3, ease: 'back.out(2)' });
+  }
+
+  function shortName(fname, max = 28) {
+    return fname.length > max ? fname.slice(0, max - 3) + '...' : fname;
+  }
+
+  /* ── WORKFLOW 1 — Synthèse BIA ──────────────────────────────── */
+
+  setupDropZone('s1-zone-fiches', '.docx', true, files => {
+    wf.s1.fiches = files;
+    const n = files.length;
+    setBadge('s1-zone-fiches','s1-badge-fiches','s1-badge-fiches-text',
+      `${n} fiche${n > 1 ? 's' : ''} sélectionnée${n > 1 ? 's' : ''}`);
+    updateS1Button();
   });
 
-  /* ── Synthèse zone ──────────────────────────────────────────── */
-  setupDropZone('zone-synthese', '.xlsx', false, files => {
-    selectedSynthese = files[0];
-    const zone  = document.getElementById('zone-synthese');
-    const badge = document.getElementById('badge-synthese');
-    const text  = document.getElementById('badge-synthese-text');
-    zone.classList.add('has-files');
-    // Truncate filename if too long
-    const name = files[0].name.length > 28
-      ? files[0].name.slice(0,25) + '...'
-      : files[0].name;
-    text.textContent = name;
-    gsap.fromTo(badge, {scale:.8,opacity:0}, {scale:1,opacity:1,duration:.3,ease:'back.out(2)'});
-    updateProcessButton();
+  setupDropZone('s1-zone-synthese', '.xlsx', false, files => {
+    wf.s1.synthese = files[0];
+    setBadge('s1-zone-synthese','s1-badge-synthese','s1-badge-synthese-text',
+      shortName(files[0].name));
+    updateS1Button();
   });
 
-  /* ── Process ────────────────────────────────────────────────── */
-  window.processFiles = async function () {
-    if (!selectedFiches.length || !selectedSynthese) return;
+  function updateS1Button() {
+    const ok  = wf.s1.fiches.length > 0 && !!wf.s1.synthese;
+    const btn = document.getElementById('s1-btn-process');
+    btn.disabled = !ok;
+    const active = [];
+    if (wf.s1.fiches.length > 0) active.push(0);
+    if (wf.s1.synthese) active.push(1);
+    if (ok) { active.push(2); gsap.fromTo(btn,{scale:.97},{scale:1,duration:.35,ease:'back.out(2)'}); }
+    cycleDots('s1-','dot1 dot2 dot3'.split(' '), active);
+  }
 
-    setState('processing');
-
-    // Cycle status messages during processing
+  window.processSynthese = async function () {
+    if (!wf.s1.fiches.length || !wf.s1.synthese) return;
+    setWfState('s1','processing');
     let msgIdx = 0;
-    const statusEl = document.getElementById('status-text');
-    statusInterval = setInterval(() => {
-      msgIdx = (msgIdx + 1) % STATUS_MESSAGES.length;
-      gsap.to(statusEl, {
-        opacity: 0, y: -6, duration: .2,
-        onComplete: () => {
-          statusEl.textContent = STATUS_MESSAGES[msgIdx];
-          gsap.to(statusEl, { opacity: 1, y: 0, duration: .2 });
-        }
-      });
+    const statusEl = document.getElementById('s1-status');
+    wf.s1.interval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % wf.s1.statusMsgs.length;
+      gsap.to(statusEl, { opacity: 0, y: -6, duration: .2, onComplete: () => {
+        statusEl.textContent = wf.s1.statusMsgs[msgIdx];
+        gsap.to(statusEl, { opacity: 1, y: 0, duration: .2 });
+      }});
     }, 1800);
 
     const form = new FormData();
-    selectedFiches.forEach(f => form.append('fiches', f));
-    form.append('synthese', selectedSynthese);
+    wf.s1.fiches.forEach(f => form.append('fiches', f));
+    form.append('synthese', wf.s1.synthese);
 
     try {
       const res = await fetch('/api/process', { method: 'POST', body: form });
-
-      clearInterval(statusInterval);
-
+      clearInterval(wf.s1.interval);
       if (!res.ok) {
         let detail = 'Erreur serveur';
-        try {
-          const err = await res.json();
-          detail = Array.isArray(err.detail)
-            ? err.detail.join('\n')
-            : String(err.detail);
-        } catch (_) {}
-        setState('error');
-        document.getElementById('error-text').textContent = detail;
+        try { const err = await res.json(); detail = Array.isArray(err.detail) ? err.detail.join('\n') : String(err.detail); } catch(_) {}
+        setWfState('s1','error');
+        document.getElementById('s1-error-text').textContent = detail;
         return;
       }
-
-      downloadBlob = await res.blob();
-      const count  = parseInt(res.headers.get('X-Processed-Count') || '0');
-      const errors = res.headers.get('X-Errors') || '';
-
-      document.getElementById('success-count').textContent = count;
-
-      const warnEl = document.getElementById('success-warnings');
-      if (errors) {
-        warnEl.style.display = '';
-        warnEl.textContent = 'Avertissements : ' + errors;
-      } else {
-        warnEl.style.display = 'none';
-      }
-
-      setState('success');
-
+      wf.s1.blob = await res.blob();
+      document.getElementById('s1-count').textContent = res.headers.get('X-Processed-Count') || '0';
+      const errs = res.headers.get('X-Errors') || '';
+      const warnEl = document.getElementById('s1-warnings');
+      if (errs) { warnEl.style.display = ''; warnEl.textContent = 'Avertissements : ' + errs; }
+      else { warnEl.style.display = 'none'; }
+      setWfState('s1','success');
     } catch (err) {
-      clearInterval(statusInterval);
-      setState('error');
-      document.getElementById('error-text').textContent =
-        err.message || 'Impossible de contacter le serveur.';
+      clearInterval(wf.s1.interval);
+      setWfState('s1','error');
+      document.getElementById('s1-error-text').textContent = err.message || 'Impossible de contacter le serveur.';
     }
   };
 
-  /* ── Download ───────────────────────────────────────────────── */
-  window.downloadResult = function () {
-    if (!downloadBlob) return;
-    const url = URL.createObjectURL(downloadBlob);
+  /* ── WORKFLOW 2 — Generate fiches ───────────────────────────── */
+
+  setupDropZone('s2-zone-recens', '.xlsx', false, files => {
+    wf.s2.recens = files[0];
+    setBadge('s2-zone-recens','s2-badge-recens','s2-badge-recens-text', shortName(files[0].name));
+    updateS2Button();
+  });
+
+  setupDropZone('s2-zone-tmpl', '.docx', false, files => {
+    wf.s2.tmpl = files[0];
+    setBadge('s2-zone-tmpl','s2-badge-tmpl','s2-badge-tmpl-text', shortName(files[0].name));
+    updateS2Button();
+  });
+
+  function updateS2Button() {
+    const ok  = !!wf.s2.recens && !!wf.s2.tmpl;
+    const btn = document.getElementById('s2-btn-process');
+    btn.disabled = !ok;
+    const active = [];
+    if (wf.s2.recens) active.push(0);
+    if (wf.s2.tmpl)   active.push(1);
+    if (ok) { active.push(2); gsap.fromTo(btn,{scale:.97},{scale:1,duration:.35,ease:'back.out(2)'}); }
+    cycleDots('s2-','dot1 dot2 dot3'.split(' '), active);
+  }
+
+  window.processGenerate = async function () {
+    if (!wf.s2.recens || !wf.s2.tmpl) return;
+    setWfState('s2','processing');
+    let msgIdx = 0;
+    const statusEl = document.getElementById('s2-status');
+    wf.s2.interval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % wf.s2.statusMsgs.length;
+      gsap.to(statusEl, { opacity: 0, y: -6, duration: .2, onComplete: () => {
+        statusEl.textContent = wf.s2.statusMsgs[msgIdx];
+        gsap.to(statusEl, { opacity: 1, y: 0, duration: .2 });
+      }});
+    }, 1800);
+
+    const form = new FormData();
+    form.append('recensement', wf.s2.recens);
+    form.append('template', wf.s2.tmpl);
+
+    try {
+      const res = await fetch('/api/generate-fiches', { method: 'POST', body: form });
+      clearInterval(wf.s2.interval);
+      if (!res.ok) {
+        let detail = 'Erreur serveur';
+        try { const err = await res.json(); detail = Array.isArray(err.detail) ? err.detail.join('\n') : String(err.detail); } catch(_) {}
+        setWfState('s2','error');
+        document.getElementById('s2-error-text').textContent = detail;
+        return;
+      }
+      wf.s2.blob = await res.blob();
+      document.getElementById('s2-count').textContent = res.headers.get('X-Generated-Count') || '0';
+      const errs = res.headers.get('X-Errors') || '';
+      const warnEl = document.getElementById('s2-warnings');
+      if (errs) { warnEl.style.display = ''; warnEl.textContent = 'Avertissements : ' + errs; }
+      else { warnEl.style.display = 'none'; }
+      setWfState('s2','success');
+    } catch (err) {
+      clearInterval(wf.s2.interval);
+      setWfState('s2','error');
+      document.getElementById('s2-error-text').textContent = err.message || 'Impossible de contacter le serveur.';
+    }
+  };
+
+  /* ── Download ────────────────────────────────────────────────── */
+  window.downloadResult = function (prefix) {
+    const state = wf[prefix];
+    if (!state.blob) return;
+    const url = URL.createObjectURL(state.blob);
     const a   = document.createElement('a');
-    a.href = url;
-    a.download = 'Synthese_BIA_filled.xlsx';
-    document.body.appendChild(a);
-    a.click();
+    a.href = url; a.download = state.filename;
+    document.body.appendChild(a); a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
-  /* ── Reset ──────────────────────────────────────────────────── */
-  window.resetUI = function () {
-    selectedFiches   = [];
-    selectedSynthese = null;
-    downloadBlob     = null;
-    clearInterval(statusInterval);
+  /* ── Reset ───────────────────────────────────────────────────── */
+  window.resetWorkflow = function (prefix) {
+    const state = wf[prefix];
+    clearInterval(state.interval);
+    state.blob = null;
 
-    // Reset zones
-    ['zone-fiches','zone-synthese'].forEach(id => {
-      document.getElementById(id).classList.remove('has-files','drag-over');
-    });
-
-    // Reset step dots
-    ['step1-dot','step2-dot','step3-dot'].forEach(id => {
-      const el = document.getElementById(id);
-      el.classList.remove('border-gold','text-gold');
-      el.classList.add('border-white/15','text-white/30');
-    });
-    // step1 stays active (first step)
-    const s1 = document.getElementById('step1-dot');
-    s1.classList.add('border-gold','text-gold');
-    s1.classList.remove('border-white/15','text-white/30');
-
-    document.getElementById('btn-process').disabled = true;
-
-    setState('upload');
-    gsap.fromTo('#state-upload', {opacity:0,y:10},{opacity:1,y:0,duration:.4});
+    if (prefix === 's1') {
+      state.fiches   = [];
+      state.synthese = null;
+      ['s1-zone-fiches','s1-zone-synthese'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('has-files','drag-over');
+      });
+      cycleDots('s1-','dot1 dot2 dot3'.split(' '), [0]);
+      document.getElementById('s1-btn-process').disabled = true;
+    } else {
+      state.recens = null;
+      state.tmpl   = null;
+      ['s2-zone-recens','s2-zone-tmpl'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('has-files','drag-over');
+      });
+      cycleDots('s2-','dot1 dot2 dot3'.split(' '), [0]);
+      document.getElementById('s2-btn-process').disabled = true;
+    }
+    setWfState(prefix, 'upload');
+    gsap.fromTo('#' + prefix + '-upload', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: .4 });
   };
 
-  /* ── Navbar scroll ──────────────────────────────────────────── */
+  /* ── Navbar scroll ───────────────────────────────────────────── */
   window.addEventListener('scroll', () => {
-    document.getElementById('navbar')
-      .classList.toggle('scrolled', window.scrollY > 50);
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
   }, { passive: true });
 
-  /* ── Footer year ────────────────────────────────────────────── */
+  /* ── Footer year ─────────────────────────────────────────────── */
   document.querySelectorAll('[data-year]').forEach(el => {
     el.textContent = new Date().getFullYear();
   });
 
-  /* ── GSAP Animations ────────────────────────────────────────── */
+  /* ── GSAP Animations ─────────────────────────────────────────── */
   const prefersReduced = window.matchMedia?.('(prefers-reduced-motion:reduce)')?.matches;
   const hasGSAP = typeof gsap !== 'undefined';
 
   if (!prefersReduced && hasGSAP) {
     gsap.registerPlugin(ScrollTrigger);
 
-    // Loader reveal
     gsap.timeline()
       .to('#loader-text', { opacity: 1, y: 0, duration: .8, ease: 'power2.out' })
       .to('#loader',      { y: '-100%', delay: .4, duration: .85, ease: 'power4.inOut' })
-      .to('.reveal-on-load', {
-          opacity: 1, y: 0, duration: .65, stagger: .12, ease: 'power2.out'
-        }, '-=.2');
+      .to('.reveal-on-load', { opacity: 1, y: 0, duration: .65, stagger: .12, ease: 'power2.out' }, '-=.2');
 
-    // Scroll reveals
     gsap.utils.toArray('.reveal-scroll').forEach(el => {
       gsap.to(el, {
         scrollTrigger: { trigger: el, start: 'top 82%', toggleActions: 'play none none none' },
         opacity: 1, y: 0, duration: .7, ease: 'power2.out',
       });
     });
-
   } else {
-    // Fallback: show everything immediately
     document.getElementById('loader').style.display = 'none';
     document.querySelectorAll('.reveal-on-load, .reveal-scroll').forEach(el => {
-      el.style.opacity = '1';
-      el.style.transform = 'none';
+      el.style.opacity = '1'; el.style.transform = 'none';
     });
   }
 

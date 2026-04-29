@@ -1,14 +1,20 @@
 """
 BIA Web App — FastAPI backend
-Accepts DOCX fiches + XLSX synthèse template, runs ETL, returns filled XLSX.
+
+Endpoints:
+  POST /api/process          – Fill the Synthèse BIA from individual fiches (.docx)
+  POST /api/generate-fiches  – Generate one BIA fiche per department from a
+                                recensement file (.xlsx) + BIA template (.docx)
 """
+import io
 import shutil
 import sys
 import tempfile
+import zipfile
 from pathlib import Path
 from typing import List
 
-# Ensure this file's directory is on sys.path so `bia_etl` is always importable
+# Ensure this file's directory is on sys.path so local modules are importable
 # regardless of which directory Python was launched from.
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -18,6 +24,7 @@ from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from bia_etl import extract, load
+from fiche_generator import generate_all_fiches
 
 app = FastAPI(title="BIA Automatique")
 
@@ -93,6 +100,60 @@ async def process_bia(
             "X-Error-Count": str(len(errors)),
             "X-Errors": " | ".join(errors) if errors else "",
             "Access-Control-Expose-Headers": "X-Processed-Count, X-Error-Count, X-Errors",
+        },
+    )
+
+
+@app.post("/api/generate-fiches")
+async def generate_fiches(
+    recensement: UploadFile = File(..., description="Fiche de recensement (.xlsx)"),
+    template: UploadFile = File(..., description="BIA fiche template (.docx)"),
+):
+    """
+    Accepts a recensement Excel file + a BIA fiche template (.docx).
+    Generates one filled BIA fiche per department / structure.
+    Returns a ZIP archive containing all generated .docx files.
+    """
+    if not recensement.filename.lower().endswith(".xlsx"):
+        raise HTTPException(status_code=422, detail="Le fichier de recensement doit être un .xlsx")
+    if not template.filename.lower().endswith(".docx"):
+        raise HTTPException(status_code=422, detail="Le modèle BIA doit être un .docx")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = Path(tmpdir)
+
+        xlsx_path = tmp / recensement.filename
+        xlsx_path.write_bytes(await recensement.read())
+
+        tmpl_path = tmp / template.filename
+        tmpl_path.write_bytes(await template.read())
+
+        out_dir = tmp / "fiches"
+
+        generated, errors = generate_all_fiches(xlsx_path, tmpl_path, out_dir)
+
+        if not generated:
+            raise HTTPException(
+                status_code=422,
+                detail=errors or ["Aucune structure trouvée dans le fichier de recensement."],
+            )
+
+        # Pack all generated fiches into a single ZIP
+        zip_buf = io.BytesIO()
+        with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
+            for fiche_path in generated:
+                zf.write(fiche_path, fiche_path.name)
+        zip_bytes = zip_buf.getvalue()
+
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": 'attachment; filename="Fiches_BIA.zip"',
+            "X-Generated-Count": str(len(generated)),
+            "X-Error-Count": str(len(errors)),
+            "X-Errors": " | ".join(errors) if errors else "",
+            "Access-Control-Expose-Headers": "X-Generated-Count, X-Error-Count, X-Errors",
         },
     )
 
