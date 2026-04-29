@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import io
 import re
+import zipfile
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -41,39 +42,29 @@ def _safe_filename(name: str) -> str:
 
 def extract_client_logo(xlsx_path: Path) -> Optional[bytes]:
     """
-    Returns the raw PNG/JPG bytes of the client logo embedded in the
-    'Planning des réunions' sheet (largest image anchored at column 0),
-    or None if no image is found.
-    """
-    wb = openpyxl.load_workbook(str(xlsx_path))
-    sheet_name = next(
-        (s for s in wb.sheetnames
-         if "réunion" in s.lower() or "reunion" in s.lower()),
-        wb.sheetnames[0],
-    )
-    ws = wb[sheet_name]
-    if not hasattr(ws, "_images") or not ws._images:
-        return None
+    Returns the raw bytes of the client logo embedded in the xlsx.
 
-    best_data: Optional[bytes] = None
-    best_size = 0
-    for img in ws._images:
-        try:
-            anchor = img.anchor
-            col = getattr(getattr(anchor, "_from", None), "col", 99)
-            ref = img.ref
-            if hasattr(ref, "read"):
-                data = ref.read()
-            elif hasattr(ref, "getvalue"):
-                data = ref.getvalue()
-            else:
-                continue
-            if col == 0 and len(data) > best_size:
-                best_data = data
-                best_size = len(data)
-        except Exception:
-            pass
-    return best_data
+    Strategy: read images directly from the xlsx zip archive (xlsx files
+    are zip files; images live in xl/media/).  The largest image is taken
+    as the client logo.  This avoids openpyxl's BytesIO position issue
+    where `read()` can return a truncated buffer if the stream is not
+    seeked back to 0.
+    """
+    try:
+        with zipfile.ZipFile(str(xlsx_path), "r") as z:
+            media = [
+                f for f in z.namelist()
+                if re.match(r"xl/media/.*\.(png|jpg|jpeg|gif|bmp|emf|wmf)$",
+                            f, re.IGNORECASE)
+            ]
+            if not media:
+                return None
+            # Pick the largest file — the client logo is typically bigger
+            # than any small decorative icon.
+            best = max(media, key=lambda f: z.getinfo(f).file_size)
+            return z.read(best)
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------------
