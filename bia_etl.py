@@ -235,7 +235,7 @@ def _is_other_eqt_table(table) -> bool:
 
 def _is_doc_table(table) -> bool:
     headers = _row_texts(table.rows[0])
-    return any("Documents" in h or "Fichiers" in h for h in headers) and any("Stockage" in h for h in headers)
+    return any("Documents" in h or "Fichiers" in h for h in headers) and any("stockage" in h.lower() for h in headers)
 
 def _is_identification_table(table) -> bool:
     if len(table.rows) < 2:
