@@ -7,6 +7,7 @@ Endpoints:
                                 recensement file (.xlsx) + BIA template (.docx)
 """
 import io
+import re
 import shutil
 import sys
 import tempfile
@@ -18,7 +19,7 @@ from typing import List
 # regardless of which directory Python was launched from.
 sys.path.insert(0, str(Path(__file__).parent))
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -108,9 +109,12 @@ async def process_bia(
 async def generate_fiches(
     recensement: UploadFile = File(..., description="Fiche de recensement (.xlsx)"),
     template: UploadFile = File(..., description="BIA fiche template (.docx)"),
+    version: str = Form("2.0", description="Document version: '1.0' or '2.0'"),
+    openai_key: str = Form("", description="OpenAI API key (optional, overrides env var)"),
 ):
     """
     Accepts a recensement Excel file + a BIA fiche template (.docx).
+    Uses GPT-4o Vision to detect the client name and logo from the xlsx.
     Generates one filled BIA fiche per department / structure.
     Returns a ZIP archive containing all generated .docx files.
     """
@@ -118,6 +122,8 @@ async def generate_fiches(
         raise HTTPException(status_code=422, detail="Le fichier de recensement doit être un .xlsx")
     if not template.filename.lower().endswith(".docx"):
         raise HTTPException(status_code=422, detail="Le modèle BIA doit être un .docx")
+    if version not in ("1.0", "2.0"):
+        version = "2.0"
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
@@ -130,7 +136,11 @@ async def generate_fiches(
 
         out_dir = tmp / "fiches"
 
-        generated, errors = generate_all_fiches(xlsx_path, tmpl_path, out_dir)
+        generated, errors = generate_all_fiches(
+            xlsx_path, tmpl_path, out_dir,
+            version=version,
+            openai_api_key=openai_key or None,
+        )
 
         if not generated:
             raise HTTPException(
@@ -145,17 +155,31 @@ async def generate_fiches(
                 zf.write(fiche_path, fiche_path.name)
         zip_bytes = zip_buf.getvalue()
 
+    # Extract client name from the first generated filename for the response
+    client_name = "Client"
+    if generated:
+        client_name = generated[0].name.split(" - MCO")[0]
+
+    safe_zip_name = f"Fiches_BIA_{_safe_zip_name(client_name)}_V{version}.zip"
+
     return Response(
         content=zip_bytes,
         media_type="application/zip",
         headers={
-            "Content-Disposition": 'attachment; filename="Fiches_BIA.zip"',
+            "Content-Disposition": f'attachment; filename="{safe_zip_name}"',
             "X-Generated-Count": str(len(generated)),
             "X-Error-Count": str(len(errors)),
             "X-Errors": " | ".join(errors) if errors else "",
-            "Access-Control-Expose-Headers": "X-Generated-Count, X-Error-Count, X-Errors",
+            "X-Client-Name": client_name,
+            "Access-Control-Expose-Headers": (
+                "X-Generated-Count, X-Error-Count, X-Errors, X-Client-Name"
+            ),
         },
     )
+
+
+def _safe_zip_name(name: str) -> str:
+    return re.sub(r'[^\w\-]', '_', name)[:40]
 
 
 if __name__ == "__main__":

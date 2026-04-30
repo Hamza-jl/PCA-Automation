@@ -307,6 +307,45 @@
       line-height: 1.15;
     }
 
+    /* ── Version toggle ──────────────────────────────────────── */
+    .version-toggle {
+      display: flex; gap: 0; border: 1px solid rgba(255,255,255,.1);
+      border-radius: .5rem; overflow: hidden;
+    }
+    .version-btn {
+      flex: 1; padding: .6rem 1rem; cursor: pointer; border: none;
+      background: transparent; color: rgba(240,238,232,.4);
+      font-family: 'Montserrat', sans-serif;
+      font-size: .7rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; transition: all .25s;
+    }
+    .version-btn:first-child { border-right: 1px solid rgba(255,255,255,.1); }
+    .version-btn.selected {
+      background: rgba(197,160,89,.12);
+      color: #C5A059;
+    }
+
+    /* ── API key input ────────────────────────────────────────── */
+    .api-key-input {
+      width: 100%; background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.1); border-radius: .5rem;
+      padding: .65rem 1rem; color: #F0EEE8;
+      font-family: 'Montserrat', sans-serif; font-size: .75rem;
+      letter-spacing: .04em; outline: none;
+      transition: border-color .25s;
+    }
+    .api-key-input::placeholder { color: rgba(240,238,232,.2); }
+    .api-key-input:focus { border-color: rgba(197,160,89,.45); }
+
+    /* ── AI badge ─────────────────────────────────────────────── */
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      background: rgba(197,160,89,.08); border: 1px solid rgba(197,160,89,.2);
+      border-radius: 2rem; padding: .25rem .75rem;
+      font-size: .62rem; font-weight: 600; letter-spacing: .12em;
+      color: rgba(197,160,89,.8); text-transform: uppercase;
+    }
+
     /* ── Toast ────────────────────────────────────────────────── */
     #toast {
       position: fixed; bottom: 2rem; right: 2rem; z-index: 200;
@@ -536,7 +575,9 @@
 
         <!-- STATE: UPLOAD -->
         <div id="s2-upload">
-          <div class="grid md:grid-cols-2 gap-5 mb-8">
+
+          <!-- Drop zones -->
+          <div class="grid md:grid-cols-2 gap-5 mb-6">
 
             <div class="drop-zone text-center" id="s2-zone-recens"
                  role="button" aria-label="Fichier de recensement (.xlsx)">
@@ -563,6 +604,45 @@
             </div>
           </div>
 
+          <!-- Version selector -->
+          <div class="glass p-5 mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <span class="section-label">Version du document</span>
+              <span class="ai-badge">
+                <i class="fa-solid fa-robot text-xs"></i> Détection client par IA
+              </span>
+            </div>
+            <div class="version-toggle" id="s2-version-toggle">
+              <button class="version-btn" id="s2-v1" onclick="selectVersion('1.0')">
+                <i class="fa-solid fa-star mr-1.5 text-xs"></i>Première version — V1.0
+              </button>
+              <button class="version-btn selected" id="s2-v2" onclick="selectVersion('2.0')">
+                <i class="fa-solid fa-rotate mr-1.5 text-xs"></i>Actualisation — V2.0
+              </button>
+            </div>
+          </div>
+
+          <!-- OpenAI API key -->
+          <div class="glass p-5 mb-6">
+            <label class="section-label block mb-2">
+              <i class="fa-solid fa-key mr-1.5 opacity-70"></i>Clé API OpenAI
+              <span class="ml-2 text-white/25 normal-case tracking-normal font-normal text-xs">
+                (pour la détection automatique du client et du logo)
+              </span>
+            </label>
+            <input
+              type="password"
+              class="api-key-input"
+              id="s2-openai-key"
+              placeholder="sk-..."
+              autocomplete="off"
+            />
+            <p class="text-xs text-white/25 mt-2 tracking-wide">
+              La clé n'est jamais stockée. Elle est transmise uniquement le temps de la requête.
+              Vous pouvez aussi la définir via la variable d'environnement <code class="text-gold/50">OPENAI_API_KEY</code>.
+            </p>
+          </div>
+
           <div class="flex justify-center">
             <button class="btn-gold" id="s2-btn-process" disabled onclick="processGenerate()">
               <span><i class="fa-solid fa-wand-magic-sparkles"></i></span>
@@ -570,7 +650,7 @@
             </button>
           </div>
           <p class="text-center mt-5 text-xs text-white/25 tracking-wide">
-            Le logo client est extrait du fichier de recensement et intégré dans chaque fiche générée.
+            Le logo et le nom du client sont détectés automatiquement via GPT-4o.
           </p>
         </div>
 
@@ -602,7 +682,8 @@
             <div class="text-center">
               <h3 class="font-serif text-2xl font-light text-white mb-2">Fiches générées&nbsp;!</h3>
               <p class="text-sm text-white/40">
-                <span id="s2-count" class="text-gold font-semibold">0</span> fiche(s) créée(s) avec succès
+                <span id="s2-count" class="text-gold font-semibold">0</span> fiche(s) créée(s) —
+                Client détecté&nbsp;: <span id="s2-client-name" class="text-gold font-semibold">—</span>
               </p>
             </div>
             <div id="s2-warnings" style="display:none;"
@@ -797,15 +878,23 @@
       tmpl:     null,
       blob:     null,
       interval: null,
+      version:  '2.0',
       filename: 'Fiches_BIA.zip',
       statusMsgs: [
         "Lecture du recensement...",
+        "Détection du client via GPT-4o...",
         "Extraction du logo client...",
         "Génération des fiches...",
-        "Remplissage des entités...",
         "Création de l'archive ZIP...",
       ],
     },
+  };
+
+  /* ── Version selector ───────────────────────────────────────── */
+  window.selectVersion = function (v) {
+    wf.s2.version = v;
+    document.getElementById('s2-v1').classList.toggle('selected', v === '1.0');
+    document.getElementById('s2-v2').classList.toggle('selected', v === '2.0');
   };
 
   /* ── Tab switcher ───────────────────────────────────────────── */
@@ -1005,6 +1094,9 @@
     const form = new FormData();
     form.append('recensement', wf.s2.recens);
     form.append('template', wf.s2.tmpl);
+    form.append('version', wf.s2.version);
+    const apiKey = document.getElementById('s2-openai-key').value.trim();
+    if (apiKey) form.append('openai_key', apiKey);
 
     try {
       const res = await fetch('/api/generate-fiches', { method: 'POST', body: form });
@@ -1017,11 +1109,21 @@
         return;
       }
       wf.s2.blob = await res.blob();
-      document.getElementById('s2-count').textContent = res.headers.get('X-Generated-Count') || '0';
-      const errs = res.headers.get('X-Errors') || '';
+
+      const count      = res.headers.get('X-Generated-Count') || '0';
+      const clientName = res.headers.get('X-Client-Name')    || '—';
+      const errs       = res.headers.get('X-Errors')         || '';
+
+      // Update filename to match the actual ZIP name
+      wf.s2.filename = `Fiches_BIA_${clientName}_V${wf.s2.version}.zip`;
+
+      document.getElementById('s2-count').textContent       = count;
+      document.getElementById('s2-client-name').textContent = clientName;
+
       const warnEl = document.getElementById('s2-warnings');
       if (errs) { warnEl.style.display = ''; warnEl.textContent = 'Avertissements : ' + errs; }
       else { warnEl.style.display = 'none'; }
+
       setWfState('s2','success');
     } catch (err) {
       clearInterval(wf.s2.interval);
@@ -1058,12 +1160,17 @@
       cycleDots('s1-','dot1 dot2 dot3'.split(' '), [0]);
       document.getElementById('s1-btn-process').disabled = true;
     } else {
-      state.recens = null;
-      state.tmpl   = null;
+      state.recens  = null;
+      state.tmpl    = null;
+      state.version = '2.0';
+      state.filename = 'Fiches_BIA.zip';
       ['s2-zone-recens','s2-zone-tmpl'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.remove('has-files','drag-over');
       });
+      // Reset version toggle to V2.0
+      document.getElementById('s2-v1').classList.remove('selected');
+      document.getElementById('s2-v2').classList.add('selected');
       cycleDots('s2-','dot1 dot2 dot3'.split(' '), [0]);
       document.getElementById('s2-btn-process').disabled = true;
     }
