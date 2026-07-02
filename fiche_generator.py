@@ -151,73 +151,153 @@ def detect_client_info(
 # Parse the recensement sheet into a list of structures
 # ---------------------------------------------------------------------------
 
+# Keywords that identify each conceptual column type in the header row.
+# Order matters within each list — more specific keywords first.
+# n1 = broadest org level, n3 = most specific.
+_HDR_KEYWORDS: dict[str, list[str]] = {
+    "n1":   ["niveau 1", "niveau1", "pôle", "pole", "division"],
+    "n2":   ["niveau 2", "niveau2", "unité", "unite"],
+    "n3":   ["niveau 3", "niveau3", "département", "departement"],
+    "vav":  ["vis-à-vis", "vis a vis", "contact", "responsable"],
+    "date": ["date"],
+}
+
+# Cell values treated as "empty" (no entity)
+_EMPTY_MARKERS = {"-", "–", "—", "", "n/a", "na"}
+
+
+def _is_empty_marker(val: str) -> bool:
+    return val.strip().lower() in _EMPTY_MARKERS or not val.strip()
+
+
+def _detect_header_and_cols(ws) -> tuple[int, dict[str, int]]:
+    """
+    Scan the worksheet for a header row and return
+    (header_row_index, {col_type: col_index}).
+    """
+    for row_idx, row in enumerate(ws.iter_rows(max_row=30, values_only=True)):
+        vals = [_clean(v) for v in row]
+        row_lower = " ".join(vals).lower()
+        # Header row: contains at least two org-level keywords
+        matches = sum(
+            1 for kws in _HDR_KEYWORDS.values()
+            for kw in kws
+            if kw in row_lower
+        )
+        if matches < 2:
+            continue
+
+        col_map: dict[str, int] = {}
+        for col_idx, cell_val in enumerate(vals):
+            cv = cell_val.lower()
+            for col_type, keywords in _HDR_KEYWORDS.items():
+                if col_type not in col_map and any(kw in cv for kw in keywords):
+                    col_map[col_type] = col_idx
+                    break
+        if col_map:
+            return row_idx, col_map
+
+    return -1, {}
+
+
 def parse_structures(xlsx_path: Path) -> list[dict]:
     """
-    Reads the 'Planning des réunions' sheet and returns one dict per row
-    that represents a concrete structure (department / sub-department).
+    Parse a recensement Excel file and return one dict per meeting/structure row.
 
-    Each dict:
-        name       – most specific level name (N3 > N2 > N1)
-        vis_a_vis  – contact person name
-        date       – meeting date as "DD/MM/YYYY" string
-        niveau1    – parent Pôle (cascaded)
-        niveau2    – parent Département (cascaded)
-        niveau3    – sub-department (may be empty)
+    Handles two common formats:
+      • "Niveau 1 / Niveau 2 / Niveau 3" columns (Suivi projet style)
+      • "Division / Unité / Département"   columns (Recensement style)
+
+    Each returned dict:
+        name       – most specific non-empty level name
+        vis_a_vis  – contact person (first line only)
+        date       – "DD/MM/YYYY" string
+        niveau1    – top-level parent (cascaded)
+        niveau2    – mid-level parent (cascaded)
+        niveau3    – deepest level (may be empty)
     """
     wb = openpyxl.load_workbook(str(xlsx_path), data_only=True)
+
+    # Prefer a sheet whose name suggests a meeting / planning / tracking sheet
+    preferred_keywords = ("réunion", "reunion", "planning", "avancement", "suivi")
     sheet_name = next(
         (s for s in wb.sheetnames
-         if "réunion" in s.lower() or "reunion" in s.lower()),
+         if any(kw in s.lower() for kw in preferred_keywords)),
         wb.sheetnames[0],
     )
     ws = wb[sheet_name]
 
-    COL_N1, COL_N2, COL_N3 = 0, 1, 2
-    COL_VAV, COL_DATE       = 3, 4
+    header_row_idx, col_map = _detect_header_and_cols(ws)
+    if not col_map:
+        return []
 
-    header_found = False
+    # Determine which columns map to the three hierarchy levels
+    # Prefer n3 > n2 > n1 as "name"; fall back gracefully
+    level_cols: list[int] = []
+    for level in ("n1", "n2", "n3"):
+        if level in col_map:
+            level_cols.append(col_map[level])
+
+    vav_col  = col_map.get("vav")
+    date_col = col_map.get("date")
+
     structures: list[dict] = []
-    current_n1 = ""
-    current_n2 = ""
+    cascaded: list[str] = [""] * len(level_cols)  # last seen value per level
 
-    for row in ws.iter_rows(values_only=True):
+    for row_idx, row in enumerate(ws.iter_rows(min_row=header_row_idx + 2, values_only=True)):
         vals = list(row)
 
-        if not header_found:
-            if vals[0] and "niveau" in str(vals[0]).lower():
-                header_found = True
-            continue
+        # Extract level values
+        level_vals: list[str] = []
+        for col_i in level_cols:
+            raw = _clean(vals[col_i]) if col_i < len(vals) else ""
+            level_vals.append(raw)
 
-        n1  = _clean(vals[COL_N1]) if COL_N1 < len(vals) else ""
-        n2  = _clean(vals[COL_N2]) if COL_N2 < len(vals) else ""
-        n3  = _clean(vals[COL_N3]) if COL_N3 < len(vals) else ""
-        vav = _clean(vals[COL_VAV]) if COL_VAV < len(vals) else ""
-        date_raw = vals[COL_DATE]   if COL_DATE < len(vals) else None
+        # Update cascaded values (carry forward non-empty cells)
+        for i, lv in enumerate(level_vals):
+            if lv and not _is_empty_marker(lv):
+                cascaded[i] = lv
+                # Reset deeper levels when a higher level changes
+                for j in range(i + 1, len(cascaded)):
+                    cascaded[j] = ""
 
-        if n1:
-            current_n1 = n1
-        if n2:
-            current_n2 = n2
-
-        name = n3 or n2 or n1
+        # Entity name = deepest non-empty, non-marker level value
+        name = ""
+        for lv in reversed(level_vals):
+            if lv and not _is_empty_marker(lv):
+                name = lv
+                break
         if not name:
             continue
 
+        # Contact person — take first non-empty line from raw (multi-line) value
+        vav = ""
+        if vav_col is not None and vav_col < len(vals):
+            raw_cell = vals[vav_col]
+            if raw_cell is not None:
+                first_line = str(raw_cell).split("\n")[0].strip()
+                first_line = re.sub(r"\s+", " ", first_line).strip()
+                if first_line.lower() not in ("à définir", "a definir", "-", "–", ""):
+                    vav = first_line
+
+        # Meeting date
         date_str = ""
-        if date_raw:
-            if isinstance(date_raw, datetime):
-                date_str = date_raw.strftime("%d/%m/%Y")
-            else:
-                date_str = str(date_raw)
+        if date_col is not None and date_col < len(vals):
+            date_raw = vals[date_col]
+            if date_raw:
+                if isinstance(date_raw, datetime):
+                    date_str = date_raw.strftime("%d/%m/%Y")
+                else:
+                    date_str = str(date_raw)
 
         structures.append(
             {
-                "name":    name,
+                "name":     name,
                 "vis_a_vis": vav,
-                "date":    date_str,
-                "niveau1": current_n1,
-                "niveau2": current_n2,
-                "niveau3": n3,
+                "date":     date_str,
+                "niveau1":  cascaded[0] if len(cascaded) > 0 else "",
+                "niveau2":  cascaded[1] if len(cascaded) > 1 else "",
+                "niveau3":  cascaded[2] if len(cascaded) > 2 else "",
             }
         )
 
@@ -376,6 +456,7 @@ def generate_all_fiches(
     output_dir: Path,
     version: str = "2.0",
     openai_api_key: Optional[str] = None,
+    client_name: Optional[str] = None,
 ) -> tuple[list[Path], list[str]]:
     """
     Generate one BIA fiche per structure found in *xlsx_path*.
@@ -385,8 +466,10 @@ def generate_all_fiches(
         template_path   – blank BIA fiche template (.docx)
         output_dir      – folder to write generated fiches into
         version         – "1.0" or "2.0"
-        openai_api_key  – GPT-4o key for client detection; falls back to
+        openai_api_key  – GPT-4o key for logo/client detection; falls back to
                           the OPENAI_API_KEY env var if not provided
+        client_name     – if provided, used directly and AI name detection is
+                          skipped (logo detection still runs when a key is available)
 
     Returns:
         (generated_paths, error_strings)
@@ -396,14 +479,21 @@ def generate_all_fiches(
     # Resolve API key
     api_key = openai_api_key or os.environ.get("OPENAI_API_KEY", "")
 
-    # Use OpenAI to identify client name + logo; fall back gracefully
-    if api_key:
-        client_name, logo_bytes = detect_client_info(xlsx_path, api_key)
+    if client_name:
+        # Name supplied by user — only detect the logo via AI
+        if api_key:
+            _, logo_bytes = detect_client_info(xlsx_path, api_key)
+        else:
+            images = _extract_all_images(xlsx_path)
+            logo_bytes = max(images, key=lambda x: len(x[1]))[1] if images else None
     else:
-        # No key — use largest image, unknown client name
-        images = _extract_all_images(xlsx_path)
-        logo_bytes = max(images, key=lambda x: len(x[1]))[1] if images else None
-        client_name = "Client"
+        # No name supplied — use AI to detect both name and logo
+        if api_key:
+            client_name, logo_bytes = detect_client_info(xlsx_path, api_key)
+        else:
+            images = _extract_all_images(xlsx_path)
+            logo_bytes = max(images, key=lambda x: len(x[1]))[1] if images else None
+            client_name = "Client"
 
     structures = parse_structures(xlsx_path)
 
