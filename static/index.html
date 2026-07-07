@@ -1727,62 +1727,23 @@
       <div id="oc-step1" class="app-card" style="margin-bottom:1.25rem;">
         <div class="app-card-title"><i class="fa-solid fa-robot" style="color:var(--gold);"></i> Étape 1 — Charger l'organigramme</div>
 
-        <!-- Backend toggle -->
+        <!-- Backend selector -->
         <div style="margin-bottom:1rem;">
-          <label style="font-size:.68rem;font-weight:600;color:rgba(26,24,20,.5);display:block;margin-bottom:.5rem;">Mode d'analyse</label>
-          <div style="display:inline-flex;border:1px solid rgba(26,24,20,.12);border-radius:.5rem;overflow:hidden;background:#FAF8F4;">
-            <button id="oc-toggle-ocr" onclick="ocSetBackend('ocr')"
-              style="padding:.4rem 1rem;font-size:.72rem;font-family:inherit;border:none;cursor:pointer;font-weight:600;background:#1a5c38;color:#fff;transition:background .15s;">
-              <i class="fa-solid fa-text-height"></i> OCR
-            </button>
-            <button id="oc-toggle-hybrid" onclick="ocSetBackend('hybrid')"
-              style="padding:.4rem 1rem;font-size:.72rem;font-family:inherit;border:none;cursor:pointer;font-weight:400;background:transparent;color:rgba(26,24,20,.5);transition:background .15s;">
-              <i class="fa-solid fa-layer-group"></i> Hybride
-            </button>
-            <button id="oc-toggle-glmocr" onclick="ocSetBackend('glmocr')"
-              style="padding:.4rem 1rem;font-size:.72rem;font-family:inherit;border:none;cursor:pointer;font-weight:400;background:transparent;color:rgba(26,24,20,.5);transition:background .15s;">
-              <i class="fa-solid fa-eye"></i> GLM-OCR
-            </button>
-            <button id="oc-toggle-vlm" onclick="ocSetBackend('vlm')"
-              style="padding:.4rem 1rem;font-size:.72rem;font-family:inherit;border:none;cursor:pointer;font-weight:400;background:transparent;color:rgba(26,24,20,.5);transition:background .15s;">
-              <i class="fa-solid fa-robot"></i> VLM
-            </button>
-          </div>
+          <label for="oc-mode-select" style="font-size:.68rem;font-weight:600;color:rgba(26,24,20,.5);display:block;margin-bottom:.5rem;">Mode d'analyse</label>
+          <select id="oc-mode-select" onchange="ocSetBackend(this.value)"
+            style="padding:.45rem .65rem;border:1px solid rgba(26,24,20,.12);border-radius:.5rem;font-size:.72rem;font-family:inherit;background:#FAF8F4;min-width:220px;">
+            <option value="ocr">Analyse simple</option>
+            <option value="tiled">Analyse avancée</option>
+          </select>
         </div>
 
         <!-- Mode description cards -->
         <div id="oc-info-ocr" style="margin-bottom:1rem;padding:.55rem .8rem;background:rgba(21,128,61,.05);border:1px solid rgba(21,128,61,.18);border-radius:.45rem;font-size:.72rem;color:rgba(26,24,20,.65);">
-          <strong style="color:#15803d;"><i class="fa-solid fa-bolt"></i> OCR structurel</strong> — Lit toutes les boîtes par position géométrique. Rapide (~3s), aucune hallucination, aucun modèle IA requis. Idéal pour les organigrammes avec étiquettes de niveaux (Directions centrales, Agences…).
+          <strong style="color:#15803d;"><i class="fa-solid fa-bolt"></i> Analyse simple (OCR)</strong> — Lit toutes les boîtes par position géométrique. Rapide (~3s), aucune hallucination, aucun modèle IA requis. Idéal pour les organigrammes avec étiquettes de niveaux (Directions centrales, Agences…).
           <span id="oc-ocr-warn" style="display:none;color:#b45309;"> &nbsp;⚠ EasyOCR non installé — <code style="background:rgba(0,0,0,.07);padding:.1rem .25rem;border-radius:.2rem;">pip install easyocr</code></span>
         </div>
-        <div id="oc-info-hybrid" style="display:none;margin-bottom:1rem;padding:.55rem .8rem;background:rgba(192,154,89,.06);border:1px solid rgba(192,154,89,.25);border-radius:.45rem;font-size:.72rem;color:rgba(26,24,20,.65);">
-          <strong style="color:var(--gold);"><i class="fa-solid fa-layer-group"></i> Mode hybride</strong> — OCR extrait les noms + positions (zéro hallucination), puis le LLM organise la hiérarchie via les coordonnées Y. Fonctionne avec n'importe quel modèle Ollama (pas besoin de modèle vision).
-        </div>
-        <div id="oc-info-glmocr" style="display:none;margin-bottom:1rem;padding:.55rem .8rem;background:rgba(59,100,180,.06);border:1px solid rgba(59,100,180,.22);border-radius:.45rem;font-size:.72rem;color:rgba(26,24,20,.65);">
-          <strong style="color:#3b64b4;"><i class="fa-solid fa-eye"></i> GLM-OCR</strong> — Modèle OCR spécialisé (0.9B, <strong>#1 OmniDocBench</strong>) via Ollama. Lit le texte avec une précision maximale, sépare automatiquement rôle et titulaire, groupe par niveau structurel. Rapide sur votre GPU (~10s).
-          <span id="oc-glmocr-warn" style="display:none;color:#b45309;"> &nbsp;⚠ GLM-OCR non disponible — <code style="background:rgba(0,0,0,.07);padding:.1rem .25rem;border-radius:.2rem;">ollama pull glm-ocr</code></span>
-        </div>
-        <div id="oc-info-vlm" style="display:none;margin-bottom:1rem;padding:.55rem .8rem;background:rgba(26,24,20,.03);border:1px solid rgba(26,24,20,.1);border-radius:.45rem;font-size:.72rem;color:rgba(26,24,20,.65);">
-          <strong><i class="fa-solid fa-robot"></i> Modèle vision (VLM)</strong> — Le modèle analyse l'image seul. Utile pour les organigrammes sans structure géométrique claire (schémas libres, images floues).
-        </div>
-
-        <!-- Model selector (hybrid + VLM) -->
-        <div id="oc-vlm-section" style="display:none;margin-bottom:1rem;">
-          <label id="oc-vlm-label" style="font-size:.68rem;font-weight:600;color:rgba(26,24,20,.5);display:block;margin-bottom:.35rem;">Modèle vision (Ollama)</label>
-          <div style="display:flex;gap:.6rem;align-items:center;">
-            <select id="oc-model-select"
-              style="flex:1;padding:.45rem .65rem;border:1px solid rgba(26,24,20,.1);border-radius:.45rem;font-size:.72rem;background:#FAF8F4;font-family:inherit;">
-              <option value="">Chargement des modèles…</option>
-            </select>
-            <button onclick="ocLoadModels()" title="Rafraîchir"
-              style="padding:.4rem .7rem;border:1px solid rgba(26,24,20,.1);border-radius:.45rem;background:#FAF8F4;cursor:pointer;font-size:.75rem;">
-              <i class="fa-solid fa-rotate"></i>
-            </button>
-          </div>
-          <p id="oc-no-model-warn" style="display:none;color:#b45309;margin-top:.4rem;font-size:.72rem;background:#fef3c7;padding:.4rem .6rem;border-radius:.35rem;">
-            <i class="fa-solid fa-triangle-exclamation"></i> Aucun modèle vision détecté.
-            Installez-en un : <code style="background:rgba(0,0,0,.07);padding:.1rem .3rem;border-radius:.25rem;">ollama pull granite3.2-vision:2b</code>
-          </p>
+        <div id="oc-info-tiled" style="display:none;margin-bottom:1rem;padding:.55rem .8rem;background:rgba(192,154,89,.06);border:1px solid rgba(192,154,89,.25);border-radius:.45rem;font-size:.72rem;color:rgba(26,24,20,.65);">
+          <strong style="color:var(--gold);"><i class="fa-solid fa-layer-group"></i> Analyse avancée</strong> — Découpe l'image en bandes horizontales pour une lecture plus précise par un modèle vision, puis relie la hiérarchie bande par bande. Plus lent (plusieurs minutes) mais bien plus fiable sur les organigrammes denses.
         </div>
 
         <!-- Drop zone -->
@@ -1818,9 +1779,20 @@
             style="padding:.65rem 1.6rem;background:var(--poppy,#e83b5a);color:#fff;border:none;border-radius:.45rem;font-weight:700;cursor:pointer;font-size:.85rem;font-family:inherit;box-shadow:0 2px 8px rgba(232,59,90,.35);letter-spacing:.02em;">
             <i class="fa-solid fa-magnifying-glass-chart" style="margin-right:.4rem;"></i> Analyser l'organigramme
           </button>
-          <div id="oc-analyzing" style="display:none;display:none;align-items:center;gap:.6rem;">
+          <div id="oc-analyzing" style="display:none;align-items:center;gap:.6rem;">
             <div class="spinner" style="width:18px;height:18px;border-width:2px;"></div>
             <span style="font-size:.72rem;color:rgba(26,24,20,.5);">Analyse en cours avec <strong id="oc-analyzing-model"></strong>…</span>
+          </div>
+        </div>
+
+        <!-- Progress bar (Analyse avancée only — hidden by default) -->
+        <div id="oc-progress-wrap" style="display:none;margin-top:.85rem;">
+          <div style="display:flex;justify-content:space-between;font-size:.68rem;margin-bottom:.3rem;">
+            <span id="oc-progress-label">Démarrage…</span>
+            <span id="oc-progress-pct">0%</span>
+          </div>
+          <div style="height:5px;background:rgba(0,0,0,.08);border-radius:9999px;overflow:hidden;">
+            <div id="oc-progress-bar" style="height:100%;width:0%;background:var(--poppy,#e83b5a);border-radius:9999px;transition:width .3s;"></div>
           </div>
         </div>
       </div>
@@ -3378,8 +3350,6 @@ window.navigatePage = function(pageId, group, pageName, childId) {
   if (pageId === 'page-generer-synthese') _syncFichesToSynthesePage();
   // Load BDS editor filters when sync page opens
   if (pageId === 'page-sync' && typeof bdsInitFilters === 'function') bdsInitFilters();
-  // Load vision models when generer-fiches page opens
-  if (pageId === 'page-generer-fiches') ocLoadModels();
   sbClose();
 };
 
@@ -3665,35 +3635,17 @@ function switchGfTab(tabId) {
   if (tabId === 'tab-orgchart') ocInitTab();
 }
 
-// ── OCR / Hybrid / GLM-OCR / VLM backend toggle ────────────────────────────
-let _ocBackend = 'ocr'; // 'ocr' | 'hybrid' | 'glmocr' | 'vlm'
+// ── Analyse simple (OCR) / Analyse avancée (tiled vision) mode selector ────
+let _ocBackend = 'ocr'; // 'ocr' | 'tiled'
+
+// Fixed model for "Analyse avancée" — the one that performed best/fastest
+// in testing (tiled extraction + band-by-band linking, both on this model).
+const OC_TILED_MODEL = 'qwen2.5vl:3b';
 
 function ocSetBackend(mode) {
   _ocBackend = mode;
-  const BTN_ON  = { background: '#1a5c38', color: '#fff', fontWeight: '600' };
-  const BTN_GLM = { background: '#3b64b4', color: '#fff', fontWeight: '600' };
-  const BTN_OFF = { background: 'transparent', color: 'rgba(26,24,20,.5)', fontWeight: '400' };
-  ['ocr','hybrid','glmocr','vlm'].forEach(m => {
-    const btn = document.getElementById('oc-toggle-' + m);
-    if (!btn) return;
-    const s = m === mode ? (m === 'glmocr' ? BTN_GLM : BTN_ON) : BTN_OFF;
-    Object.assign(btn.style, s);
-  });
-  document.getElementById('oc-info-ocr').style.display    = mode === 'ocr'    ? '' : 'none';
-  document.getElementById('oc-info-hybrid').style.display = mode === 'hybrid' ? '' : 'none';
-  document.getElementById('oc-info-glmocr').style.display = mode === 'glmocr' ? '' : 'none';
-  document.getElementById('oc-info-vlm').style.display    = mode === 'vlm'    ? '' : 'none';
-  document.getElementById('oc-vlm-section').style.display =
-    (mode === 'hybrid' || mode === 'vlm' || mode === 'glmocr') ? '' : 'none';
-  // Update the label to reflect what the model is used for
-  const vlmLabel = document.getElementById('oc-vlm-label');
-  if (vlmLabel) {
-    if (mode === 'glmocr') {
-      vlmLabel.textContent = 'Modèle VLM — analyse hiérarchique (Stage 3)';
-    } else {
-      vlmLabel.textContent = 'Modèle vision (Ollama)';
-    }
-  }
+  document.getElementById('oc-info-ocr').style.display   = mode === 'ocr'   ? '' : 'none';
+  document.getElementById('oc-info-tiled').style.display = mode === 'tiled' ? '' : 'none';
 }
 
 async function ocInitTab() {
@@ -3702,33 +3654,6 @@ async function ocInitTab() {
     const d = await r.json();
     document.getElementById('oc-ocr-warn').style.display = d.available ? 'none' : '';
   } catch { /* server not ready yet */ }
-  try {
-    const r = await fetch('/api/orgchart/glmocr-available');
-    const d = await r.json();
-    document.getElementById('oc-glmocr-warn').style.display = d.available ? 'none' : '';
-  } catch { /* server not ready yet */ }
-  ocLoadModels();
-}
-
-async function ocLoadModels() {
-  const sel  = document.getElementById('oc-model-select');
-  const warn = document.getElementById('oc-no-model-warn');
-  sel.innerHTML = '<option value="">Chargement…</option>';
-  try {
-    const r = await fetch('/api/orgchart/models-vision');
-    const d = await r.json();
-    const models = d.models || [];
-    if (!models.length) {
-      sel.innerHTML = '<option value="">Aucun modèle vision disponible</option>';
-      warn.style.display = '';
-    } else {
-      sel.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
-      warn.style.display = 'none';
-    }
-  } catch {
-    sel.innerHTML = '<option value="">Ollama non disponible</option>';
-    warn.style.display = '';
-  }
 }
 
 function ocHandleDrop(e) {
@@ -3755,63 +3680,101 @@ function ocHandleFile(file) {
   btn.style.display = '';
 }
 
+function _ocApplyResult(d, useLevels) {
+  _ocEntities = (d.entities || []).map(e => ({ ...e, selected: true }));
+  if (!_ocEntities.length) throw new Error('Aucune entité détectée. Essayez une image plus nette.');
+  _ocLevels = (useLevels && d.levels && d.levels.length) ? d.levels : null;
+  _ocTree = null;
+  ocRenderEntities();
+  document.getElementById('oc-step2').style.display = '';
+}
+
 async function ocAnalyze() {
   if (!_ocImageFile) { alert('Chargez une image d\'organigramme.'); return; }
 
-  const model = document.getElementById('oc-model-select').value;
-  if (_ocBackend !== 'ocr' && !model) {
-    alert('Sélectionnez un modèle vision.');
-    return;
-  }
-
   const btn       = document.getElementById('oc-analyze-btn');
   const analyzing = document.getElementById('oc-analyzing');
-  btn.style.display       = 'none';
-  analyzing.style.display = 'flex';
+  const progWrap  = document.getElementById('oc-progress-wrap');
+  const progLabel = document.getElementById('oc-progress-label');
+  const progPct   = document.getElementById('oc-progress-pct');
+  const progBar   = document.getElementById('oc-progress-bar');
 
-  const modeLabel = { ocr: 'OCR structurel', hybrid: 'Hybride OCR + IA', glmocr: 'GLM-OCR', vlm: model }[_ocBackend];
-  document.getElementById('oc-analyzing-model').textContent = modeLabel;
+  btn.style.display = 'none';
   document.getElementById('oc-step2').style.display = 'none';
+
+  const modeLabel = { ocr: 'Analyse simple (OCR)', tiled: 'Analyse avancée (' + OC_TILED_MODEL + ')' }[_ocBackend];
+  document.getElementById('oc-analyzing-model').textContent = modeLabel;
+
+  const finish = () => {
+    analyzing.style.display = 'none';
+    progWrap.style.display  = 'none';
+    btn.style.display       = '';
+  };
 
   const fd = new FormData();
   fd.append('image', _ocImageFile);
 
-  let url;
   if (_ocBackend === 'ocr') {
-    url = '/api/orgchart/analyze-ocr';
-  } else if (_ocBackend === 'hybrid') {
-    fd.append('model', model);
-    url = '/api/orgchart/analyze-hybrid';
-  } else if (_ocBackend === 'glmocr') {
-    if (model) fd.append('model', model); // optional VLM for hierarchy tree
-    url = '/api/orgchart/analyze-glmocr';
-  } else {
-    fd.append('model', model);
-    url = '/api/orgchart/analyze';
+    analyzing.style.display = 'flex';
+    try {
+      const r = await fetch('/api/orgchart/analyze-ocr', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.detail || 'Erreur analyse');
+      _ocApplyResult(d, false);
+    } catch (err) {
+      alert('Erreur : ' + err.message);
+    } finally {
+      finish();
+    }
+    return;
   }
 
+  // Analyse avancée — streamed via SSE, with a progress bar (this mode takes
+  // several minutes: several band extractions + several linking calls).
+  fd.append('model', OC_TILED_MODEL);
+  progWrap.style.display = '';
+  progLabel.textContent  = 'Démarrage…';
+  progPct.textContent    = '0%';
+  progBar.style.width    = '0%';
+
   try {
-    const r = await fetch(url, { method: 'POST', body: fd });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.detail || 'Erreur analyse');
-    _ocEntities = (d.entities || []).map(e => ({ ...e, selected: true }));
-    if (!_ocEntities.length) throw new Error('Aucune entité détectée. Essayez une image plus nette.');
-    const useLevels = (_ocBackend === 'hybrid' || _ocBackend === 'glmocr');
-    _ocLevels = (useLevels && d.levels && d.levels.length) ? d.levels : null;
-    _ocTree = (_ocBackend === 'glmocr' && d.tree) ? d.tree : null;
-    console.log('[GLM-OCR] tree received:', JSON.stringify(_ocTree)?.slice(0,300));
-    console.log('[GLM-OCR] entities:', _ocEntities.length, '| levels:', _ocLevels?.length);
-    if (_ocBackend === 'glmocr') {
-      ocRenderSplitView();
-    } else {
-      ocRenderEntities();
+    const resp = await fetch('/api/orgchart/analyze-tiled-stream', { method: 'POST', body: fd });
+    if (!resp.ok) {
+      const d = await resp.json().catch(() => ({}));
+      throw new Error(d.detail || ('Erreur serveur ' + resp.status));
     }
-    document.getElementById('oc-step2').style.display = '';
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    let finished = false;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const parts = buf.split('\n\n');
+      buf = parts.pop();
+      for (const part of parts) {
+        const line = part.trim();
+        if (!line.startsWith('data:')) continue;
+        let d;
+        try { d = JSON.parse(line.slice(5).trim()); } catch { continue; }
+        if (d.type === 'progress') {
+          progLabel.textContent = d.message || '';
+          progPct.textContent   = (d.pct ?? 0) + '%';
+          progBar.style.width   = (d.pct ?? 0) + '%';
+        } else if (d.type === 'done') {
+          _ocApplyResult(d, true);
+          finished = true;
+        } else if (d.type === 'error') {
+          throw new Error(d.message);
+        }
+      }
+    }
+    if (!finished) throw new Error('Flux interrompu avant la fin de l\'analyse.');
   } catch (err) {
     alert('Erreur : ' + err.message);
   } finally {
-    analyzing.style.display = 'none';
-    btn.style.display = '';
+    finish();
   }
 }
 

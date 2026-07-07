@@ -47,6 +47,7 @@ import projects_db as _pdb
 import risk_analysis as _risk
 import orgchart_vision as _ov
 import orgchart_ocr as _ocr
+import orgchart_tiled as _tiled
 
 app = FastAPI(title="BIA Automatique")
 
@@ -670,6 +671,85 @@ async def orgchart_analyze_glmocr(
     levels   = result.get("levels",   [])
     tree     = result.get("tree",     None)
     return {"entities": entities, "levels": levels, "tree": tree, "count": len(entities)}
+
+
+@app.post("/api/orgchart/analyze-tiled")
+async def orgchart_analyze_tiled(
+    image: UploadFile = File(..., description="Org chart image (PNG/JPG)"),
+    model: str = Form("qwen2.5vl:3b", description="Ollama vision model name"),
+):
+    """Analyse avancée : découpage en bandes + extraction IA par bande + liaison hiérarchique bande par bande."""
+    allowed = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"}
+    suffix = Path(image.filename).suffix.lower()
+    if suffix not in allowed:
+        raise HTTPException(status_code=422, detail=f"Format non supporté '{suffix}'.")
+    image_bytes = await image.read()
+    if len(image_bytes) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=422, detail="Image trop grande (max 15 Mo).")
+    try:
+        result = _tiled.analyze_orgchart_tiled(image_bytes, model)
+    except RuntimeError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+    entities = result.get("entities", [])
+    levels   = result.get("levels",   [])
+    return {"entities": entities, "levels": levels, "count": len(entities)}
+
+
+@app.post("/api/orgchart/analyze-tiled-stream")
+async def orgchart_analyze_tiled_stream(
+    image: UploadFile = File(..., description="Org chart image (PNG/JPG)"),
+    model: str = Form("qwen2.5vl:3b", description="Ollama vision model name"),
+):
+    """
+    Streaming version of /api/orgchart/analyze-tiled — SSE progress events
+    (one per band extracted, one per band-pair linked) followed by a final
+    "done" event carrying the entities/levels, or an "error" event.
+    """
+    allowed = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"}
+    suffix = Path(image.filename).suffix.lower()
+    if suffix not in allowed:
+        raise HTTPException(status_code=422, detail=f"Format non supporté '{suffix}'.")
+    image_bytes = await image.read()
+    if len(image_bytes) > 15 * 1024 * 1024:
+        raise HTTPException(status_code=422, detail="Image trop grande (max 15 Mo).")
+
+    event_q: "_queue_mod.Queue" = _queue_mod.Queue()
+
+    def worker() -> None:
+        def emit_progress(evt: dict) -> None:
+            event_q.put({"type": "progress", **evt})
+
+        try:
+            result = _tiled.analyze_orgchart_tiled(image_bytes, model, on_progress=emit_progress)
+            event_q.put({
+                "type": "done",
+                "entities": result.get("entities", []),
+                "levels": result.get("levels", []),
+                "count": len(result.get("entities", [])),
+            })
+        except RuntimeError as e:
+            event_q.put({"type": "error", "message": str(e)})
+        except Exception as e:
+            event_q.put({"type": "error", "message": f"Erreur inattendue : {e}"})
+
+    _threading.Thread(target=worker, daemon=True).start()
+
+    async def generate():
+        while True:
+            try:
+                event = event_q.get_nowait()
+                yield f"data: {_json.dumps(event, ensure_ascii=False)}\n\n"
+                if event.get("type") in ("done", "error"):
+                    break
+            except _queue_mod.Empty:
+                await asyncio.sleep(0.05)
+                yield ": \n\n"   # SSE keep-alive comment
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.post("/api/generate-fiches-from-entities")
