@@ -884,6 +884,19 @@ async def rapport_bia_endpoint(
         return {"main": data1, "compare": data2}
 
 
+@app.post("/api/rapport-bia/slides-data")
+async def rapport_bia_slides_data(
+    synthese: UploadFile = File(..., description="Synthèse BIA (.xlsx)"),
+):
+    """Return all structured data needed to render the BIA slide gallery."""
+    from bia_slides_data import extract_slides_data
+    xlsx_bytes = await synthese.read()
+    try:
+        return extract_slides_data(xlsx_bytes)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+
 @app.post("/api/rapport-bia/generate-pptx")
 async def rapport_bia_generate_pptx(
     synthese: UploadFile = File(..., description="Synthèse BIA (.xlsx)"),

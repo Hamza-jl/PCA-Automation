@@ -35,6 +35,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
     /* ══════════════════════════════════════════════
@@ -2379,177 +2380,49 @@
   <div class="app-page" id="page-rapport">
     <div class="pg-header">
       <div class="pg-label"><i class="fa-solid fa-file-chart-column"></i> Rapport BIA</div>
-      <div class="pg-title"><strong>Tableau de bord</strong> BIA</div>
-      <div class="pg-desc">Courbe de reprise, ressources humaines, équipements et analyse comparative.</div>
+      <div class="pg-title"><strong>Galerie de slides</strong> BIA</div>
+      <div class="pg-desc">Importez la Synthèse BIA pour générer les slides du rapport en version web. Téléchargez chaque slide en PNG ou exportez tout en ZIP.</div>
     </div>
 
     <!-- Upload zone -->
-    <div id="rp-upload-zone" style="max-width:760px;margin:0 auto 1.5rem;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-        <div>
-          <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-               color:rgba(26,24,20,.45);margin-bottom:.4rem;">Synthèse principale</div>
-          <div class="drop-zone text-center" id="rp-drop1" role="button" style="border-style:dashed;padding:1rem;"
-               onclick="document.getElementById('rp-inp1').click()"
-               ondragover="event.preventDefault();this.classList.add('drag')"
-               ondragleave="this.classList.remove('drag')"
-               ondrop="event.preventDefault();this.classList.remove('drag');rpSetFile(1,event.dataTransfer.files[0])">
-            <div class="drop-zone-icon"><i class="fa-regular fa-file-excel"></i></div>
-            <div class="drop-zone-sub">.xlsx — glissez ou cliquez</div>
-            <div class="file-list" id="rp-fn1"></div>
-          </div>
-          <input type="file" id="rp-inp1" accept=".xlsx" style="display:none"
-                 onchange="rpSetFile(1,this.files[0]);this.value=''">
-        </div>
-        <div>
-          <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-               color:rgba(26,24,20,.45);margin-bottom:.4rem;">Synthèse de comparaison <span style="font-weight:400;opacity:.6;">(optionnel)</span></div>
-          <div class="drop-zone text-center" id="rp-drop2" role="button" style="border-style:dashed;padding:1rem;"
-               onclick="document.getElementById('rp-inp2').click()"
-               ondragover="event.preventDefault();this.classList.add('drag')"
-               ondragleave="this.classList.remove('drag')"
-               ondrop="event.preventDefault();this.classList.remove('drag');rpSetFile(2,event.dataTransfer.files[0])">
-            <div class="drop-zone-icon"><i class="fa-regular fa-file-excel" style="opacity:.5;"></i></div>
-            <div class="drop-zone-sub">.xlsx comparaison</div>
-            <div class="file-list" id="rp-fn2"></div>
-          </div>
-          <input type="file" id="rp-inp2" accept=".xlsx" style="display:none"
-                 onchange="rpSetFile(2,this.files[0]);this.value=''">
-        </div>
+    <div id="rp-upload-zone" style="max-width:680px;margin:0 auto 1.5rem;">
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(26,24,20,.45);margin-bottom:.5rem;">Synthèse BIA</div>
+      <div class="drop-zone text-center" id="rp-drop1" role="button" style="border-style:dashed;padding:1.2rem;"
+           onclick="document.getElementById('rp-inp1').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="event.preventDefault();this.classList.remove('drag');rpSetFile(1,event.dataTransfer.files[0])">
+        <div class="drop-zone-icon"><i class="fa-regular fa-file-excel"></i></div>
+        <div class="drop-zone-sub">.xlsx — glissez ou cliquez</div>
+        <div class="file-list" id="rp-fn1"></div>
       </div>
-      <div style="text-align:center;">
-        <button id="rp-btn-gen" disabled onclick="rpGenerate()"
+      <input type="file" id="rp-inp1" accept=".xlsx" style="display:none"
+             onchange="rpSetFile(1,this.files[0]);this.value=''">
+      <div style="text-align:center;margin-top:1rem;display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+        <button id="rp-btn-gen" disabled onclick="sgGenerate()"
           style="padding:.65rem 2rem;background:#1a1814;color:#fff;border:none;border-radius:8px;
-                 font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;opacity:.4;
-                 transition:opacity .15s;">
-          <i class="fa-solid fa-chart-line fa-xs"></i> Générer le rapport
+                 font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;opacity:.4;transition:opacity .15s;">
+          <i class="fa-solid fa-wand-magic-sparkles fa-xs"></i> Générer les slides
         </button>
-        <button id="rp-btn-pptx" disabled onclick="rpDownloadPptx()"
-          style="margin-left:.75rem;padding:.65rem 2rem;background:#E8394C;color:#fff;border:none;
-                 border-radius:8px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;
-                 opacity:.4;transition:opacity .15s;">
-          <i class="fa-solid fa-file-powerpoint fa-xs"></i> Télécharger le rapport PPTX
+        <button id="rp-btn-zip" disabled onclick="sgDownloadAll()"
+          style="padding:.65rem 2rem;background:#E8394C;color:#fff;border:none;border-radius:8px;
+                 font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;opacity:.4;transition:opacity .15s;">
+          <i class="fa-solid fa-file-zipper fa-xs"></i> Tout télécharger (ZIP)
         </button>
       </div>
     </div>
 
-    <!-- Report dashboard (hidden until data loaded) -->
-    <div id="rp-main" style="display:none;max-width:1100px;margin:0 auto;">
-
-      <!-- ── Section 1: Reprise des activités ────────────────────────── -->
-      <div class="rp-section-title">
-        <i class="fa-solid fa-chart-line"></i> Reprise des activités
-      </div>
-      <div class="rp-cards-row" style="margin-bottom:1.4rem;">
-        <div class="rp-chart-card" style="flex:2;">
-          <div class="rp-card-hd">Courbe de reprise des activités<button class="rp-dl-btn" onclick="rpDownloadChart('rp-curve-svg','courbe_reprise')">⬇ PNG</button></div>
-          <div style="padding:1.2rem 1rem .8rem;position:relative;" id="rp-curve-wrap">
-            <div id="rp-curve-svg"></div>
-          </div>
-          <div style="font-size:.64rem;color:rgba(26,24,20,.35);text-align:center;padding-bottom:.6rem;">
-            Cliquez sur un point pour voir les activités concernées
-          </div>
-        </div>
-        <div class="rp-chart-card" style="flex:1;">
-          <div class="rp-card-hd" style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;position:relative;">
-            <span>Activités par horizon</span>
-            <div style="display:flex;align-items:center;gap:.4rem;">
-              <select id="rp-horizon-sel" style="font-size:.72rem;padding:.2rem .5rem;border:1px solid rgba(0,0,0,.18);border-radius:6px;background:#fff;color:#1a1814;cursor:pointer;max-width:90px;"></select>
-              <button class="rp-dl-btn" style="position:static;transform:none;" onclick="rpDownloadChart('rp-bar-j1','activites_horizon')">⬇ PNG</button>
-            </div>
-          </div>
-          <div style="padding:1rem;" id="rp-bar-j1"></div>
-        </div>
-      </div>
-
-      <!-- ── Section 2: Ressources Humaines ─────────────────────────── -->
-      <div class="rp-section-title">
-        <i class="fa-solid fa-users"></i> Ressources humaines
-      </div>
-      <div class="rp-cards-row" style="margin-bottom:1.4rem;">
-        <div class="rp-chart-card" style="flex:2;">
-          <div class="rp-card-hd">Positions vs Télétravail<button class="rp-dl-btn" onclick="rpDownloadChart('rp-hr-svg','positions_teletravail')">⬇ PNG</button></div>
-          <div style="padding:1.2rem 1rem .8rem;" id="rp-hr-svg"></div>
-        </div>
-        <div class="rp-chart-card" style="flex:1;">
-          <div class="rp-card-hd">Répartition au dernier horizon<button class="rp-dl-btn" onclick="rpDownloadChart('rp-pie-wrap','repartition_horizon')">⬇ PNG</button></div>
-          <div style="padding:1rem;display:flex;justify-content:center;" id="rp-pie-wrap"></div>
-        </div>
-      </div>
-
-      <!-- ── Section 3: Équipements ──────────────────────────────────── -->
-      <div class="rp-section-title">
-        <i class="fa-solid fa-toolbox"></i> Équipements nécessaires à la reprise
-      </div>
-      <!-- Fiche loader -->
-      <div class="rp-chart-card" style="margin-bottom:.8rem;">
-        <div class="rp-card-hd">Charger les fiches BIA</div>
-        <div style="padding:1rem;display:flex;flex-wrap:wrap;gap:.8rem;align-items:flex-end;">
-          <!-- Upload direct -->
-          <div style="display:flex;flex-direction:column;gap:.3rem;">
-            <label style="font-size:.68rem;font-weight:600;color:rgba(26,24,20,.5);text-transform:uppercase;letter-spacing:.04em;">Fiches (.docx)</label>
-            <label style="display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .75rem;border:1.5px dashed rgba(0,0,0,.2);border-radius:7px;cursor:pointer;font-size:.75rem;color:#1a66ff;background:#f5f8ff;">
-              <i class="fa-solid fa-file-arrow-up"></i> Choisir des fichiers
-              <input type="file" id="rp-fiche-input" accept=".docx" multiple style="display:none;" onchange="rpFichesSelected(this.files)">
-            </label>
-          </div>
-          <!-- OR from DB -->
-          <div style="display:flex;flex-direction:column;gap:.3rem;">
-            <label style="font-size:.68rem;font-weight:600;color:rgba(26,24,20,.5);text-transform:uppercase;letter-spacing:.04em;">Depuis la base</label>
-            <div style="display:flex;gap:.4rem;align-items:center;">
-              <select id="rp-fiche-sector" style="font-size:.74rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.18);border-radius:6px;" onchange="rpFicheLoadClients()">
-                <option value="">— Secteur —</option>
-              </select>
-              <select id="rp-fiche-client" style="font-size:.74rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.18);border-radius:6px;">
-                <option value="">— Client —</option>
-              </select>
-              <button onclick="rpFicheLoadFromDB()" style="font-size:.74rem;padding:.3rem .8rem;border:none;border-radius:6px;background:#1a1814;color:#fff;cursor:pointer;">Charger</button>
-            </div>
-          </div>
-          <!-- Store toggle -->
-          <div style="display:flex;flex-direction:column;gap:.3rem;">
-            <label style="font-size:.68rem;font-weight:600;color:rgba(26,24,20,.5);text-transform:uppercase;letter-spacing:.04em;">Sauvegarder</label>
-            <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;">
-              <input type="text" id="rp-fiche-sector-save" placeholder="Secteur" style="font-size:.74rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.18);border-radius:6px;width:90px;">
-              <input type="text" id="rp-fiche-client-save" placeholder="Client" style="font-size:.74rem;padding:.3rem .5rem;border:1px solid rgba(0,0,0,.18);border-radius:6px;width:90px;">
-              <button onclick="rpFicheUploadAndStore()" style="font-size:.74rem;padding:.3rem .8rem;border:none;border-radius:6px;background:#1a66ff;color:#fff;cursor:pointer;">Importer & sauvegarder</button>
-            </div>
-          </div>
-        </div>
-        <div id="rp-fiche-status" style="padding:0 1rem .5rem;font-size:.74rem;color:#1a66ff;min-height:1.2rem;"></div>
-      </div>
-
-      <!-- Equipment table from fiches -->
-      <div class="rp-chart-card" style="margin-bottom:1.4rem;">
-        <div class="rp-card-hd">Recensement des besoins en équipements<button class="rp-dl-btn" onclick="rpDownloadChart('rp-equipment-grid','equipements')">⬇ PNG</button></div>
-        <div style="padding:1rem;" id="rp-equipment-grid"></div>
-      </div>
-
+    <!-- Slide gallery (hidden until data loaded) -->
+    <div id="sg-main" style="display:none;max-width:1100px;margin:0 auto;">
+      <!-- Section navigation -->
+      <div id="sg-nav" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.4rem;"></div>
+      <!-- Slides container -->
+      <div id="sg-sections"></div>
     </div>
-
-    <!-- ── Detail drawer ──────────────────────────────────────────────── -->
-    <div id="rp-drawer" style="position:fixed;top:0;right:-420px;width:400px;height:100vh;
-         background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.12);z-index:900;transition:right .3s ease;
-         overflow-y:auto;display:flex;flex-direction:column;">
-      <div style="padding:1.1rem 1.2rem;border-bottom:1px solid rgba(26,24,20,.08);
-           display:flex;align-items:center;gap:.8rem;background:#1a1814;">
-        <div>
-          <div id="rp-drawer-title" style="font-size:.85rem;font-weight:700;color:#fff;"></div>
-          <div id="rp-drawer-sub"   style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:2px;"></div>
-        </div>
-        <button onclick="rpCloseDrawer()" style="margin-left:auto;background:rgba(255,255,255,.1);
-          border:none;color:#fff;border-radius:6px;padding:5px 9px;cursor:pointer;font-size:.8rem;">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div id="rp-drawer-body" style="padding:1rem;flex:1;"></div>
-    </div>
-    <div id="rp-drawer-overlay" onclick="rpCloseDrawer()" style="display:none;position:fixed;
-         inset:0;background:rgba(0,0,0,.25);z-index:899;"></div>
-
   </div>
   <!-- /page-rapport -->
 
+  
   <!-- ══ PAGE: Montée en charge ══ -->
   <div class="app-page" id="page-montee-en-charge">
     <div class="pg-header">
@@ -5563,659 +5436,509 @@ function exportOrgchart() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   RAPPORT BIA  — full dashboard
+   RAPPORT BIA  — Slide Gallery
 ════════════════════════════════════════════════════════════ */
 (function(){
-const _C = { rouge:'#E05252', orange:'#F59E0B', vert:'#10B981', none:'#94A3B8',
-             blue:'#3B82F6', pink:'#F87171', dark:'#1a1814' };
+'use strict';
 
-/* ── state ── */
-window._rpState = { file1:null, file2:null, data:null };
+const C = {
+  dark:'#1A1814', red:'#E8394C', light:'#F4F3F0', mgray:'#D0CEC8',
+  dkgr:'#5A5852', white:'#FFFFFF', green:'#10B981', amber:'#F59E0B',
+};
+const DMIA_ORDER=['H0','H+1','H+2','H+4','J+1','J+2','J+3','J+4','J+5','J+10','J+15','J+30','Au-delà'];
 
-/* ── file input ── */
+window._rpState = { file1:null, data:null };
+
 window.rpSetFile = function(n, f) {
   if (!f || !f.name.endsWith('.xlsx')) return;
-  window._rpState['file'+n] = f;
-  const zone = document.getElementById('rp-drop'+n);
-  const fn   = document.getElementById('rp-fn'+n);
+  window._rpState.file1 = f;
+  const zone = document.getElementById('rp-drop1');
+  const fn   = document.getElementById('rp-fn1');
   if (zone) zone.classList.add('ok');
   if (fn) fn.innerHTML = `<div style="font-size:.62rem;color:#2E7D32;margin-top:4px;">${f.name}</div>`;
-  const btn = document.getElementById('rp-btn-gen');
-  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
-  const btnP = document.getElementById('rp-btn-pptx');
-  if (btnP) { btnP.disabled = false; btnP.style.opacity = '1'; }
+  ['rp-btn-gen','rp-btn-zip'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) { b.disabled=false; b.style.opacity='1'; }
+  });
 };
 
-/* ── generate ── */
-window.rpGenerate = async function() {
-  const s   = window._rpState;
-  const btn = document.getElementById('rp-btn-gen');
+window.sgGenerate = async function() {
+  const s=window._rpState, btn=document.getElementById('rp-btn-gen');
   if (!s.file1) return;
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-sm"></span> Analyse…';
+  btn.disabled=true;
+  btn.innerHTML='<i class="fa-solid fa-spinner fa-spin fa-xs"></i> Chargement…';
   try {
-    const fd = new FormData();
-    fd.append('synthese', s.file1);
-    if (s.file2) fd.append('synthese2', s.file2);
-    const r = await fetch('/api/rapport-bia', {method:'POST', body:fd});
-    if (!r.ok) { const j=await r.json().catch(()=>({})); throw new Error(j.detail||r.statusText); }
-    s.data = await r.json();
-    document.getElementById('rp-main').style.display = '';
-    rpRenderAll();
-    toast('Rapport généré ✓', 'ok');
-  } catch(e) {
-    toast(e.message||'Erreur lors de l\'analyse','error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-chart-line fa-xs"></i> Générer le rapport';
-  }
+    const fd=new FormData(); fd.append('synthese',s.file1);
+    const r=await fetch('/api/rapport-bia/slides-data',{method:'POST',body:fd});
+    if (!r.ok){const j=await r.json().catch(()=>({detail:r.statusText}));throw new Error(j.detail);}
+    s.data=await r.json();
+    sgRender(s.data);
+    document.getElementById('sg-main').style.display='';
+    document.getElementById('sg-main').scrollIntoView({behavior:'smooth'});
+  } catch(e){ alert('Erreur : '+e.message); }
+  finally { btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-wand-magic-sparkles fa-xs"></i> Générer les slides'; }
 };
 
-/* ── render all charts ── */
-function rpRenderAll() {
-  const d = window._rpState.data;
-  if (!d) return;
-  // Data now comes from real "Montée en charge" sheet
-  rpRenderCurve(d.main.recovery_steps, d.compare?.recovery_steps);
-  rpRenderBarJ1(d.main.recovery_steps, d.compare?.recovery_steps);
-  // HR uses the aggregated totals + time_cols from the sheet
-  rpRenderHR(d.main, d.compare);
-  rpRenderPie(d.main);
-  rpRenderEquipment(d.main.equipment);
-}
+/* ══════════════════════════════════════════════════════════════
+   RENDER ENGINE
+══════════════════════════════════════════════════════════════ */
+function sgRender(data) {
+  const nav=document.getElementById('sg-nav'), cont=document.getElementById('sg-sections');
+  nav.innerHTML=''; cont.innerHTML='';
+  const sections=[
+    {id:'s-cover',  label:'Couverture',         fn:()=>[slideCover(data.meta)]},
+    {id:'s-resume', label:'Résumé Exécutif',    fn:()=>slideResume(data)},
+    {id:'s-zoom',   label:'Zoom sur la Reprise', fn:()=>slideZoom(data.zoom)},
+    {id:'s-impacts',label:'Tableau des Impacts', fn:()=>slideImpacts(data.impacts)},
+    {id:'s-apps',   label:'Applications',        fn:()=>slideApps(data.apps)},
+    {id:'s-collabs',label:'Collaborateurs',      fn:()=>slideCollabs(data.collaborateurs)},
+    {id:'s-docs',   label:'Documents',           fn:()=>slideDocs(data.documents)},
+    {id:'s-equip',  label:'Équipements',         fn:()=>slideEquip(data.equipements,data.time_cols)},
+  ];
+  sections.forEach((sec,si)=>{
+    const pill=document.createElement('button');
+    pill.textContent=sec.label;
+    pill.style.cssText=`padding:.35rem .9rem;border-radius:20px;border:1px solid rgba(26,24,20,.18);
+      background:${si===0?C.dark:'transparent'};color:${si===0?C.white:C.dark};
+      font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;`;
+    pill.onmouseenter=()=>{ if(pill.style.background==='transparent'||!pill.style.background.includes('1A')){pill.style.background='rgba(26,24,20,.06)';} };
+    pill.onmouseleave=()=>{ if(si>0) pill.style.background='transparent'; };
+    pill.onclick=()=>document.getElementById(sec.id)?.scrollIntoView({behavior:'smooth',block:'start'});
+    nav.appendChild(pill);
 
-/* ═══ SVG helpers ═══════════════════════════════════════════ */
-const NS = 'http://www.w3.org/2000/svg';
-function se(tag,a,p){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a||{}))e.setAttribute(k,v);if(p)p.appendChild(e);return e;}
-function st(c,a,p){const e=se('text',a,p);e.textContent=c;return e;}
+    const wrap=document.createElement('div');
+    wrap.id=sec.id;
+    wrap.style.cssText='margin-bottom:2.5rem;scroll-margin-top:80px;';
+    const lbl=document.createElement('div');
+    lbl.style.cssText=`font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      color:rgba(26,24,20,.45);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;`;
+    lbl.innerHTML=`<div style="flex:1;height:1px;background:rgba(26,24,20,.12);"></div>
+      <span>${sec.label}</span>
+      <div style="flex:1;height:1px;background:rgba(26,24,20,.12);"></div>`;
+    wrap.appendChild(lbl);
 
-/* ═══ CHART 1: Recovery curve ═══════════════════════════════ */
-function rpRenderCurve(steps1, steps2) {
-  const wrap = document.getElementById('rp-curve-svg');
-  wrap.innerHTML = '';
-  if (!steps1?.length) return;
-
-  const M = {top:20,right:30,bottom:50,left:48};
-  const TW = Math.max(500, wrap.clientWidth || 560);
-  const TH = 280;
-  const W  = TW - M.left - M.right;
-  const H  = TH - M.top  - M.bottom;
-
-  // Filter meaningful steps (not 0%)
-  const pts1 = steps1.filter(s => s.label !== 'Début');
-  const pts2 = steps2 ? steps2.filter(s => s.label !== 'Début') : null;
-
-  const xPos = (i, n) => i * (W / Math.max(n-1, 1));
-  const yPos = pct => H - (pct / 100) * H;
-
-  const svg = se('svg',{xmlns:NS,width:TW,height:TH});
-  se('rect',{width:TW,height:TH,fill:'#F8FAFB',rx:8},svg);
-  const g = se('g',{transform:`translate(${M.left},${M.top})`},svg);
-
-  // Horizontal grid lines
-  [0,25,50,75,100].forEach(v => {
-    const y = yPos(v);
-    se('line',{x1:0,x2:W,y1:y,y2:y,stroke:'rgba(0,0,0,.07)','stroke-dasharray':'4 3'},g);
-    st(v+'%',{x:-6,y:y+4,'text-anchor':'end','font-size':10,'font-family':'inherit',fill:'rgba(26,24,20,.4)'},g);
-  });
-
-  // Draw curve (function)
-  function drawCurve(pts, color, dashed) {
-    const n = pts.length;
-    const pathD = pts.map((s,i) => (i===0?'M':'L') + xPos(i,n) + ' ' + yPos(s.percent)).join(' ');
-    se('path',{d:pathD,fill:'none',stroke:color,'stroke-width':2.5,
-               'stroke-dasharray':dashed?'6 4':'none',
-               'stroke-linecap':'round','stroke-linejoin':'round'},g);
-
-    pts.forEach((s,i) => {
-      const x = xPos(i,n), y = yPos(s.percent);
-      const r = 18;
-      const dotC = s.percent === 100 ? _C.dark :
-                   s.percent >= 75 ? color :
-                   s.percent >= 40 ? color : color;
-
-      // Glow
-      se('circle',{cx:x,cy:y,r:r+4,fill:dotC,opacity:.12},g);
-      // Circle
-      const dot = se('circle',{cx:x,cy:y,r,fill:dotC,stroke:'#fff','stroke-width':2,
-                                style:'cursor:pointer;'},g);
-      // Label inside
-      st(s.percent+'%',{x,y:y+4,'text-anchor':'middle','font-size':11,'font-weight':700,
-                         'font-family':'inherit',fill:'#fff','pointer-events':'none'},g);
-
-      // Click handler
-      dot.addEventListener('click', () => rpOpenDrawer(s));
-
-      // X label
-      if (!dashed) {
-        st(s.label,{x,y:H+18,'text-anchor':'middle','font-size':10,'font-family':'inherit',
-                    fill:'rgba(26,24,20,.5)'},g);
-      }
-    });
-  }
-
-  if (pts2) drawCurve(pts2, _C.pink,  true);
-  drawCurve(pts1, _C.blue, false);
-
-  // Legend
-  if (pts2) {
-    const lg = se('g',{transform:`translate(${W-120},0)`},g);
-    se('line',{x1:0,x2:20,y1:7,y2:7,stroke:_C.blue,'stroke-width':2.5},lg);
-    st('Principale',{x:24,y:11,'font-size':10,'font-family':'inherit',fill:'rgba(26,24,20,.6)'},lg);
-    se('line',{x1:0,x2:20,y1:22,y2:22,stroke:_C.pink,'stroke-width':2.5,'stroke-dasharray':'5 3'},lg);
-    st('Comparaison',{x:24,y:26,'font-size':10,'font-family':'inherit',fill:'rgba(26,24,20,.6)'},lg);
-  }
-
-  wrap.appendChild(svg);
-}
-
-/* ═══ CHART 2: Bar J+1 ══════════════════════════════════════ */
-function rpRenderBarJ1(steps1, steps2) {
-  const wrap = document.getElementById('rp-bar-j1');
-
-  // Collect all time labels from steps (skip "Début")
-  // Skip first step ("Début" / H+0 baseline) — it's always 0%
-  const labels = (steps1 || []).slice(1).map(s=>s.label);
-
-  const sel = document.getElementById('rp-horizon-sel');
-  const prev = sel.value;
-  sel.innerHTML = '';
-  labels.forEach(l => { const o = document.createElement('option'); o.value = l; o.textContent = l; sel.appendChild(o); });
-  if (labels.includes(prev)) sel.value = prev;
-  else if (labels.includes('J+1')) sel.value = 'J+1';
-  else if (labels.length) sel.value = labels[0];
-
-  function draw() {
-    wrap.innerHTML = '';
-    const chosen = sel.value;
-    const s1 = steps1?.find(s=>s.label===chosen);
-    const s2 = steps2?.find(s=>s.label===chosen);
-
-    const bars = steps2
-      ? [{v:s1?.count||0, c:_C.blue, step:s1, lbl:'Principal'},
-         {v:s2?.count||0, c:_C.pink, step:s2, lbl:'Comparaison'}]
-      : [{v:s1?.count||0, c:_C.blue, step:s1}];
-
-    const total1 = steps1 ? (steps1[steps1.length-1]?.count || 1) : 1;
-    const maxV   = Math.max(...bars.map(b=>b.v), 1);
-    const W = 260, H = 170, barW = steps2 ? 34 : 52;
-    const M = {top:16, right:12, bottom:36, left:32};
-    const cW = W - M.left - M.right;
-    const cH = H - M.top  - M.bottom;
-
-    const svg = se('svg',{xmlns:NS,width:'100%',height:H,viewBox:`0 0 ${W} ${H}`});
-    const g   = se('g',{transform:`translate(${M.left},${M.top})`},svg);
-
-    // Y grid lines
-    [0, Math.ceil(maxV/2), maxV].forEach(v=>{
-      const y = cH - (v/maxV)*cH;
-      se('line',{x1:0,x2:cW,y1:y,y2:y,stroke:'rgba(0,0,0,.07)'},g);
-      st(v,{x:-4,y:y+4,'text-anchor':'end','font-size':9,fill:'rgba(26,24,20,.4)'},g);
-    });
-
-    const groupW = cW / bars.length;
-    bars.forEach((b,i)=>{
-      const cx  = i*groupW + groupW/2;
-      const bh  = Math.max((b.v/maxV)*cH, b.v>0?2:0);
-      const bx  = cx - barW/2;
-      const by  = cH - bh;
-      const pct = total1 > 0 ? Math.round(b.v/total1*100) : 0;
-
-      const bar = se('rect',{x:bx,y:by,width:barW,height:bh,fill:b.c,rx:4,
-                              style:'cursor:pointer;transition:opacity .15s;'},g);
-      bar.addEventListener('mouseenter',()=>bar.setAttribute('opacity','0.8'));
-      bar.addEventListener('mouseleave',()=>bar.setAttribute('opacity','1'));
-      if (b.step) bar.addEventListener('click',()=>rpOpenDrawer(b.step));
-
-      // Count label above bar
-      st(b.v,{x:cx,y:by-6,'text-anchor':'middle','font-size':11,'font-weight':700,fill:b.c},g);
-      // % label inside bar (only if tall enough)
-      if (bh > 22) st(pct+'%',{x:cx,y:by+bh/2+4,'text-anchor':'middle','font-size':9,
-                                fill:'#fff','font-weight':600},g);
-      // Series label below
-      if (steps2) st(b.lbl,{x:cx,y:cH+14,'text-anchor':'middle','font-size':9,
-                             fill:'rgba(26,24,20,.5)'},g);
-    });
-
-    // X axis label: chosen horizon
-    if (!steps2) {
-      st(chosen,{x:cW/2,y:cH+16,'text-anchor':'middle','font-size':11,
-                 fill:'rgba(26,24,20,.45)'},g);
-    }
-
-    wrap.appendChild(svg);
-  }
-
-  sel.onchange = draw;
-  draw();
-}
-
-/* ═══ CHART 3: HR line chart ════════════════════════════════ */
-// d1/d2 are the full main/compare objects (have .time_cols + .totals)
-function rpRenderHR(d1, d2) {
-  const wrap = document.getElementById('rp-hr-svg');
-  wrap.innerHTML = '';
-  if (!d1?.time_cols?.length) {
-    wrap.innerHTML = '<div class="mec-empty">Données RH non disponibles dans la feuille Montée en charge.</div>';
-    return;
-  }
-
-  const cols = d1.time_cols;
-  const pos1 = d1.totals?.positions   || [];
-  const tt1  = d1.totals?.teletravail || [];
-  const pos2 = d2?.totals?.positions   || [];
-  const tt2  = d2?.totals?.teletravail || [];
-
-  const allVals = [...pos1,...tt1,...pos2,...tt2].filter(v=>v!=null);
-  const maxV = Math.max(...allVals, 1);
-
-  const M = {top:20,right:30,bottom:45,left:40};
-  const TW = Math.max(420, wrap.clientWidth||460);
-  const TH = 220;
-  const W  = TW - M.left - M.right;
-  const H  = TH - M.top  - M.bottom;
-  const N  = cols.length;
-  const xP = i => i/(N-1)*W;
-  const yP = v => v==null ? null : H - (v/maxV)*H;
-
-  const svg = se('svg',{xmlns:NS,width:TW,height:TH});
-  se('rect',{width:TW,height:TH,fill:'#F8FAFB',rx:8},svg);
-  const g = se('g',{transform:`translate(${M.left},${M.top})`},svg);
-
-  // Grid
-  for(let i=0;i<=4;i++){
-    const y=i/4*H;
-    se('line',{x1:0,x2:W,y1:y,y2:y,stroke:'rgba(0,0,0,.06)'},g);
-    st(Math.round(maxV*(1-i/4)),{x:-5,y:y+4,'text-anchor':'end','font-size':9,fill:'rgba(26,24,20,.4)'},g);
-  }
-
-  function drawLine(vals, color, dashed, dotR=5) {
-    const pts = vals.map((v,i)=>({x:xP(i),y:yP(v),v,i})).filter(p=>p.y!=null);
-    if(pts.length<2) return;
-    const d=pts.map((p,j)=>(j===0?'M':'L')+p.x+' '+p.y).join(' ');
-    se('path',{d,fill:'none',stroke:color,'stroke-width':2.2,
-               'stroke-dasharray':dashed?'5 3':'none',
-               'stroke-linecap':'round','stroke-linejoin':'round'},g);
-    pts.forEach(p=>{
-      se('circle',{cx:p.x,cy:p.y,r:dotR,fill:color,stroke:'#fff','stroke-width':1.5},g);
-      st(p.v!=null?p.v:'',{x:p.x,y:p.y-8,'text-anchor':'middle','font-size':9,'font-weight':700,
-                            fill:color},g);
-    });
-  }
-
-  if (pos2.length)  drawLine(pos2, 'rgba(59,130,246,.4)',  true);
-  if (tt2.length)   drawLine(tt2,  'rgba(240,113,113,.4)', true);
-  drawLine(pos1, _C.blue,  false);
-  drawLine(tt1,  _C.rouge, false);
-
-  // X labels
-  cols.forEach((c,i)=>{
-    if(i%Math.max(1,Math.floor(N/6))===0||i===N-1)
-      st(c,{x:xP(i),y:H+14,'text-anchor':'middle','font-size':9,fill:'rgba(26,24,20,.45)'},g);
-  });
-
-  // Legend
-  const lg = se('g',{transform:`translate(${W-150},${H+28})`},g);
-  se('line',{x1:0,x2:14,y1:4,y2:4,stroke:_C.blue,'stroke-width':2},lg);
-  se('circle',{cx:7,cy:4,r:3,fill:_C.blue},lg);
-  st('Positions',{x:18,y:8,'font-size':9,fill:'rgba(26,24,20,.5)'},lg);
-  se('line',{x1:70,x2:84,y1:4,y2:4,stroke:_C.rouge,'stroke-width':2},lg);
-  se('circle',{cx:77,cy:4,r:3,fill:_C.rouge},lg);
-  st('Télétravail',{x:88,y:8,'font-size':9,fill:'rgba(26,24,20,.5)'},lg);
-
-  wrap.appendChild(svg);
-}
-
-/* ═══ CHART 4: Pie chart ════════════════════════════════════ */
-// d = full main object (has .totals.positions + .totals.teletravail)
-function rpRenderPie(d) {
-  const wrap = document.getElementById('rp-pie-wrap');
-  wrap.innerHTML = '';
-  const pos = (d?.totals?.positions  ||[]).filter(v=>v!=null&&v>0);
-  const tt  = (d?.totals?.teletravail||[]).filter(v=>v!=null&&v>0);
-  if (!pos.length && !tt.length) {
-    wrap.innerHTML = '<div class="mec-empty" style="padding:.5rem;">Données RH non disponibles</div>';
-    return;
-  }
-  // Use the peak values (maximum across all time steps)
-  const vPos = pos.length ? Math.max(...pos) : 0;
-  const vTT  = tt.length  ? Math.max(...tt)  : 0;
-  const total = vPos + vTT || 1;
-  const pPos = Math.round(vPos/total*100), pTT=100-pPos;
-
-  const R=60, CX=80, CY=80;
-  const svg=se('svg',{xmlns:NS,width:160,height:180});
-  function arc(pct,start){
-    const a=(pct/100)*2*Math.PI;
-    const x1=CX+R*Math.sin(start), y1=CY-R*Math.cos(start);
-    const x2=CX+R*Math.sin(start+a), y2=CY-R*Math.cos(start+a);
-    const lg=pct>50?1:0;
-    return `M ${CX} ${CY} L ${x1} ${y1} A ${R} ${R} 0 ${lg} 1 ${x2} ${y2} Z`;
-  }
-  const startPos=-(pPos/100)*Math.PI;
-  se('path',{d:arc(pPos,startPos),fill:_C.blue,opacity:.85},svg);
-  se('path',{d:arc(pTT,startPos+(pPos/100)*2*Math.PI),fill:_C.pink,opacity:.85},svg);
-  se('circle',{cx:CX,cy:CY,r:R*0.5,fill:'#fff'},svg);
-  st(vPos+vTT,{x:CX,y:CY+5,'text-anchor':'middle','font-size':14,'font-weight':800,fill:'#1a1814'},svg);
-
-  const lg=se('g',{transform:'translate(10,150)'},svg);
-  se('rect',{x:0,y:0,width:10,height:10,fill:_C.blue,rx:2},lg);
-  st(`Positions ${pPos}%`,{x:14,y:9,'font-size':9,fill:'rgba(26,24,20,.6)'},lg);
-  se('rect',{x:80,y:0,width:10,height:10,fill:_C.pink,rx:2},lg);
-  st(`TT ${pTT}%`,{x:94,y:9,'font-size':9,fill:'rgba(26,24,20,.6)'},lg);
-
-  wrap.appendChild(svg);
-}
-
-/* ═══ CHART 5: Equipment grid ═══════════════════════════════ */
-const _EQT_ICONS = [
-  {k:'ordinateur',    i:'fa-laptop'},          {k:'portable',     i:'fa-laptop'},
-  {k:'laptop',        i:'fa-laptop'},           {k:'telephone',    i:'fa-phone'},
-  {k:'smartphone',    i:'fa-mobile-screen'},    {k:'mobile',       i:'fa-mobile-screen'},
-  {k:'imprimante',    i:'fa-print'},            {k:'scanner',      i:'fa-qrcode'},
-  {k:'internet',      i:'fa-wifi'},             {k:'wifi',         i:'fa-wifi'},
-  {k:'fourniture bureau',i:'fa-pen-clip'},      {k:'fourniture info',i:'fa-network-wired'},
-  {k:'reseau',        i:'fa-network-wired'},    {k:'serveur',      i:'fa-server'},
-  {k:'carnet',        i:'fa-book'},             {k:'registre',     i:'fa-book-open'},
-  {k:'document',      i:'fa-file-lines'},       {k:'dossier',      i:'fa-folder-open'},
-  {k:'coffre',        i:'fa-lock'},             {k:'cachet',       i:'fa-stamp'},
-  {k:'tampon',        i:'fa-stamp'},            {k:'chequier',     i:'fa-credit-card'},
-  {k:'cheque',        i:'fa-credit-card'},      {k:'cote',         i:'fa-file-invoice'},
-  {k:'sinistre',      i:'fa-file-shield'},      {k:'fax',          i:'fa-fax'},
-  {k:'cle',           i:'fa-key'},              {k:'badge',        i:'fa-id-badge'},
-  {k:'ecran',         i:'fa-desktop'},          {k:'moniteur',     i:'fa-desktop'},
-  {k:'clavier',       i:'fa-keyboard'},         {k:'souris',       i:'fa-computer-mouse'},
-  {k:'disque',        i:'fa-hard-drive'},       {k:'usb',          i:'fa-usb'},
-  {k:'attestation',   i:'fa-certificate'},      {k:'vehicule',     i:'fa-car'},
-];
-
-function rpEqtIcon(name) {
-  const n = (name||'').toLowerCase().normalize('NFD').replace(/\p{Mn}/gu,'');
-  for (const {k,i} of _EQT_ICONS) {
-    if (n.includes(k.normalize('NFD').replace(/\p{Mn}/gu,''))) return i;
-  }
-  return 'fa-box';
-}
-
-function _rpEqtCard(name, qty, entity, idx) {
-  const color = idx % 2 === 0 ? 'blue' : 'red';
-  const card = document.createElement('div');
-  card.className = 'rp-eqt-card';
-  card.innerHTML = `
-    <div class="rp-eqt-icon ${color}"><i class="fa-solid ${rpEqtIcon(name)}"></i></div>
-    <div class="rp-eqt-name">${name}</div>
-    <div class="rp-eqt-qty">${qty}</div>
-    <div class="rp-eqt-unit">unité${qty>1?'s':''}</div>
-    ${entity ? `<div class="rp-eqt-entity">${entity}</div>` : ''}`;
-  return card;
-}
-
-function rpRenderEquipment(equipment) {
-  const wrap = document.getElementById('rp-equipment-grid');
-  wrap.innerHTML = '';
-  if (!equipment?.length) {
-    wrap.innerHTML = '<div class="mec-empty">Aucun équipement trouvé dans la synthèse.</div>';
-    return;
-  }
-  const grid = document.createElement('div');
-  grid.className = 'rp-eqt-grid';
-  equipment.forEach((eq, i) => grid.appendChild(_rpEqtCard(eq.name, eq.qty, '', i)));
-  wrap.appendChild(grid);
-}
-
-/* ═══ DRAWER ════════════════════════════════════════════════ */
-window.rpOpenDrawer = function(step) {
-  if (!step) return;
-  const drawer = document.getElementById('rp-drawer');
-  const overlay= document.getElementById('rp-drawer-overlay');
-  document.getElementById('rp-drawer-title').textContent =
-    step.label + (step.hours ? ` — ${step.hours < 24 ? step.hours+'h' : Math.round(step.hours/24)+'j'}` : '');
-  document.getElementById('rp-drawer-sub').textContent =
-    `${step.count || 0} activité(s) opérationnelle(s) — ${step.percent||0}%`;
-
-  const COLORS = {rouge:'#EF4444',orange:'#F59E0B',vert:'#10B981',none:'#94A3B8'};
-  const acts = step.activities || [];
-  let html = '';
-  if (!acts.length) {
-    html = '<div style="color:rgba(26,24,20,.4);font-size:.72rem;padding:.5rem 0;">Aucune activité opérationnelle à ce stade.</div>';
-  } else {
-    // Header row
-    html += `<div style="display:flex;font-size:.6rem;font-weight:700;letter-spacing:.06em;
-              text-transform:uppercase;color:rgba(26,24,20,.35);padding:.3rem 0 .5rem;border-bottom:2px solid rgba(26,24,20,.07);">
-      <div style="flex:1;">Activité</div>
-      <div style="width:48px;text-align:right;">Pos.</div>
-      <div style="width:48px;text-align:right;">T.T.</div>
-    </div>`;
-    acts.forEach(a => {
-      const p  = a.positions   != null ? a.positions   : '—';
-      const tt = a.teletravail != null ? a.teletravail : '—';
-      const hasP  = a.positions   > 0;
-      const hasTT = a.teletravail > 0;
-      html += `<div class="rp-drawer-item">
-        <div class="rp-drawer-dot" style="background:${hasTT?_C.rouge:hasP?_C.blue:'#94A3B8'};"></div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;font-size:.71rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.name||a.activity||''}</div>
-          <div style="font-size:.6rem;color:rgba(26,24,20,.35);">${a.departement||a.entity||''}</div>
+    const grid=document.createElement('div');
+    grid.style.cssText='display:flex;flex-direction:column;gap:1.2rem;';
+    const slides=sec.fn();
+    slides.forEach((html,idx)=>{
+      const slideId=`${sec.id}-${idx}`;
+      const card=document.createElement('div');
+      card.style.cssText='border-radius:10px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.12);';
+      card.innerHTML=`
+        <div id="${slideId}" style="width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;font-family:Calibri,Arial,sans-serif;">
+          ${html}
         </div>
-        <div style="width:48px;text-align:right;font-weight:700;font-size:.7rem;color:${hasP?_C.blue:'rgba(26,24,20,.25)'};">${p}</div>
-        <div style="width:48px;text-align:right;font-weight:700;font-size:.7rem;color:${hasTT?_C.rouge:'rgba(26,24,20,.25)'};">${tt}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;
+             padding:.5rem .75rem;background:#fff;border-top:1px solid rgba(26,24,20,.08);">
+          <span style="font-size:.68rem;color:rgba(26,24,20,.45);font-weight:600;">
+            ${sec.label}${slides.length>1?' '+(idx+1)+'/'+slides.length:''}
+          </span>
+          <button onclick="sgDownloadSlide('${slideId}','${sec.label.replace(/[^a-z0-9]/gi,'_')}_${idx+1}')"
+            style="padding:.3rem .75rem;background:#1a1814;color:#fff;border:none;border-radius:6px;
+                   font-size:.68rem;font-weight:600;cursor:pointer;font-family:inherit;">
+            <i class="fa-solid fa-download fa-xs"></i> PNG
+          </button>
+        </div>`;
+      grid.appendChild(card);
+    });
+    wrap.appendChild(grid);
+    cont.appendChild(wrap);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SLIDE BUILDERS
+══════════════════════════════════════════════════════════════ */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function trunc(s,n=55){s=String(s||'');return s.length>n?s.slice(0,n)+'…':s;}
+function sl(bg){return `width:100%;height:100%;background:${bg||C.light};box-sizing:border-box;position:relative;overflow:hidden;`;}
+
+function buildTable(cols,widths,rows,{headerBg=C.dark,hColor=C.white,rowFs='0.55em',hFs='0.57em',altBg='#ECEAE6',maxR=18}={}) {
+  const chunk=rows.slice(0,maxR);
+  return `<table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+    <colgroup>${widths.map(w=>`<col style="width:${w}">`).join('')}</colgroup>
+    <thead><tr>${cols.map(c=>`<th style="background:${headerBg};color:${hColor};font-size:${hFs};
+      font-weight:700;padding:2px 5px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(c)}</th>`).join('')}</tr></thead>
+    <tbody>${chunk.map((row,ri)=>`<tr style="background:${ri%2?altBg:'#fff'};">${row.map(cell=>`<td style="font-size:${rowFs};
+      padding:2px 5px;color:${C.dark};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      border-bottom:1px solid ${C.mgray};">${esc(String(cell??''))}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>`;
+}
+
+function buildDonut(values,colors,centerLabel) {
+  const sum=values.reduce((a,b)=>a+b,0)||1;
+  const r=40,cx=50,cy=50,ir=25;
+  let a=-Math.PI/2;
+  const arcs=values.map((v,i)=>{
+    const angle=(v/sum)*2*Math.PI;
+    const x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a);
+    const x2=cx+r*Math.cos(a+angle),y2=cy+r*Math.sin(a+angle);
+    const ix1=cx+ir*Math.cos(a),iy1=cy+ir*Math.sin(a);
+    const ix2=cx+ir*Math.cos(a+angle),iy2=cy+ir*Math.sin(a+angle);
+    const lg=angle>Math.PI?1:0;
+    const d=`M${x1} ${y1}A${r} ${r} 0 ${lg} 1 ${x2} ${y2}L${ix2} ${iy2}A${ir} ${ir} 0 ${lg} 0 ${ix1} ${iy1}Z`;
+    a+=angle;
+    return `<path d="${d}" fill="${colors[i]||C.mgray}"/>`;
+  }).join('');
+  return `<svg viewBox="0 0 100 100" style="width:100%;max-width:160px;display:block;margin:0 auto;">
+    ${arcs}
+    <text x="${cx}" y="${cy+2}" text-anchor="middle" dominant-baseline="middle"
+      font-size="11" font-weight="700" fill="${C.dark}">${esc(String(centerLabel??''))}</text>
+  </svg>`;
+}
+
+function dividerSlide(label,num) {
+  return `<div style="${sl(C.dark)}">
+    <div style="position:absolute;top:0;left:0;right:0;height:1%;background:${C.red};"></div>
+    <div style="position:absolute;bottom:0;left:0;right:0;height:9%;background:${C.red};"></div>
+    <div style="position:absolute;left:5%;top:50%;transform:translateY(-50%);width:65%;">
+      <div style="font-size:2.6em;font-weight:700;color:${C.white};line-height:1.2;">${esc(label)}</div>
+    </div>
+    <div style="position:absolute;right:4%;bottom:10%;font-size:.65em;color:rgba(255,255,255,.3);font-weight:700;">${num}</div>
+  </div>`;
+}
+
+/* ── 1. Cover ─────────────────────────────────────────────────────────────── */
+function slideCover(meta) {
+  return `<div style="${sl(C.dark)}">
+    <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+    <div style="position:absolute;bottom:0;left:0;right:0;height:9%;background:${C.red};"></div>
+    <div style="position:absolute;left:4%;top:8%;font-size:.65em;color:rgba(255,255,255,.45);font-weight:600;letter-spacing:.05em;">
+      Devoteam | AI-driven tech consulting
+    </div>
+    <div style="position:absolute;left:4%;top:18%;width:60%;display:flex;flex-direction:column;gap:.3em;">
+      <div style="font-size:1.25em;font-weight:300;color:rgba(255,255,255,.6);line-height:1.25;">
+        Actualisation et Maintien du Plan de Continuité d'Activité
+      </div>
+      <div style="font-size:1.9em;font-weight:700;color:${C.white};line-height:1.1;">de ${esc(meta.company)}</div>
+    </div>
+    <div style="position:absolute;left:4%;top:63%;background:${C.red};padding:.25em .9em;border-radius:4px;display:inline-flex;align-items:center;">
+      <span style="font-size:.85em;font-weight:700;color:${C.white};">Rapport BIA</span>
+    </div>
+    <div style="position:absolute;left:4%;top:75%;font-size:.7em;color:rgba(255,255,255,.5);">${esc(meta.date)}</div>
+  </div>`;
+}
+
+/* ── 2. Résumé ────────────────────────────────────────────────────────────── */
+function slideResume(data) {
+  const slides=[];
+  const r=data.resume;
+
+  if (r&&r.dmia_labels&&r.dmia_labels.length) {
+    const maxV=Math.max(...r.dmia_counts,1);
+    const barH=Math.max(7,Math.floor(68/r.dmia_labels.length));
+    const bars=r.dmia_labels.map((lbl,i)=>{
+      const w=(r.dmia_counts[i]/maxV*62).toFixed(1);
+      return `<div style="display:flex;align-items:center;gap:.4em;margin-bottom:${barH<9?'1px':'2px'};">
+        <div style="width:6em;font-size:.52em;color:${C.dkgr};text-align:right;white-space:nowrap;padding-right:.3em;">${esc(lbl)}</div>
+        <div style="height:${barH}px;width:${w}%;background:${C.red};border-radius:2px;min-width:3px;transition:width .4s;"></div>
+        <div style="font-size:.52em;color:${C.dark};font-weight:700;">${r.dmia_counts[i]}</div>
       </div>`;
-    });
+    }).join('');
+    slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+      <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+      <div style="font-size:1.05em;font-weight:700;color:${C.dark};margin-bottom:.7em;margin-top:1.2em;">
+        Reprise des Activités Exprimées — Répartition par DMIA
+      </div>
+      <div style="display:flex;gap:4%;align-items:flex-start;">
+        <div style="flex:2.2;">${bars}</div>
+        <div style="flex:1;background:${C.white};border-radius:8px;padding:5% 6%;box-shadow:0 1px 5px rgba(0,0,0,.08);">
+          <div style="font-size:.5em;color:${C.dkgr};margin-bottom:.2em;">Activités ≤ J+1</div>
+          <div style="font-size:2.8em;font-weight:700;color:${C.red};line-height:1;">${r.urgent_n}</div>
+          <div style="font-size:.5em;color:${C.dkgr};margin-bottom:.5em;">soit <b>${r.urgent_pct}%</b> du total</div>
+          <hr style="border:none;border-top:1px solid ${C.mgray};margin:.4em 0;">
+          <div style="font-size:.5em;color:${C.dark};font-weight:700;">Total activités : ${r.total}</div>
+        </div>
+      </div>
+    </div>`);
+
+    if (r.critical_structures&&r.critical_structures.length) {
+      const rows=r.critical_structures.map(s=>[trunc(s.structure,48),s.count,s.dmia_min]);
+      slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+        <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+        <div style="font-size:.95em;font-weight:700;color:${C.dark};margin-bottom:.4em;margin-top:1.2em;">
+          Structures critiques (H0 – J+1) — ${r.critical_structures.length} structures
+        </div>
+        ${buildTable(['Structure','Nb activités','DMIA min'],['64%','19%','17%'],rows,{maxR:20})}
+      </div>`);
+    }
   }
-  document.getElementById('rp-drawer-body').innerHTML = html;
-  drawer.style.right  = '0';
-  overlay.style.display = '';
-};
-window.rpCloseDrawer = function() {
-  document.getElementById('rp-drawer').style.right = '-420px';
-  document.getElementById('rp-drawer-overlay').style.display = 'none';
-};
 
-/* ═══ DOWNLOAD CHART AS PNG ════════════════════════════════ */
-window.rpDownloadChart = function(containerId, filename) {
-  const wrap = document.getElementById(containerId);
-  if (!wrap) return;
-  const svg = wrap.querySelector('svg');
-  if (!svg) { alert('Aucun graphique à télécharger.'); return; }
+  const rh=data.reprise_rh;
+  if (rh&&rh.time_cols&&rh.effectif&&rh.nominal>0) {
+    const tc=rh.time_cols, nom=rh.nominal;
+    const pcts=rh.effectif.map(v=>Math.min(100,Math.round(v/nom*100)));
+    const W=70,H=50;
+    const pts=pcts.map((p,i)=>`${(i/(tc.length-1)*W).toFixed(1)},${(H-p/100*H).toFixed(1)}`).join(' ');
+    const ptsTT=rh.teletravail?rh.teletravail.map((v,i)=>`${(i/(tc.length-1)*W).toFixed(1)},${(H-Math.min(100,Math.round(v/nom*100))/100*H).toFixed(1)}`).join(' '):'';
+    const xL=tc.map((t,i)=>`<text x="${(i/(tc.length-1)*W).toFixed(1)}" y="${H+6}" text-anchor="middle" font-size="2.8" fill="${C.dkgr}">${t}</text>`).join('');
+    const yL=[0,25,50,75,100].map(p=>`<line x1="0" y1="${(H-p/100*H).toFixed(1)}" x2="${W}" y2="${(H-p/100*H).toFixed(1)}" stroke="${C.mgray}" stroke-width=".3" stroke-dasharray="2,2"/>
+      <text x="-2" y="${(H-p/100*H+1).toFixed(1)}" text-anchor="end" font-size="2.5" fill="${C.dkgr}">${p}%</text>`).join('');
+    const circles=pcts.map((p,i)=>`<circle cx="${(i/(tc.length-1)*W).toFixed(1)}" cy="${(H-p/100*H).toFixed(1)}" r="1.5" fill="${C.red}"/>`).join('');
+    slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+      <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+      <div style="font-size:.95em;font-weight:700;color:${C.dark};margin-bottom:.2em;margin-top:1.2em;">
+        Reprise des Ressources Humaines
+      </div>
+      <div style="font-size:.55em;color:${C.dkgr};margin-bottom:.5em;">Effectif nominal total : ${nom} collaborateurs</div>
+      <div style="display:flex;gap:4%;align-items:flex-start;">
+        <div style="flex:2.2;">
+          <svg viewBox="-10 -5 90 65" style="width:100%;overflow:visible;">
+            ${yL}
+            ${ptsTT?`<polyline points="${ptsTT}" fill="none" stroke="${C.amber}" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="3,1.5"/>`:''}
+            <polyline points="${pts}" fill="none" stroke="${C.red}" stroke-width="1.8" stroke-linejoin="round"/>
+            ${circles}
+            ${xL}
+            <line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="${C.dark}" stroke-width=".5"/>
+            <line x1="0" y1="0" x2="0" y2="${H}" stroke="${C.dark}" stroke-width=".5"/>
+          </svg>
+          <div style="display:flex;gap:1.5em;margin-top:.3em;">
+            <div style="display:flex;align-items:center;gap:.3em;"><div style="width:16px;height:2px;background:${C.red};"></div><span style="font-size:.45em;color:${C.dkgr};">Effectif</span></div>
+            ${ptsTT?`<div style="display:flex;align-items:center;gap:.3em;"><div style="width:16px;height:2px;background:${C.amber};border-top:2px dashed ${C.amber};"></div><span style="font-size:.45em;color:${C.dkgr};">Télétravail</span></div>`:''}
+          </div>
+        </div>
+        <div style="flex:1;background:${C.white};border-radius:8px;padding:4%;box-shadow:0 1px 5px rgba(0,0,0,.08);">
+          <div style="font-size:.5em;color:${C.dkgr};margin-bottom:.2em;">Pic de reprise</div>
+          <div style="font-size:2em;font-weight:700;color:${C.red};line-height:1;">${Math.max(...pcts)}%</div>
+          <hr style="border:none;border-top:1px solid ${C.mgray};margin:.4em 0;">
+          ${tc.filter((_,i)=>pcts[i]>0).map((t,i)=>{const pi=tc.indexOf(t);return `<div style="display:flex;justify-content:space-between;font-size:.47em;padding:.15em 0;border-bottom:1px solid rgba(0,0,0,.05);">
+            <span style="color:${C.dkgr};">${t}</span><span style="font-weight:700;color:${C.dark};">${pcts[pi]}%</span></div>`;}).join('')}
+        </div>
+      </div>
+    </div>`);
+  }
 
-  // Serialize SVG with all computed styles inlined
-  const clone = svg.cloneNode(true);
-  // Embed white background
-  const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
-  bg.setAttribute('width','100%'); bg.setAttribute('height','100%'); bg.setAttribute('fill','#ffffff');
-  clone.insertBefore(bg, clone.firstChild);
-
-  const w = svg.viewBox.baseVal.width  || svg.getBoundingClientRect().width  || 600;
-  const h = svg.viewBox.baseVal.height || svg.getBoundingClientRect().height || 400;
-  clone.setAttribute('width', w); clone.setAttribute('height', h);
-
-  const xml = new XMLSerializer().serializeToString(clone);
-  const blob = new Blob([xml], {type:'image/svg+xml'});
-  const url  = URL.createObjectURL(blob);
-  const img  = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const scale  = 2; // retina
-    canvas.width  = w * scale;
-    canvas.height = h * scale;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(scale, scale);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, w, h);
-    ctx.drawImage(img, 0, 0, w, h);
-    URL.revokeObjectURL(url);
-    const a = document.createElement('a');
-    a.download = filename + '.png';
-    a.href = canvas.toDataURL('image/png');
-    a.click();
-  };
-  img.src = url;
-};
-
-/* ═══ FICHE EQUIPMENT LOADER ═══════════════════════════════ */
-// Load sector/client lists for DB filter dropdowns
-async function rpInitFicheFilters() {
-  try {
-    const tree = await fetch('/api/sectors-clients').then(r=>r.json());
-    const secSel = document.getElementById('rp-fiche-sector');
-    secSel.innerHTML = '<option value="">— Secteur —</option>';
-    Object.keys(tree).forEach(s => {
-      const o = document.createElement('option'); o.value=s; o.textContent=s;
-      secSel.appendChild(o);
-    });
-    secSel._tree = tree;
-  } catch(e) {}
+  return slides.length?slides:[`<div style="${sl(C.light)}display:flex;align-items:center;justify-content:center;"><span style="color:${C.dkgr};font-size:.8em;">Données insuffisantes</span></div>`];
 }
 
-window.rpFicheLoadClients = function() {
-  const secSel = document.getElementById('rp-fiche-sector');
-  const clSel  = document.getElementById('rp-fiche-client');
-  const clients = (secSel._tree || {})[secSel.value] || [];
-  clSel.innerHTML = '<option value="">— Client —</option>';
-  clients.forEach(c => {
-    const o = document.createElement('option'); o.value=c; o.textContent=c;
-    clSel.appendChild(o);
+/* ── 3. Zoom sur la Reprise ───────────────────────────────────────────────── */
+function slideZoom(zoom) {
+  const slides=[dividerSlide('Zoom sur la Reprise des Activités','02')];
+  zoom.forEach(z=>{
+    const rows=z.activities.map(a=>[trunc(a.structure,38),trunc(a.activite,52),a.im_4h,a.score]);
+    slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+      <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+      <div style="display:flex;align-items:center;gap:.6em;margin-top:1.2em;margin-bottom:.45em;">
+        <div style="background:${C.red};color:${C.white};font-size:.85em;font-weight:700;padding:.2em .8em;border-radius:4px;">${esc(z.dmia)}</div>
+        <div style="font-size:.6em;color:${C.dkgr};">${z.nb_structures} structure${z.nb_structures>1?'s':''} · ${z.nb_activities} activité${z.nb_activities>1?'s':''}</div>
+      </div>
+      ${buildTable(['Structure','Activité','Impact 4H','Score'],['38%','44%','9%','9%'],rows,{maxR:19})}
+    </div>`);
   });
-};
-
-window.rpFicheLoadFromDB = async function() {
-  const sector = document.getElementById('rp-fiche-sector').value;
-  const client = document.getElementById('rp-fiche-client').value;
-  const status = document.getElementById('rp-fiche-status');
-  status.textContent = 'Chargement…';
-  try {
-    const params = new URLSearchParams();
-    if (sector) params.append('sector', sector);
-    if (client) params.append('client', client);
-    let rows = await fetch('/api/fiches-equipment?' + params).then(r=>r.json());
-
-    // If no equipment indexed yet, auto-index from stored docx files first
-    if (!rows.length) {
-      status.textContent = 'Indexation des fiches en cours…';
-      const fd = new FormData();
-      if (sector) fd.append('sector', sector);
-      if (client) fd.append('client', client);
-      const idx = await fetch('/api/index-equipment', {method:'POST', body:fd}).then(r=>r.json());
-      if (idx.processed === 0) {
-        status.textContent = 'Aucune fiche trouvée pour ces filtres.'; return;
-      }
-      rows = await fetch('/api/fiches-equipment?' + params).then(r=>r.json());
-    }
-
-    if (!rows.length) { status.textContent = 'Aucun équipement trouvé pour ces filtres.'; return; }
-    const items = rows.map(r => ({
-      name: r.designation,
-      entity: r.entity,
-      client: r.client,
-      horizons: r.horizons,
-      qty: Math.max(0, ...Object.values(r.horizons||{}).map(Number))
-    }));
-    rpRenderFicheEquipment(items);
-    status.textContent = `${items.length} équipement(s) chargé(s) — ${[...new Set(rows.map(r=>r.project_name||r.entity))].length} fiche(s).`;
-  } catch(e) { status.textContent = 'Erreur: ' + e.message; }
-};
-
-window.rpFichesSelected = function(files) {
-  const status = document.getElementById('rp-fiche-status');
-  if (!files?.length) return;
-  status.textContent = `${files.length} fichier(s) sélectionné(s). Cliquez "Importer & sauvegarder" ou glissez pour extraire.`;
-  // Auto-extract without storing
-  rpFicheUploadAndStore(false);
-};
-
-window.rpFicheUploadAndStore = async function(store=true) {
-  const input  = document.getElementById('rp-fiche-input');
-  const sector = document.getElementById('rp-fiche-sector-save').value.trim();
-  const client = document.getElementById('rp-fiche-client-save').value.trim();
-  const status = document.getElementById('rp-fiche-status');
-  if (!input.files?.length) { status.textContent = 'Sélectionnez d\'abord des fichiers .docx.'; return; }
-
-  status.textContent = 'Extraction en cours…';
-  const fd = new FormData();
-  for (const f of input.files) fd.append('fiches', f);
-  fd.append('sector', sector);
-  fd.append('client', client);
-  fd.append('store', store && sector && client ? 'true' : 'false');
-
-  try {
-    const results = await fetch('/api/extract-fiches-equipment', {method:'POST', body:fd}).then(r=>r.json());
-    const allItems = [];
-    results.forEach(r => {
-      if (r.error) { console.warn(r.entity, r.error); return; }
-      (r.items||[]).forEach(item => allItems.push({
-        name: item.name, entity: r.entity, client: client||r.entity,
-        horizons: item.horizons,
-        qty: Math.max(0, ...Object.values(item.horizons||{0:0}).map(Number))
-      }));
-    });
-    rpRenderFicheEquipment(allItems);
-    const stored = results.filter(r=>r.project_id).length;
-    status.textContent = `${allItems.length} équipement(s) extrait(s) de ${results.length} fiche(s).` +
-      (stored ? ` ${stored} fiche(s) sauvegardée(s).` : '');
-    if (store && stored) rpInitFicheFilters(); // refresh dropdowns
-  } catch(e) { status.textContent = 'Erreur: ' + e.message; }
-};
-
-function rpRenderFicheEquipment(items) {
-  const wrap = document.getElementById('rp-equipment-grid');
-  if (!items?.length) {
-    wrap.innerHTML = '<div class="mec-empty">Aucun équipement extrait.</div>';
-    return;
-  }
-
-  // Aggregate: merge items with same name across fiches, sum quantities
-  const merged = new Map();
-  items.forEach(item => {
-    const key = item.name.trim().toLowerCase();
-    const qty = Math.max(0, ...Object.values(item.horizons||{0:0}).map(Number));
-    if (merged.has(key)) {
-      const ex = merged.get(key);
-      ex.qty += qty;
-      if (item.entity && !ex.entities.includes(item.entity)) ex.entities.push(item.entity);
-    } else {
-      merged.set(key, { name: item.name, qty, entities: item.entity ? [item.entity] : [] });
-    }
-  });
-
-  const grid = document.createElement('div');
-  grid.className = 'rp-eqt-grid';
-  [...merged.values()].forEach((eq, i) => {
-    const entity = eq.entities.slice(0,2).join(', ') + (eq.entities.length > 2 ? ` +${eq.entities.length-2}` : '');
-    grid.appendChild(_rpEqtCard(eq.name, eq.qty, entity, i));
-  });
-
-  wrap.innerHTML = '';
-  wrap.appendChild(grid);
+  return slides;
 }
 
-// Init filters immediately — sector/client dropdowns are ready as soon as the page loads
-rpInitFicheFilters();
+/* ── 4. Tableau des Impacts ───────────────────────────────────────────────── */
+function slideImpacts(impacts) {
+  const slides=[dividerSlide('Tableau des Impacts','03')];
+  impacts.forEach(g=>{
+    const rows=g.rows.map(r=>[trunc(r.structure,30),trunc(r.activite,40),r.im_1h,r.im_4h,r.im_1j,r.im_2_3j,r.score]);
+    for (let p=0;p<Math.ceil(rows.length/18);p++) {
+      const chunk=rows.slice(p*18,(p+1)*18), pages=Math.ceil(rows.length/18);
+      slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+        <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+        <div style="display:flex;align-items:center;gap:.6em;margin-top:1.2em;margin-bottom:.45em;">
+          <div style="background:${C.dark};color:${C.white};font-size:.78em;font-weight:700;padding:.2em .8em;border-radius:4px;">DMIA ${esc(g.dmia)}</div>
+          <div style="font-size:.58em;color:${C.dkgr};">${g.rows.length} activité${g.rows.length>1?'s':''}${pages>1?' — page '+(p+1)+'/'+pages:''}</div>
+        </div>
+        ${buildTable(['Structure','Activité','1H','4H','1J','2-3J','Score'],['29%','37%','6%','6%','6%','7%','9%'],chunk,{maxR:18})}
+      </div>`);
+    }
+  });
+  return slides;
+}
 
-/* ── download PPTX ── */
-window.rpDownloadPptx = async function() {
-  const s = window._rpState;
-  if (!s.file1) return;
-  const btn = document.getElementById('rp-btn-pptx');
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin fa-xs"></i> Génération en cours…';
-  try {
-    const fd = new FormData();
-    fd.append('synthese', s.file1);
-    const r = await fetch('/api/rapport-bia/generate-pptx', { method: 'POST', body: fd });
-    if (!r.ok) { const j = await r.json().catch(()=>({detail:'Erreur'})); throw new Error(j.detail); }
-    const blob = await r.blob();
-    const fname = (s.file1.name || 'rapport').replace('.xlsx','') + '_Rapport_BIA.pptx';
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = fname; a.click();
-    URL.revokeObjectURL(url);
-  } catch(e) {
-    alert('Erreur génération PPTX : ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.innerHTML = '<i class="fa-solid fa-file-powerpoint fa-xs"></i> Télécharger le rapport PPTX';
+/* ── 5. Applications ─────────────────────────────────────────────────────── */
+function slideApps(apps) {
+  const lotColors=[C.red,C.amber,C.dkgr];
+  const slides=[dividerSlide('Reprise actualisée des applications','04')];
+  const totalApps=apps.reduce((s,l)=>s+l.rows.length,0);
+  const dp=apps.filter(l=>l.rows.length).map((l,i)=>({label:l.label,count:l.rows.length,color:lotColors[i]}));
+  if (dp.length) {
+    const donut=buildDonut(dp.map(p=>p.count),dp.map(p=>p.color),totalApps);
+    const legend=dp.map((p,i)=>`<div style="display:flex;align-items:center;gap:.45em;margin-bottom:.35em;">
+      <div style="width:10px;height:10px;border-radius:2px;background:${p.color};flex-shrink:0;"></div>
+      <span style="font-size:.55em;color:${C.dark};">Lot ${i+1} — ${p.label} : <b>${p.count}</b></span>
+    </div>`).join('');
+    slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+      <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+      <div style="font-size:1em;font-weight:700;color:${C.dark};margin-bottom:.4em;margin-top:1.2em;">
+        Reprise actualisée des applications — ${totalApps} applications
+      </div>
+      <div style="display:flex;gap:6%;align-items:center;margin-top:.5em;">
+        <div style="flex:1;">${donut}</div>
+        <div style="flex:2;">${legend}</div>
+      </div>
+    </div>`);
   }
+  apps.forEach((lot,li)=>{
+    if (!lot.rows.length) return;
+    const rows=lot.rows.map(r=>[trunc(r.structure,30),trunc(r.application,20),r.dmia,r.criticite,trunc(r.contournement,42)]);
+    for (let p=0;p<Math.ceil(rows.length/18);p++) {
+      const chunk=rows.slice(p*18,(p+1)*18), pages=Math.ceil(rows.length/18);
+      slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+        <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+        <div style="display:flex;align-items:center;gap:.6em;margin-top:1.2em;margin-bottom:.45em;">
+          <div style="background:${lotColors[li]};color:${C.white};font-size:.78em;font-weight:700;padding:.2em .8em;border-radius:4px;">Lot ${li+1}</div>
+          <div style="font-size:.58em;color:${C.dkgr};">${esc(lot.label)} · ${lot.rows.length} applications${pages>1?' — page '+(p+1)+'/'+pages:''}</div>
+        </div>
+        ${buildTable(['Structure','Application','DMIA','Criticité','Contournement'],['26%','17%','8%','8%','41%'],chunk,{maxR:18})}
+      </div>`);
+    }
+  });
+  return slides;
+}
+
+/* ── 6. Collaborateurs ───────────────────────────────────────────────────── */
+function slideCollabs(data) {
+  const slides=[dividerSlide('Collaborateurs clés','05')];
+  const donut=buildDonut([data.pct_with_supp,100-data.pct_with_supp],[C.green,C.mgray],`${data.pct_with_supp}%`);
+  slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+    <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+    <div style="font-size:.95em;font-weight:700;color:${C.dark};margin-bottom:.3em;margin-top:1.2em;">Analyse des collaborateurs clés</div>
+    <div style="display:flex;gap:6%;align-items:center;margin-top:.5em;">
+      <div style="flex:1;">${donut}</div>
+      <div style="flex:2;display:flex;flex-direction:column;gap:.5em;">
+        <div style="font-size:1.5em;font-weight:700;color:${C.green};">${data.pct_with_supp}%</div>
+        <div style="font-size:.6em;color:${C.dark};">des collaborateurs clés disposent d'au moins un suppléant</div>
+        <hr style="border:none;border-top:1px solid ${C.mgray};margin:.3em 0;">
+        <div style="font-size:.6em;color:${C.dkgr};font-weight:700;">Total : ${data.total} collaborateurs clés</div>
+      </div>
+    </div>
+  </div>`);
+  const rows=data.rows.map(r=>[trunc(r.structure,30),r.nom,r.prenom,r.fonction,r.poste,r.anciennete,trunc(r.suppleant,26)]);
+  for (let p=0;p<Math.ceil(rows.length/18);p++) {
+    const chunk=rows.slice(p*18,(p+1)*18),pages=Math.ceil(rows.length/18);
+    slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+      <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+      <div style="font-size:.85em;font-weight:700;color:${C.dark};margin-bottom:.4em;margin-top:1.2em;">
+        Liste des Collaborateurs Clés${pages>1?' ('+(p+1)+'/'+pages+')':''}
+      </div>
+      ${buildTable(['Structure','Nom','Prénom','Fonction','Poste','Ancienneté','Suppléant'],['25%','8%','8%','11%','10%','10%','28%'],chunk,{maxR:18,rowFs:'0.5em',hFs:'0.52em'})}
+    </div>`);
+  }
+  return slides;
+}
+
+/* ── 7. Documents ────────────────────────────────────────────────────────── */
+function slideDocs(docs) {
+  const slides=[dividerSlide('Documents critiques','06')];
+  const dup=docs.dupliques.length, nonDup=docs.non_dupliques.length;
+  const donut=buildDonut([dup,nonDup],[C.green,C.red],dup+nonDup);
+  slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+    <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+    <div style="font-size:.95em;font-weight:700;color:${C.dark};margin-bottom:.3em;margin-top:1.2em;">Analyse des documents critiques</div>
+    <div style="display:flex;gap:6%;align-items:center;margin-top:.5em;">
+      <div style="flex:1;">${donut}</div>
+      <div style="flex:2;display:flex;flex-direction:column;gap:.55em;">
+        <div style="display:flex;align-items:center;gap:.5em;"><div style="width:12px;height:12px;background:${C.green};border-radius:2px;"></div>
+          <span style="font-size:.65em;color:${C.dark};">Dupliqués : <b>${dup}</b></span></div>
+        <div style="display:flex;align-items:center;gap:.5em;"><div style="width:12px;height:12px;background:${C.red};border-radius:2px;"></div>
+          <span style="font-size:.65em;color:${C.dark};">Non dupliqués : <b>${nonDup}</b></span></div>
+        <hr style="border:none;border-top:1px solid ${C.mgray};margin:.2em 0;">
+        <span style="font-size:.65em;color:${C.dkgr};font-weight:700;">Total : ${dup+nonDup} documents critiques</span>
+      </div>
+    </div>
+  </div>`);
+  for (const [subset,label] of [[docs.dupliques,'Documents dupliqués'],[docs.non_dupliques,'Documents non dupliqués']]) {
+    if (!subset.length) continue;
+    const rows=subset.map(d=>[trunc(d.structure,36),trunc(d.document,30),d.type,trunc(d.modalite,22)]);
+    for (let p=0;p<Math.ceil(rows.length/18);p++) {
+      const chunk=rows.slice(p*18,(p+1)*18),pages=Math.ceil(rows.length/18);
+      slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+        <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+        <div style="font-size:.85em;font-weight:700;color:${C.dark};margin-bottom:.4em;margin-top:1.2em;">
+          ${esc(label)}${pages>1?' ('+(p+1)+'/'+pages+')':''}
+        </div>
+        ${buildTable(['Structure','Document / Fichier','Type','Modalité de duplication'],['35%','28%','12%','25%'],chunk,{maxR:18})}
+      </div>`);
+    }
+  }
+  return slides;
+}
+
+/* ── 8. Équipements ──────────────────────────────────────────────────────── */
+function slideEquip(equipements,timeCols) {
+  const slides=[dividerSlide('Équipements nécessaires à la reprise','07')];
+  if (!equipements||!equipements.length) return slides;
+  const top=equipements.slice(0,16), maxV=Math.max(...top.map(e=>e.total),1);
+  const bars=top.map(e=>{
+    const w=(e.total/maxV*62).toFixed(1);
+    return `<div style="display:flex;align-items:center;gap:.4em;margin-bottom:1.5px;">
+      <div style="width:11em;font-size:.46em;color:${C.dkgr};text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:.3em;">${esc(trunc(e.designation,28))}</div>
+      <div style="height:9px;width:${w}%;background:${C.red};border-radius:2px;min-width:2px;"></div>
+      <div style="font-size:.46em;color:${C.dark};font-weight:700;">${e.total}</div>
+    </div>`;
+  }).join('');
+  slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+    <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+    <div style="font-size:.95em;font-weight:700;color:${C.dark};margin-bottom:.4em;margin-top:1.2em;">
+      Équipements nécessaires à la reprise — ${equipements.length} types
+    </div>
+    <div style="display:flex;gap:4%;align-items:flex-start;margin-top:.3em;">
+      <div style="flex:2.2;">${bars}</div>
+      <div style="flex:1;background:${C.white};border-radius:8px;padding:5%;box-shadow:0 1px 5px rgba(0,0,0,.08);">
+        <div style="font-size:.5em;color:${C.dkgr};margin-bottom:.2em;">Total besoins</div>
+        <div style="font-size:2.2em;font-weight:700;color:${C.red};line-height:1;">${equipements.reduce((s,e)=>s+e.total,0)}</div>
+        <hr style="border:none;border-top:1px solid ${C.mgray};margin:.4em 0;">
+        <div style="font-size:.48em;color:${C.dkgr};">Types d'équipements : ${equipements.length}</div>
+      </div>
+    </div>
+  </div>`);
+  const avail=(timeCols||[]).filter(t=>equipements.some(e=>e[t]>0));
+  const tCols=['Équipement',...avail,'Total'];
+  const tW=[`${Math.max(25,55-avail.length*7)}%`,...avail.map(()=>'7%'),'7%'];
+  const rows=equipements.map(e=>[trunc(e.designation,32),...avail.map(t=>e[t]||''),e.total]);
+  for (let p=0;p<Math.ceil(rows.length/20);p++) {
+    const chunk=rows.slice(p*20,(p+1)*20),pages=Math.ceil(rows.length/20);
+    slides.push(`<div style="${sl(C.light)}padding:3.5% 4%;">
+      <div style="position:absolute;top:0;left:0;right:0;height:.8%;background:${C.red};"></div>
+      <div style="font-size:.82em;font-weight:700;color:${C.dark};margin-bottom:.4em;margin-top:1.2em;">
+        Recensement des besoins en équipements${pages>1?' ('+(p+1)+'/'+pages+')':''}
+      </div>
+      ${buildTable(tCols,tW,chunk,{maxR:20,rowFs:'0.45em',hFs:'0.47em'})}
+    </div>`);
+  }
+  return slides;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DOWNLOAD
+══════════════════════════════════════════════════════════════ */
+window.sgDownloadSlide = function(slideId, filename) {
+  const el=document.getElementById(slideId);
+  if (!el||typeof html2canvas==='undefined'){alert('html2canvas non disponible');return;}
+  html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:null})
+    .then(canvas=>{
+      const a=document.createElement('a');
+      a.download=(filename||slideId).replace(/[^a-z0-9_\-]/gi,'_')+'.png';
+      a.href=canvas.toDataURL('image/png'); a.click();
+    }).catch(e=>alert('Erreur export PNG : '+e.message));
+};
+
+window.sgDownloadAll = async function() {
+  const s=window._rpState;
+  if (!s.data){alert('Générez d\'abord les slides.');return;}
+  if (typeof html2canvas==='undefined'||typeof JSZip==='undefined'){alert('Librairies non disponibles');return;}
+  const btn=document.getElementById('rp-btn-zip');
+  btn.disabled=true;
+  btn.innerHTML='<i class="fa-solid fa-spinner fa-spin fa-xs"></i> Export ZIP…';
+  try {
+    const zip=new JSZip();
+    const slides=document.querySelectorAll('[id^="s-"][id*="-"]');
+    let i=1;
+    for (const el of slides) {
+      const canvas=await html2canvas(el,{scale:2,useCORS:true,allowTaint:true,backgroundColor:null});
+      const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+      zip.file(`slide_${String(i).padStart(3,'0')}_${el.id}.png`,blob);
+      i++;
+    }
+    const content=await zip.generateAsync({type:'blob'});
+    const a=document.createElement('a');
+    a.download='Rapport_BIA_Slides.zip';
+    a.href=URL.createObjectURL(content); a.click();
+  } catch(e){alert('Erreur export ZIP : '+e.message);}
+  finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-file-zipper fa-xs"></i> Tout télécharger (ZIP)';}
 };
 
 })(); // end RAPPORT BIA
