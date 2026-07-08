@@ -884,6 +884,26 @@ async def rapport_bia_endpoint(
         return {"main": data1, "compare": data2}
 
 
+@app.post("/api/rapport-bia/generate-pptx")
+async def rapport_bia_generate_pptx(
+    synthese: UploadFile = File(..., description="Synthèse BIA (.xlsx)"),
+):
+    """Generate a full BIA Rapport PPTX from a Synthèse BIA xlsx and return it as a download."""
+    from bia_report_pptx import generate_pptx
+    from fastapi.responses import Response
+    xlsx_bytes = await synthese.read()
+    try:
+        pptx_bytes = generate_pptx(xlsx_bytes)
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    filename = (synthese.filename or "synthese").replace(".xlsx", "") + "_Rapport_BIA.pptx"
+    return Response(
+        content=pptx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @app.post("/api/extract-fiches-equipment")
 async def extract_fiches_equipment_endpoint(
     fiches: list[UploadFile] = File(..., description="Fiches BIA (.docx)"),
