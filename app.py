@@ -45,6 +45,7 @@ from activity_filler import fill_activities as _fill_activities
 from fiche_writer import fill_fiche as _fill_fiche
 import projects_db as _pdb
 import risk_analysis as _risk
+import questionnaires_db as _quest
 import orgchart_vision as _ov
 import orgchart_ocr as _ocr
 import orgchart_tiled as _tiled
@@ -912,6 +913,75 @@ async def rapport_bia_generate_pptx(
     filename = (synthese.filename or "synthese").replace(".xlsx", "") + "_Rapport_BIA.pptx"
     return Response(
         content=pptx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@app.post("/api/rapport-bia/slides-to-pptx")
+async def slides_to_pptx(request: Request):
+    """Receive a list of base64 PNG slide images and return a 16:9 PPTX."""
+    import base64, io
+    from pptx import Presentation
+    from pptx.util import Emu
+    from fastapi.responses import Response
+
+    body = await request.json()
+    images_b64: list[str] = body.get("images", [])
+    filename: str = body.get("filename", "Rapport_BIA") + ".pptx"
+
+    # 16:9 slide size: 10 in × 5.625 in
+    SLIDE_W = Emu(9144000)   # 10 inches
+    SLIDE_H = Emu(5143500)   # 5.625 inches
+
+    prs = Presentation()
+    prs.slide_width  = SLIDE_W
+    prs.slide_height = SLIDE_H
+
+    blank_layout = prs.slide_layouts[6]  # completely blank
+
+    if not images_b64:
+        raise HTTPException(400, "Aucune image reçue — regénérez les slides.")
+
+    # Each image is handled individually so one malformed capture reports which
+    # slide it was instead of collapsing the whole request into a bare 500.
+    for idx, b64 in enumerate(images_b64, start=1):
+        try:
+            # Strip data-URI prefix if present
+            if "," in b64:
+                b64 = b64.split(",", 1)[1]
+            img_bytes = base64.b64decode(b64)
+            if not img_bytes:
+                raise ValueError("image vide")
+            slide = prs.slides.add_slide(blank_layout)
+            slide.shapes.add_picture(
+                io.BytesIO(img_bytes),
+                left=0, top=0,
+                width=SLIDE_W, height=SLIDE_H,
+            )
+        except MemoryError:
+            raise HTTPException(
+                507,
+                f"Mémoire insuffisante à la slide {idx}/{len(images_b64)}. "
+                "Redémarrez le serveur puis relancez l'export.",
+            )
+        except Exception as exc:
+            raise HTTPException(
+                400,
+                f"Image illisible à la slide {idx}/{len(images_b64)} : {exc}",
+            )
+
+    buf = io.BytesIO()
+    try:
+        prs.save(buf)
+    except MemoryError:
+        raise HTTPException(
+            507,
+            f"Mémoire insuffisante lors de l'assemblage du PPTX ({len(images_b64)} slides). "
+            "Redémarrez le serveur puis relancez l'export.",
+        )
+    return Response(
+        content=buf.getvalue(),
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
@@ -1928,12 +1998,12 @@ async def risk_upload(
     raw = await file.read()
     sheet_arg = sheet.strip() or None
     try:
-        rows, detected_sheet, sheets = _risk.parse_risk_excel(raw, sheet_arg)
+        rows, detected_sheet, sheets, scale = _risk.parse_risk_excel(raw, sheet_arg)
     except Exception as e:
         raise HTTPException(400, f"Impossible de lire le fichier : {e}")
 
     fname = name.strip() or file.filename or "Analyse des risques"
-    file_id = _risk.save_risk_file(fname, sector, client, rows, detected_sheet)
+    file_id = _risk.save_risk_file(fname, sector, client, rows, detected_sheet, scale)
     _risk_excel_store[file_id] = raw
 
     return {
@@ -1942,6 +2012,8 @@ async def risk_upload(
         "sheets": sheets,
         "rows": rows,
         "total": len(rows),
+        "scale": scale,
+        "diverged": sum(1 for r in rows if r.get("diverged")),
     }
 
 
@@ -1960,10 +2032,31 @@ async def risk_load(file_id: int):
 
 @app.post("/api/risk/save/{file_id}")
 async def risk_save(file_id: int, request: Request):
+    """
+    Persist edited rows, re-scoring them server-side first.
+
+    The browser scores as you type for immediate feedback, but the value that
+    reaches the database and the export goes through the same engine that
+    parsed the file, so the two can never drift.
+    """
     body = await request.json()
     rows = body.get("rows", [])
+
+    existing = _risk.load_risk_file(file_id)
+    scale_dict = (existing or {}).get("scale") or {}
+    try:
+        scale = _risk._scale_from_dict(scale_dict) if scale_dict else None
+    except Exception:
+        scale = None
+    for r in rows:
+        _risk.apply_scoring(r, scale)
+
     _risk.update_risk_file(file_id, rows)
-    return {"ok": True}
+    return {
+        "ok": True,
+        "rows": rows,
+        "diverged": sum(1 for r in rows if r.get("diverged")),
+    }
 
 
 @app.delete("/api/risk/delete/{file_id}")
@@ -1981,7 +2074,8 @@ async def risk_export(file_id: int):
     original = _risk_excel_store.get(file_id)
     if not original:
         raise HTTPException(400, "Fichier source non disponible — veuillez le re-télécharger.")
-    out = _risk.export_risk_excel(original, data["rows"], data["sheet"])
+    out = _risk.export_risk_excel(original, data["rows"], data["sheet"],
+                                  data.get("scale"))
     safe_name = _safe_header(f"{data['name']}_plan_actions.xlsx")
     return Response(
         content=out,
@@ -2009,6 +2103,170 @@ async def risk_suggest(request: Request):
 @app.get("/api/risk/models")
 async def risk_models():
     return {"models": _risk.list_ollama_models()}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Questionnaires routes (Gestion des risques)
+# ══════════════════════════════════════════════════════════════════════════════
+
+@app.get("/api/questionnaires/types")
+async def questionnaires_types():
+    return _quest.QUESTIONNAIRE_TYPES
+
+
+@app.get("/api/questionnaires/counts")
+async def questionnaires_counts(sector: str = "", client: str = ""):
+    return _quest.count_by_type(sector, client)
+
+
+@app.get("/api/questionnaires/list")
+async def questionnaires_list(sector: str = "", client: str = "", qtype: str = ""):
+    return _quest.list_questionnaires(sector, client, qtype)
+
+
+@app.get("/api/questionnaires/template/{qtype}")
+async def questionnaires_template(qtype: str):
+    data = _quest.get_template(qtype)
+    if not data:
+        raise HTTPException(404, "Aucun modèle enregistré pour ce type")
+    return data
+
+
+@app.get("/api/questionnaires/load/{qid}")
+async def questionnaires_load(qid: int):
+    data = _quest.load_questionnaire(qid)
+    if not data:
+        raise HTTPException(404, "Questionnaire introuvable")
+    return data
+
+
+@app.post("/api/questionnaires/parse")
+async def questionnaires_parse(file: UploadFile = File(...), sheet: str = Form("")):
+    """Parse-only (no DB write) — used by the Réponses comparison flow to
+    preview a client's file before the user decides to save it."""
+    raw = await file.read()
+    try:
+        columns, rows, detected_sheet, sheets = _quest.parse_questionnaire_excel(raw, sheet.strip() or None)
+    except Exception as e:
+        raise HTTPException(400, f"Impossible de lire le fichier : {e}")
+    return {"columns": columns, "rows": rows, "sheet": detected_sheet, "sheets": sheets}
+
+
+@app.post("/api/questionnaires/upload")
+async def questionnaires_upload(
+    file: UploadFile = File(...),
+    name: str = Form(""),
+    sector: str = Form(""),
+    client: str = Form(""),
+    qtype: str = Form(...),
+    sheet: str = Form(""),
+    as_template: str = Form(""),
+):
+    raw = await file.read()
+    sheet_arg = sheet.strip() or None
+    try:
+        columns, rows, detected_sheet, sheets = _quest.parse_questionnaire_excel(raw, sheet_arg)
+    except Exception as e:
+        raise HTTPException(400, f"Impossible de lire le fichier : {e}")
+
+    fname = name.strip() or file.filename or "Questionnaire"
+    is_template = as_template.strip().lower() in ("1", "true", "yes", "on")
+    try:
+        qid = _quest.save_questionnaire(fname, sector, client, qtype, columns, rows, detected_sheet, raw, is_template)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+    return {"id": qid, "sheet": detected_sheet, "sheets": sheets, "columns": columns, "rows": rows, "total": len(rows)}
+
+
+@app.post("/api/questionnaires/create-from-template")
+async def questionnaires_create_from_template(request: Request):
+    body = await request.json()
+    qtype   = body.get("qtype", "")
+    sector  = body.get("sector", "")
+    client  = body.get("client", "")
+    name    = body.get("name") or "Nouveau questionnaire"
+    columns = body.get("columns", [])
+    rows    = body.get("rows", [])
+    try:
+        qid = _quest.create_from_template(qtype, sector, client, name, columns, rows)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"id": qid}
+
+
+@app.post("/api/questionnaires/save-template")
+async def questionnaires_save_template_direct(request: Request):
+    """Save (or update) the reference template for a type — no prior upload required."""
+    body = await request.json()
+    qtype   = body.get("qtype", "")
+    name    = body.get("name") or "Questionnaire de référence"
+    columns = body.get("columns", [])
+    rows    = body.get("rows", [])
+    try:
+        qid = _quest.save_template_direct(qtype, columns, rows, name)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"id": qid}
+
+
+@app.post("/api/questionnaires/save-direct")
+async def questionnaires_save_direct(request: Request):
+    """Save a client questionnaire without requiring a pre-existing template."""
+    body = await request.json()
+    qtype   = body.get("qtype", "")
+    sector  = body.get("sector", "")
+    client  = body.get("client", "")
+    name    = body.get("name") or "Questionnaire client"
+    columns = body.get("columns", [])
+    rows    = body.get("rows", [])
+    try:
+        qid = _quest.save_questionnaire_direct(qtype, sector, client, name, columns, rows)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"id": qid}
+
+
+@app.post("/api/questionnaires/save/{qid}")
+async def questionnaires_save(qid: int, request: Request):
+    body = await request.json()
+    columns = body.get("columns", [])
+    rows = body.get("rows", [])
+    name = body.get("name")
+    _quest.update_questionnaire(qid, columns, rows, name)
+    return {"ok": True}
+
+
+@app.post("/api/questionnaires/save-as-template/{qid}")
+async def questionnaires_save_as_template(qid: int):
+    try:
+        new_id = _quest.set_as_template(qid)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+    return {"ok": True, "template_id": new_id}
+
+
+@app.delete("/api/questionnaires/delete/{qid}")
+async def questionnaires_delete(qid: int):
+    _quest.delete_questionnaire(qid)
+    return {"ok": True}
+
+
+@app.get("/api/questionnaires/export/{qid}")
+async def questionnaires_export(qid: int):
+    data = _quest.load_questionnaire(qid)
+    if not data:
+        raise HTTPException(404, "Questionnaire introuvable")
+    original = _quest.get_original_bytes(qid)
+    if not original:
+        raise HTTPException(400, "Fichier source introuvable sur le disque.")
+    out = _quest.export_questionnaire_excel(original, data["columns"], data["rows"], data["sheet_name"])
+    safe_name = _safe_header(f"{data['name']}.xlsx")
+    return Response(
+        content=out,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+    )
 
 
 if __name__ == "__main__":

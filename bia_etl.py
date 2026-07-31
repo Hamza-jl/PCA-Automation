@@ -679,51 +679,89 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                 """
                 _AUTO = "__AUTO__"
 
+                def _norm_hex(val: str) -> str:
+                    """
+                    Normalize a w:val colour to a comparison key.
+
+                    Word writes black three interchangeable ways — "auto",
+                    an explicit "000000", and a theme black (w:val="000000"
+                    + w:themeColor="background2").  All three mean "not
+                    colour-coded", so they collapse onto the same sentinel;
+                    otherwise the same structure reads as two different
+                    colours depending on which cell it was typed in.
+                    """
+                    if not val or val.lower() == "auto":
+                        return _AUTO
+                    v = val.strip().upper()
+                    if len(v) != 6:
+                        return _AUTO
+                    try:
+                        r, g, b = int(v[0:2], 16), int(v[2:4], 16), int(v[4:6], 16)
+                    except ValueError:
+                        return _AUTO
+                    if r + g + b <= 90:      # near-black
+                        return _AUTO
+                    return v
+
                 def _run_hex(run) -> str:
-                    """Return uppercase hex color for a run, or _AUTO if none."""
                     rPr = run._r.find(_qn("w:rPr"))
                     if rPr is None:
                         return _AUTO
                     col_elem = rPr.find(_qn("w:color"))
                     if col_elem is None:
                         return _AUTO
-                    val = col_elem.get(_qn("w:val"), "auto")
-                    if not val or val.lower() == "auto":
-                        return _AUTO
-                    return val.upper()
+                    return _norm_hex(col_elem.get(_qn("w:val"), "auto"))
+
+                def _para_entry(para) -> tuple[str, str] | None:
+                    """
+                    One paragraph == one value entry.
+
+                    Grouping by paragraph rather than by run is what makes
+                    "+2" survive: Word frequently splits it into a "+" run
+                    and a "2" run, and per-run handling would emit two
+                    separate values.
+                    """
+                    runs = [r for r in para.runs if r.text.strip()]
+                    if not runs:
+                        return None
+                    text = "".join(r.text for r in runs).strip()
+                    if not text:
+                        return None
+                    colour = _AUTO
+                    for r in runs:
+                        c = _run_hex(r)
+                        if c != _AUTO:
+                            colour = c
+                            break
+                    return colour, text
 
                 if _com_idx < 0 or _com_idx >= len(docx_row.cells):
                     return {}
 
-                # 1. Build color → [structure_name] from Commentaires cell.
-                # Rules:
-                #   - Each non-annotation paragraph registers one structure name.
-                #   - Annotation paragraphs (start with "(") are skipped.
-                #   - Multiple structures may share the same color (e.g. when the
-                #     document was uniformly reformatted).  In that case ALL of them
-                #     receive matching time values.
+                # 1. Structures from the Commentaires cell — one per paragraph,
+                #    kept in document order so the Excel rows follow the Word doc.
                 com_cell = docx_row.cells[_com_idx]
-                color_map: dict[str, list[str]] = {}   # hex_color → [struct_name, ...]
+                color_map: dict[str, list[str]] = {}     # colour → [structure, ...]
+                ordered_structs: list[str] = []          # names, document order
+                ordered_pairs: list[tuple[str, str]] = []  # (colour, name)
                 for para in com_cell.paragraphs:
-                    runs = [r for r in para.runs if r.text.strip()]
-                    if not runs:
+                    entry = _para_entry(para)
+                    if not entry:
                         continue
-                    full_text = "".join(r.text for r in runs).strip()
-                    if not full_text:
+                    colour, text = entry
+                    # "(...)" notes and "*" footnotes qualify a structure —
+                    # they are not structures themselves.
+                    if text.startswith("(") or text.lstrip().startswith("*"):
                         continue
-                    # Skip parenthetical annotations — they qualify a structure,
-                    # they are not structure names themselves.
-                    if full_text.startswith("("):
-                        continue
-                    dom_color = _run_hex(runs[0])
-                    color_map.setdefault(dom_color, []).append(full_text)
+                    color_map.setdefault(colour, []).append(text)
+                    ordered_structs.append(text)
+                    ordered_pairs.append((colour, text))
 
-                # Only trigger expansion if at least one non-auto colored structure exists
-                has_colored = any(k != _AUTO for k in color_map)
-                if not has_colored:
-                    return {}   # plain text comments — no structure expansion
+                # A single structure carries no more information than the plain
+                # Commentaires cell — leave those rows alone.
+                if len(ordered_structs) < 2:
+                    return {}
 
-                # Helper: Euclidean RGB distance between two hex color strings.
                 def _rgb_dist(h1: str, h2: str) -> float:
                     try:
                         r1, g1, b1 = int(h1[0:2],16), int(h1[2:4],16), int(h1[4:6],16)
@@ -732,27 +770,24 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                     except Exception:
                         return 999.0
 
-                # Nearest-color lookup: map a run color to the closest Commentaires
-                # color within a tolerance (handles slight shade variations e.g.
-                # EE0000 in Commentaires vs FF0000 in time cells — same red, different
-                # brightness, Euclidean distance ≈ 17).
-                _COLOR_TOLERANCE = 60   # RGB Euclidean distance threshold
-                _color_cache: dict[str, str | None] = {}  # memoize lookups
+                # Tolerance has to absorb theme drift: the same purple is cached
+                # as 8F18F5 in one cell and 7030A0 in another (distance ≈ 94)
+                # when a document is edited under two different Word themes.
+                # Nearest-colour still wins, so this only widens what counts as
+                # a candidate — the next-closest hue here sits at ≈ 130.
+                _COLOR_TOLERANCE = 110
+                _color_cache: dict[str, str | None] = {}
 
                 def _nearest_color(run_hex: str) -> str | None:
-                    """Return the best-matching color key from color_map, or None."""
                     if run_hex in _color_cache:
                         return _color_cache[run_hex]
-                    # Exact match first
                     if run_hex in color_map:
                         _color_cache[run_hex] = run_hex
                         return run_hex
-                    # Auto sentinel: only matches __AUTO__ key
                     if run_hex == _AUTO:
                         result = _AUTO if _AUTO in color_map else None
                         _color_cache[run_hex] = result
                         return result
-                    # Approximate: find nearest non-AUTO color within tolerance
                     best_key, best_dist = None, _COLOR_TOLERANCE
                     for ck in color_map:
                         if ck == _AUTO:
@@ -763,27 +798,65 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                     _color_cache[run_hex] = best_key
                     return best_key
 
-                # 2. For each time column, match colored runs to structures
+                # Structures sharing a colour are one activity split over several
+                # lines — the colour IS the grouping the author applied.  They
+                # collapse to a single joined label so the sheet shows one row
+                # carrying the value once, instead of N rows repeating it.
+                group_label = {c: "\n".join(names) for c, names in color_map.items()}
+
                 per_struct: dict[str, dict[str, str]] = {}
+
+                # When every structure shares one colour the colour carries no
+                # signal.  Fall back to position when the counts line up, and
+                # otherwise treat the value as applying to all of them — that is
+                # what a single uncoloured "+3" against three structures means.
+                uniform_colour = len(color_map) == 1
+
+                def _add(label: str, time_label: str, val: str) -> None:
+                    slot = per_struct.setdefault(label, {})
+                    prev = slot.get(time_label, "")
+                    slot[time_label] = f"{prev}\n{val}" if prev else val
+
                 for time_label, col_idx in _time_col_map.items():
                     if col_idx >= len(docx_row.cells):
                         continue
-                    data_cell = docx_row.cells[col_idx]
-                    for para in data_cell.paragraphs:
-                        for run in para.runs:
-                            val = run.text.strip()
-                            if not val:
-                                continue
-                            run_color = _run_hex(run)
-                            matched_key = _nearest_color(run_color)
-                            if matched_key is not None:
-                                for struct_name in color_map[matched_key]:
-                                    per_struct.setdefault(struct_name, {})
-                                    # Accumulate split runs (e.g. "+" and "2")
-                                    existing = per_struct[struct_name].get(time_label, "")
-                                    per_struct[struct_name][time_label] = existing + val
+                    entries = [
+                        e for e in (
+                            _para_entry(p) for p in docx_row.cells[col_idx].paragraphs
+                        ) if e
+                    ]
+                    if not entries:
+                        continue
 
-                return per_struct
+                    if uniform_colour:
+                        only_colour = next(iter(color_map))
+                        if len(entries) == len(ordered_structs):
+                            # One value each — they are distinct after all.
+                            for (_, val), name in zip(entries, ordered_structs):
+                                _add(name, time_label, val)
+                        else:
+                            for _, val in entries:
+                                _add(group_label[only_colour], time_label, val)
+                        continue
+
+                    for colour, val in entries:
+                        key = _nearest_color(colour)
+                        if key is None:
+                            continue
+                        _add(group_label[key], time_label, val)
+
+                # Restore document order — keys may be either a single structure
+                # name (positional case) or a joined colour group.
+                rank: dict[str, int] = {}
+                for i, (c, name) in enumerate(ordered_pairs):
+                    rank.setdefault(group_label[c], i)
+                    rank.setdefault(name, i)
+
+                return {
+                    k: v for k, v in sorted(
+                        per_struct.items(), key=lambda kv: rank.get(kv[0], 10_000)
+                    ) if v
+                }
 
             for row in table.rows[1:]:
                 cells = _row_texts(row)
@@ -1211,55 +1284,70 @@ def transform_montee_en_charge(fiche: BIAFiche) -> list[dict]:
             return False
         return (norm in {_strip_accents(p) for p in _PRIMARY_LABELS})
 
+    # An all-blank primary row (Nominal only, no time values) carries nothing the
+    # Positions/Télétravail rows don't already say.  Only pruned on fiches that
+    # use colour-coded structures, to leave simpler documents untouched.
+    _has_structures = any(r.per_structure for r in fiche.ramp_up)
+
+    def _row_is_blank(r) -> bool:
+        return not any([r.h0, r.h1, r.h2, r.h4, r.j1, r.j2,
+                        r.j3, r.j4, r.j5, r.j10, r.j15, r.j30])
+
+    primaries = [
+        r for r in fiche.ramp_up
+        if _is_primary(r.label)
+        and not (_has_structures and not r.per_structure and _row_is_blank(r))
+    ]
+
+    # Structure-major order: a structure is named once and its Positions /
+    # Télétravail lines sit together underneath it, rather than the structure
+    # list being repeated in full for every metric.
+    struct_order: list[str] = []
+    for r in primaries:
+        for s in r.per_structure:
+            if s not in struct_order:
+                struct_order.append(s)
+
     rows: list[dict] = []
-    for r in fiche.ramp_up:
-        if not _is_primary(r.label):
-            continue
 
+    # Aggregate (structure-less) metrics first, in their original order.
+    for r in primaries:
         if r.per_structure:
-            # Group structures that share the same time values (= same color in
-            # the Word doc) into a single Excel row.  Structures with identical
-            # time-value signatures are joined with a newline in the Structure
-            # cell — e.g. "Gestion des affaires fac.\nGestion des différents traités"
-            # instead of two separate rows with the same "+3" value.
-            from collections import defaultdict as _dd
-            _groups: dict[frozenset, list[str]] = _dd(list)
-            for struct_name, time_vals in r.per_structure.items():
-                key = frozenset(
-                    (k, v) for k, v in time_vals.items() if v
-                )
-                _groups[key].append(struct_name)
+            continue
+        # Leave Commentaires empty for rows that only appear as context
+        # (Effectif/Positions whose values are 0 or aggregated across
+        # structures already shown individually).
+        rows.append({
+            "Montée en charge exprimée": r.label,
+            "Nominal": r.nominal,
+            "H0": r.h0, "H+1": r.h1, "H+2": r.h2, "H+4": r.h4,
+            "J+1": r.j1, "J+2": r.j2, "J+3": r.j3, "J+4": r.j4,
+            "J+5": r.j5, "J+10": r.j10, "J+15": r.j15, "J+30": r.j30,
+            "Commentaires": "",   # suppress raw comment text when structures are present
+        })
 
-            for time_key, struct_names in _groups.items():
-                time_vals = dict(time_key)
-                rows.append({
-                    "Montée en charge exprimée": r.label,
-                    "Nominal": r.nominal,
-                    "Structure": "\n".join(struct_names),
-                    "H0":  time_vals.get("H0",  ""),
-                    "H+1": time_vals.get("H+1", ""),
-                    "H+2": time_vals.get("H+2", ""),
-                    "H+4": time_vals.get("H+4", ""),
-                    "J+1": time_vals.get("J+1", ""),
-                    "J+2": time_vals.get("J+2", ""),
-                    "J+3": time_vals.get("J+3", ""),
-                    "J+4": time_vals.get("J+4", ""),
-                    "J+5": time_vals.get("J+5", ""),
-                    "J+10": time_vals.get("J+10", ""),
-                    "J+15": time_vals.get("J+15", ""),
-                    "J+30": time_vals.get("J+30", ""),
-                })
-        else:
-            # Standard row — leave Commentaires empty for rows that only
-            # appear as context (Effectif/Positions whose values are 0 or
-            # aggregated across structures already shown individually).
+    # Then each structure once, with its metric lines grouped beneath it.
+    for struct_name in struct_order:
+        for r in primaries:
+            time_vals = r.per_structure.get(struct_name)
+            if not time_vals:
+                continue
             rows.append({
                 "Montée en charge exprimée": r.label,
                 "Nominal": r.nominal,
-                "H0": r.h0, "H+1": r.h1, "H+2": r.h2, "H+4": r.h4,
-                "J+1": r.j1, "J+2": r.j2, "J+3": r.j3, "J+4": r.j4,
-                "J+5": r.j5, "J+10": r.j10, "J+15": r.j15, "J+30": r.j30,
-                "Commentaires": "",   # suppress raw comment text when structures are present
+                "Structure": struct_name,
+                "H0":  time_vals.get("H0",  ""),
+                "H+1": time_vals.get("H+1", ""),
+                "H+2": time_vals.get("H+2", ""),
+                "H+4": time_vals.get("H+4", ""),
+                "J+1": time_vals.get("J+1", ""),
+                "J+2": time_vals.get("J+2", ""),
+                "J+3": time_vals.get("J+3", ""),
+                "J+4": time_vals.get("J+4", ""),
+                "J+5": time_vals.get("J+5", ""),
+                "J+10": time_vals.get("J+10", ""),
+                "J+15": time_vals.get("J+15", ""),
+                "J+30": time_vals.get("J+30", ""),
             })
 
     return rows
@@ -2371,6 +2459,33 @@ def extract_rapport_bia(synthese_path: str | Path) -> dict:
             "count":      len(ops),
             "percent":    pct,
             "activities": ops,
+        })
+
+    # Activities with no positions/télétravail in any tracked column are assumed
+    # to recover at J+30 or beyond. Add them as a final step so the curve reaches 100%.
+    never_op = [j for j, fo in enumerate(first_op) if fo is None]
+    if never_op:
+        last_count = recovery_steps[-1]["count"] if recovery_steps else 0
+        late_ops = []
+        for j in never_op:
+            act = activities[j]
+            late_ops.append({
+                "name":         act["activity"],
+                "entity":       act["departement"] or act["direction"],
+                "direction":    act["direction"],
+                "departement":  act["departement"],
+                "positions":    0,
+                "teletravail":  0,
+                "dmia":         "J+30",
+            })
+        total_late = last_count + len(late_ops)
+        pct_late = round(total_late / total_activities * 100) if total_activities else 100
+        recovery_steps.append({
+            "label":      "J+30",
+            "hours":      720,
+            "count":      total_late,
+            "percent":    pct_late,
+            "activities": (recovery_steps[-1]["activities"] if recovery_steps else []) + late_ops,
         })
 
     # ── Equipment (Logistiques sheet) ──────────────────────────────────────────
@@ -3709,8 +3824,19 @@ def _clear_existing_rows(ws, first_row: int) -> None:
             mr for mr in list(ws.merged_cells.ranges)
             if any(r in range(mr.min_row, mr.max_row + 1) for r in delete_set)
         ]
+        # Done manually rather than via ws.unmerge_cells(): that helper drops the
+        # range first and only then deletes the range's secondary cells, so it
+        # half-completes with a KeyError on any cell that was never materialised
+        # — which is every merge written by an earlier run and reloaded from
+        # disk.  Removing the range and discarding the cells in that order is
+        # equivalent and cannot raise.
         for mr in ranges_to_unmerge:
-            ws.unmerge_cells(str(mr))
+            if mr in ws.merged_cells.ranges:
+                ws.merged_cells.ranges.remove(mr)
+            cells = mr.cells
+            next(cells, None)          # keep the master (top-left) cell
+            for row, col in cells:
+                ws._cells.pop((row, col), None)
 
     # Delete collected rows in reverse order so row numbers stay valid
     for r in reversed(rows_to_delete):
@@ -4087,6 +4213,28 @@ def load(synthesis_path: str | Path, fiche: BIAFiche, dry_run: bool = False,
                     ws.cell(dept_row, col).alignment = _Align(
                         vertical="center", wrap_text=True
                     )
+
+                # "Structure" repeats across a structure's own metric lines but
+                # changes within the entity block, so it can't join the block
+                # merge above.  Blank the repeats instead of merging sub-ranges:
+                # the structure still reads once at the top of its Positions /
+                # Télétravail group, and sub-ranges inside an already-merged
+                # block corrupt openpyxl's bookkeeping when a later fiche calls
+                # insert_rows over the same region.
+                struct_col = next(
+                    (c for c in range(1, (ws.max_column or 10) + 1)
+                     if _strip_accents(str(ws.cell(hdr_row_load, c).value or "").strip().lower())
+                     == "structure"),
+                    None,
+                )
+                if struct_col:
+                    prev_val = None
+                    for rr in range(dept_row, dept_row + n):
+                        cur_val = ws.cell(rr, struct_col).value
+                        if cur_val not in (None, "") and cur_val == prev_val:
+                            ws.cell(rr, struct_col).value = None
+                        elif cur_val not in (None, ""):
+                            prev_val = cur_val
 
         if verbose: print(f"  OK [{sheet_name}] -> {n} row(s) written for '{fiche.entity_name}'")
 

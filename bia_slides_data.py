@@ -4,12 +4,54 @@ Returns a single JSON-serialisable dict consumed by the frontend.
 """
 from __future__ import annotations
 import io, math
-from typing import Any
+from typing import Any, Optional
 
+import re
 import pandas as pd
 
 DMIA_ORDER = ["H0","H+1","H+2","H+4","J+1","J+2","J+3","J+4","J+5","J+10","J+15","J+30","Au-delà"]
 TIME_COLS  = ["H0","H+1","H+2","H+4","J+1","J+2","J+3","J+4","J+5","J+10","J+15"]
+
+
+def _normalize_dmia(v: str) -> str:
+    """Normalize raw DMIA strings to DMIA_ORDER format: '3J'→'J+3', '4H'→'H+4', '0H'/'H0'→'H0'."""
+    if not v:
+        return v
+    v = v.strip()
+    if re.match(r'^[HhJj]\+\d', v):   # already J+N or H+N
+        return v.upper().replace('J+', 'J+').replace('H+', 'H+')
+    m = re.match(r'^(\d+)[Jj]$', v)   # NJ → J+N
+    if m:
+        return f"J+{m.group(1)}"
+    m = re.match(r'^(\d+)[Hh]$', v)   # NH → H+N
+    if m:
+        n = int(m.group(1))
+        return "H0" if n == 0 else f"H+{n}"
+    if re.match(r'^[Hh]0$', v):        # H0 already
+        return "H0"
+    return v
+
+
+def _dmia_days(v: str) -> Optional[float]:
+    """
+    DMIA expressed in days, or None when it carries no duration.
+
+    Accepts both spellings found in these workbooks — the normalised "J+3" /
+    "H+4" / "H0" and the raw "3J" / "4H" / "0H" — by normalising first. Values
+    like "Au-delà" or "-" mean "no committed deadline" and return None.
+    """
+    s = _normalize_dmia(_safe(v))
+    if not s:
+        return None
+    m = re.match(r'^[Hh]\+(\d+(?:[.,]\d+)?)$', s)
+    if m:
+        return float(m.group(1).replace(",", ".")) / 24.0
+    if re.match(r'^[Hh]0$', s):
+        return 0.0
+    m = re.match(r'^[Jj]\+(\d+(?:[.,]\d+)?)$', s)
+    if m:
+        return float(m.group(1).replace(",", "."))
+    return None
 
 
 def _safe(v: Any) -> str:
@@ -18,6 +60,36 @@ def _safe(v: Any) -> str:
     if isinstance(v, float) and math.isnan(v):
         return ""
     return str(v).strip()
+
+
+# Quantity columns in these workbooks are not reliably numeric. Alongside counts,
+# contributors mark a requirement with an "X" — "this equipment is needed at this
+# horizon" without committing to a number. A single such cell turns the whole
+# pandas column to object dtype, and .sum() then raises
+# "unsupported operand type(s) for +: 'float' and 'str'".
+_PRESENCE_MARKS = {"x", "✓", "✔", "o", "oui", "yes"}
+
+
+def _numeric_col(series: "pd.Series") -> "pd.Series":
+    """
+    Coerce a quantity column to numbers.
+
+    Three shapes have to survive, because all three appear in real workbooks:
+      "+6"   an increment, which pandas already parses
+      "13*"  a count carrying a footnote marker — the 13 is the datum and
+             dropping it would silently understate a whole division
+      "X"    a requirement recorded without a count
+
+    Presence marks become 1 rather than 0: they denote something real, and
+    zeroing them both understates the total and drops the row from any
+    "total > 0" filter downstream.
+    """
+    txt = series.astype(str).str.strip()
+    # Leading number, ignoring any trailing footnote marker or unit.
+    lead = txt.str.extract(r'^([+-]?\d+(?:[.,]\d+)?)', expand=False).str.replace(",", ".")
+    num = pd.to_numeric(lead, errors="coerce")
+    marks = txt.str.lower().isin(_PRESENCE_MARKS)
+    return num.where(~marks, 1).fillna(0)
 
 
 def _read(xl: pd.ExcelFile, sheet: str) -> pd.DataFrame:
@@ -29,9 +101,10 @@ def _read(xl: pd.ExcelFile, sheet: str) -> pd.DataFrame:
 
 
 def _struct(row: pd.Series) -> str:
-    for col in ["Structure Niveau 2", "Structure Niveau 1"]:
+    for col in ["Structure Niveau 2", "Structure Niveau 1",
+                "Département", "Unité", "Division", "Direction", "Service", "Entité"]:
         v = _safe(row.get(col, ""))
-        if v and v != "-":
+        if v and v not in ("-", "nan"):
             return v
     return ""
 
@@ -58,6 +131,27 @@ def extract_slides_data(xlsx_bytes: bytes) -> dict:
     col_df  = _read(xl, "Collaborateurs Clés")
     doc_df  = _read(xl, "Doc critiques")
     eq_df   = _read(xl, "Autres Eqt IT")
+
+    # Forward-fill structure/hierarchy columns that use merged cells.
+    # Every sheet needs this, not just Impact DMIA: the identity columns are
+    # vertically merged across each entity's block, so pandas sees the name on
+    # the block's first row and NaN on all the rest. Applying it to Impact DMIA
+    # alone left the Applications table with a Structure on 22 rows out of 133
+    # and blank everywhere else.
+    _ID_COLS = ["Structure Niveau 1", "Structure Niveau 2",
+                "Division", "Direction", "Unité", "Département", "Service", "Entité"]
+    for _df in (imp_df, mc_df, apps_df, col_df, doc_df, eq_df):
+        if _df.empty:
+            continue
+        for col in _ID_COLS:
+            if col in _df.columns:
+                _df[col] = _df[col].ffill()
+
+    # Normalize DMIA values to standard format (e.g. "3J"→"J+3", "4H"→"H+4")
+    if not imp_df.empty and "DMIA Exprimée" in imp_df.columns:
+        imp_df["DMIA Exprimée"] = imp_df["DMIA Exprimée"].apply(
+            lambda v: _normalize_dmia(_safe(v)) if pd.notna(v) else ""
+        )
 
     company = _detect_company(xl)
 
@@ -104,22 +198,64 @@ def extract_slides_data(xlsx_bytes: bytes) -> dict:
     reprise_rh: dict = {}
     if not mc_df.empty:
         avail_tc = [c for c in TIME_COLS if c in mc_df.columns]
-        nominal_total = 0
-        effectif_rows = mc_df[mc_df["Montée en charge exprimée"] == "Effectif"]
-        if not effectif_rows.empty:
-            nominal_total = int(effectif_rows["Nominal"].sum(skipna=True))
 
-        def _agg(row_type: str) -> list[int]:
-            rows = mc_df[mc_df["Montée en charge exprimée"] == row_type]
-            return [int(rows[c].sum(skipna=True)) for c in avail_tc]
+        # Matched on a prefix, not equality. The sheet writes the metric as
+        # "Positions" while this code asked for "Position", so the whole series
+        # silently aggregated to zero and the Position-vs-Télétravail chart drew
+        # a flat line. Accents and case vary between clients too.
+        _labels = (mc_df["Montée en charge exprimée"].astype(str)
+                   .str.strip().str.lower()
+                   .str.normalize("NFKD").str.encode("ascii", "ignore").str.decode("ascii"))
+
+        def _rows_for(prefix: str) -> "pd.DataFrame":
+            return mc_df[_labels.str.startswith(prefix)]
+
+        # Nominal is the division's headcount, written once per division block
+        # and vertically merged across it — so it lands on whichever metric row
+        # happens to come first, which is Télétravail or Positions as often as
+        # Effectif. Summing only the Effectif rows therefore recovered a
+        # fraction of the workforce (41 of 267 on a real file), and every
+        # percentage computed against it pinned to 100%.
+        nominal_total = 0
+        if "Nominal" in mc_df.columns:
+            # Counted once per contiguous block rather than per row. Two layouts
+            # exist in the wild and this handles both: one writes the identity
+            # and headcount once and merges them down the block (so the repeats
+            # arrive as NaN and are forward-filled), the other repeats them on
+            # every row. Splitting on a *change* in either identity or headcount
+            # also keeps divisions that legitimately span two blocks with
+            # different headcounts from collapsing into one.
+            nom = pd.to_numeric(mc_df["Nominal"], errors="coerce").ffill()
+            id_cols = [c for c in ("Division", "Unité", "Département") if c in mc_df.columns]
+            if id_cols:
+                ident = mc_df[id_cols].ffill().astype(str).agg(" | ".join, axis=1)
+            else:
+                ident = pd.Series([""] * len(mc_df), index=mc_df.index)
+            key = ident + "||" + nom.astype(str)
+            blocks = (key != key.shift()).cumsum()
+            nominal_total = int(nom.groupby(blocks).first().fillna(0).sum())
+
+        def _agg(prefix: str) -> list[int]:
+            rows = _rows_for(prefix)
+            if rows.empty:
+                return [0] * len(avail_tc)
+            return [int(_numeric_col(rows[c]).sum()) for c in avail_tc]
 
         reprise_rh = {
             "time_cols": avail_tc,
             "nominal": nominal_total,
-            "effectif": _agg("Effectif"),
-            "position": _agg("Position"),
-            "teletravail": _agg("Télétravail"),
+            "effectif": _agg("effectif"),
+            "position": _agg("position"),
+            "teletravail": _agg("teletravail"),
         }
+
+    # Helper: try multiple column name variants, return first non-empty value
+    def _get(row: pd.Series, *keys: str) -> str:
+        for k in keys:
+            v = _safe(row.get(k, ""))
+            if v:
+                return v
+        return ""
 
     # ── 4. Zoom sur la Reprise (per DMIA) ────────────────────────────────────
     zoom: list[dict] = []
@@ -134,8 +270,8 @@ def extract_slides_data(xlsx_bytes: bytes) -> dict:
                 activities.append({
                     "structure": _struct(row),
                     "activite": _safe(row.get("Activité", "")),
-                    "im_4h": _safe(row.get("IM 4H", "")),
-                    "score": _safe(row.get("Score 2-3J", "")),
+                    "im_4h": _get(row, "IM 4H", "IM < 1 jour"),
+                    "score": _get(row, "Score 2-3J", "Score ≥ 5 jours", "Score < 1 jour"),
                 })
             zoom.append({
                 "dmia": dmia,
@@ -156,20 +292,49 @@ def extract_slides_data(xlsx_bytes: bytes) -> dict:
                 rows.append({
                     "structure": _struct(row),
                     "activite": _safe(row.get("Activité", "")),
-                    "im_1h":  _safe(row.get("IM 1H", "")),
-                    "im_4h":  _safe(row.get("IM 4H", "")),
-                    "im_1j":  _safe(row.get("IM 1J", "")),
-                    "im_2_3j":_safe(row.get("IM 2-3J", "")),
-                    "score":  _safe(row.get("Score 2-3J", "")),
+                    # Image / Réputation
+                    "im_1h":   _get(row, "IM 1H",   "IM < 1 jour",  "IM 1h"),
+                    "im_4h":   _get(row, "IM 4H",   "IM < 1 jour",  "IM 4h"),
+                    "im_1j":   _get(row, "IM 1J",   "IM < 1 jour",  "IM 1j"),
+                    "im_2_3j": _get(row, "IM 2-3J", "IM ≥ 5 jours", "IM 2-3j"),
+                    # Désorganisation interne
+                    "di_1h":   _get(row, "DI 1H",   "DI < 1 jour",  "DI 1h"),
+                    "di_4h":   _get(row, "DI 4H",   "DI < 1 jour",  "DI 4h"),
+                    "di_1j":   _get(row, "DI 1J",   "DI < 1 jour",  "DI 1j"),
+                    "di_2_3j": _get(row, "DI 2-3J", "DI ≥ 5 jours", "DI 2-3j"),
+                    # Juridique / Réglementaire
+                    "jr_1h":   _get(row, "JR 1H",   "JR < 1 jour",  "JR 1h"),
+                    "jr_4h":   _get(row, "JR 4H",   "JR < 1 jour",  "JR 4h"),
+                    "jr_1j":   _get(row, "JR 1J",   "JR < 1 jour",  "JR 1j"),
+                    "jr_2_3j": _get(row, "JR 2-3J", "JR ≥ 5 jours", "JR 2-3j"),
+                    # Financier
+                    "fin_1h":  _get(row, "FIN 1H",  "FIN < 1 jour", "FIN 1h"),
+                    "fin_4h":  _get(row, "FIN 4H",  "FIN < 1 jour", "FIN 4h"),
+                    "fin_1j":  _get(row, "FIN 1J",  "FIN < 1 jour", "FIN 1j"),
+                    "fin_2_3j":_get(row, "FIN 2-3J","FIN ≥ 5 jours","FIN 2-3j"),
+                    "score":   _get(row, "Score 2-3J", "Score ≥ 5 jours", "Score < 1 jour"),
                     "commentaire": _safe(row.get("Commentaires", "")),
                 })
             impacts.append({"dmia": dmia, "rows": rows})
 
     # ── 6. Applications (per lot) ─────────────────────────────────────────────
     def _lot(dmia: str) -> int:
-        if dmia in ("H0","H+1","H+2","H+4","J+1"):
+        """
+        Lot 1 ≤ 1 jour · Lot 2 de 2 à 5 jours · Lot 3 au-delà (ou inconnu).
+
+        Classified on the parsed duration rather than by matching a fixed list
+        of spellings. The previous version compared against "J+1", "J+2"… but
+        these workbooks overwhelmingly write the raw form — "3J", "4H", "10J" —
+        so all but a handful of rows fell through to Lot 3: a real file put 130
+        applications in Lot 3 and left Lot 2 empty, with 3J entries sitting
+        under "Au-delà de 5J".
+        """
+        days = _dmia_days(dmia)
+        if days is None:
+            return 3          # "Au-delà", "-", or unparseable
+        if days <= 1:
             return 1
-        if dmia in ("J+2","J+3","J+4","J+5"):
+        if days <= 5:
             return 2
         return 3
 
@@ -232,7 +397,10 @@ def extract_slides_data(xlsx_bytes: bytes) -> dict:
     equipements: list[dict] = []
     if not eq_df.empty and "Désignation" in eq_df.columns:
         avail_tc = [c for c in TIME_COLS if c in eq_df.columns]
-        grp = eq_df.groupby("Désignation")[avail_tc].sum()
+        eq_num = eq_df[["Désignation"]].copy()
+        for c in avail_tc:
+            eq_num[c] = _numeric_col(eq_df[c])
+        grp = eq_num.groupby("Désignation")[avail_tc].sum()
         grp["Total"] = grp[avail_tc].sum(axis=1)
         grp = grp[grp["Total"] > 0].reset_index()
         for _, row in grp.iterrows():
