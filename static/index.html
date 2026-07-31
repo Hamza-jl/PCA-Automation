@@ -8192,15 +8192,47 @@ function bubbleLineChart(series, xLabels, color1, color2, _W, _H, maxVal) {
     return vals[i] > vals[i-1] && vals[i] >= vals[i+1];
   }
 
-  /* Per-series: alternate label side (above/below) to avoid clashes */
+  /* Every series' y at every x, so a label can be placed knowing where the
+     other curve sits rather than by a fixed above/below rule per series. */
+  const allY = series.map(s => s.pcts.map(p => yOf(p)));
+
+  /* Pill positions resolved for every series at once, per x.
+     Choosing a side series-by-series only knows where the other curve's DOT
+     sits, not where its pill ended up — so two pills could still be placed on
+     top of each other, which is how a Positions value ended up hidden behind
+     the Télétravail one. A pill is 11 tall, so it needs ~13 of clearance. */
+  const PILL_CLEAR = 13;
+  const labelYs = series.map(() => new Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    const stack = allY.map((arr, si) => ({ si, y: arr[i] })).sort((a, b) => a.y - b.y);
+    /* Highest curve labels above, the ones below it label below. */
+    stack.forEach((o, rank) => {
+      let above = rank === 0;
+      if (o.y - PT <= 24) above = false;                       /* no room above */
+      if (!above && o.y + 21 > PT + cH + 6) above = true;      /* would hit the axis */
+      labelYs[o.si][i] = above ? o.y - 15 : o.y + 15;
+    });
+    /* Separate any pair that still overlaps after siding. */
+    for (let a = 0; a < stack.length; a++) {
+      for (let b = a + 1; b < stack.length; b++) {
+        const ia = stack[a].si, ib = stack[b].si;
+        const gap = Math.abs(labelYs[ia][i] - labelYs[ib][i]);
+        if (gap >= PILL_CLEAR) continue;
+        const push = (PILL_CLEAR - gap) / 2 + 0.5;
+        if (labelYs[ia][i] <= labelYs[ib][i]) { labelYs[ia][i] -= push; labelYs[ib][i] += push; }
+        else                                  { labelYs[ia][i] += push; labelYs[ib][i] -= push; }
+      }
+    }
+    for (const o of stack) {   /* keep them inside the plot */
+      labelYs[o.si][i] = Math.max(PT + 6, Math.min(PT + cH + 2, labelYs[o.si][i]));
+    }
+  }
+
   const seriesSvg = series.map((s,si) => {
     const pts = s.pcts.map((p,i) => [xOf(i), yOf(p)]);
     const d = makePath(pts);
     const baseY = (PT+cH).toFixed(1);
     const areaD = d + ` L ${pts[pts.length-1][0].toFixed(1)},${baseY} L ${pts[0][0].toFixed(1)},${baseY} Z`;
-
-    /* Decide default side per series: si=0 → above, si=1 → below */
-    const defaultAbove = si === 0;
 
     const dots = pts.map(([cx,cy],i) => {
       const raw = s.pcts[i];
@@ -8212,12 +8244,9 @@ function bubbleLineChart(series, xLabels, color1, color2, _W, _H, maxVal) {
 
       if (!showLbl) return dot;
 
-      /* Force label placement: check available space */
-      let above = (cy - PT > 24) ? defaultAbove : !defaultAbove;
-      let labelY = above ? cy - 15 : cy + 15;
-      /* Flip below→above if pill would overlap x-axis labels */
-      const xAxisTop = PT + cH + 6;
-      if (!above && labelY + 6 > xAxisTop) { above = true; labelY = cy - 15; }
+      /* Position decided up front across all series (see labelYs above). */
+      const labelY = labelYs[si][i];
+      const above  = labelY < cy;
       const tickY1 = above ? cy - 6  : cy + 6;
       const tickY2 = above ? labelY + 5 : labelY - 5;
 
