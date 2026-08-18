@@ -7604,23 +7604,41 @@ function sgFitSlides() {
           k.style.width = k.dataset.sgFitW || ''; delete k.dataset.sgFitted;
         }
       });
+      slide.style.background = '';
 
       /* In-flow content only. The Devoteam footer, page number and accent bar
          are absolutely positioned against the slide's bottom edge by design;
          their subtrees are skipped whole, since those children are laid out
-         relative to the absolute parent rather than the slide. */
+         relative to the absolute parent rather than the slide.
+
+         The d+ mark is absolute chrome too, so it never counts toward
+         `lowest` — nothing pushes it or reserves space for it. That's how a
+         caption ends up sitting right under it: text is free to lay out as
+         if the mark weren't there at all. Rather than special-casing every
+         slide builder to leave a gap, treat any in-flow text leaf whose box
+         actually reaches into the mark's footprint as its own kind of
+         overflow — measured the same way (how far it would need to lift to
+         clear), and folded into the same `over` value so one scale pass
+         fixes both. */
+      const markEl = slide.querySelector('[data-dv-mark]');
+      const markRect = markEl ? markEl.getBoundingClientRect() : null;
       const overflowNow = () => {
-        let lowest = 0;
+        let lowest = 0, footerOver = 0;
         (function walk(node) {
           for (const el of node.children) {
             const pos = getComputedStyle(el).position;
             if (pos === 'absolute' || pos === 'fixed') continue;
             const r = el.getBoundingClientRect();
             if (r.height > 0) lowest = Math.max(lowest, r.bottom);
+            if (markRect && el.children.length === 0 && el.textContent.trim() &&
+                r.left < markRect.right && r.right > markRect.left &&
+                r.top < markRect.bottom && r.bottom > markRect.top) {
+              footerOver = Math.max(footerOver, r.bottom - markRect.top);
+            }
             walk(el);
           }
         })(slide);
-        return lowest - box.bottom;
+        return Math.max(lowest - box.bottom, footerOver);
       };
 
       const inFlow = kids.filter(k => getComputedStyle(k).position !== 'absolute');
@@ -7638,6 +7656,19 @@ function sgFitSlides() {
       if (over <= 4) return;
 
       const k = Math.max(0.5, (box.height - 4) / (box.height - 4 + over));
+      /* The child being scaled down is what actually carries the slide's own
+         background (sl('#fff') etc. is set on it, not on this wrapper) — so
+         shrinking it toward top-center leaves gaps on the sides and bottom
+         where the wrapper's own (unset) background shows through instead,
+         i.e. whatever happens to be behind the slide card. Copying the
+         child's resolved background onto the wrapper before scaling makes
+         those gaps read as intentional margin instead of a mismatched gutter. */
+      const bgSource = inFlow.find(k => {
+        const bg = getComputedStyle(k).backgroundColor;
+        return bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
+      });
+      if (bgSource) slide.style.background = getComputedStyle(bgSource).backgroundColor;
+
       inFlow.forEach(kid => {
         kid.dataset.sgFitW = kid.style.width || '';
         kid.dataset.sgFitted = '1';
@@ -7725,7 +7756,7 @@ function dvFooter(pageNum, secId) {
       <img src="${clientLogo}" style="max-height:${logoSize}px;width:auto;max-width:200px;object-fit:contain;display:block;"/>
     </div>` : ''}
     <!-- d+ mark — bottom-left -->
-    <div style="position:absolute;bottom:2%;left:2%;z-index:10;pointer-events:none;">
+    <div data-dv-mark="1" style="position:absolute;bottom:2%;left:2%;z-index:10;pointer-events:none;">
       <img src="${DV_DMARK}" alt="Devoteam" style="height:7%;max-height:28px;min-height:18px;object-fit:contain;opacity:.9;"/>
     </div>
     <!-- page number — bottom-right -->
@@ -8226,15 +8257,32 @@ function bubbleLineChart(series, xLabels, color1, color2, _W, _H, maxVal) {
       if (!above && o.y + 21 > PT + cH + 6) above = true;      /* would hit the axis */
       labelYs[o.si][i] = above ? o.y - 15 : o.y + 15;
     });
-    /* Separate any pair that still overlaps after siding. */
-    for (let a = 0; a < stack.length; a++) {
-      for (let b = a + 1; b < stack.length; b++) {
-        const ia = stack[a].si, ib = stack[b].si;
-        const gap = Math.abs(labelYs[ia][i] - labelYs[ib][i]);
-        if (gap >= PILL_CLEAR) continue;
-        const push = (PILL_CLEAR - gap) / 2 + 0.5;
-        if (labelYs[ia][i] <= labelYs[ib][i]) { labelYs[ia][i] -= push; labelYs[ib][i] += push; }
-        else                                  { labelYs[ia][i] += push; labelYs[ib][i] -= push; }
+    /* Separating pills from each other isn't enough — a pill can still land
+       on top of a FOREIGN dot (the raw marker of another series), which is
+       how a low Télétravail value ended up hidden behind the Positions dot
+       when both curves sit near the baseline. Dots don't move, so pushing a
+       pill off one can reopen a pill-vs-pill overlap; a few passes let both
+       constraints settle together. */
+    const DOT_CLEAR = 12; /* pill half-height (5.5) + dot radius (4.5) + a little air */
+    for (let pass = 0; pass < 4; pass++) {
+      for (const o of stack) {
+        for (const other of stack) {
+          if (other.si === o.si) continue;
+          const gap = labelYs[o.si][i] - other.y;
+          if (Math.abs(gap) < DOT_CLEAR) {
+            labelYs[o.si][i] = other.y + (gap < 0 ? -DOT_CLEAR : DOT_CLEAR);
+          }
+        }
+      }
+      for (let a = 0; a < stack.length; a++) {
+        for (let b = a + 1; b < stack.length; b++) {
+          const ia = stack[a].si, ib = stack[b].si;
+          const gap = Math.abs(labelYs[ia][i] - labelYs[ib][i]);
+          if (gap >= PILL_CLEAR) continue;
+          const push = (PILL_CLEAR - gap) / 2 + 0.5;
+          if (labelYs[ia][i] <= labelYs[ib][i]) { labelYs[ia][i] -= push; labelYs[ib][i] += push; }
+          else                                  { labelYs[ia][i] += push; labelYs[ib][i] -= push; }
+        }
       }
     }
     for (const o of stack) {   /* keep them inside the plot */
