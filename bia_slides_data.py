@@ -14,21 +14,48 @@ TIME_COLS  = ["H0","H+1","H+2","H+4","J+1","J+2","J+3","J+4","J+5","J+10","J+15"
 
 
 def _normalize_dmia(v: str) -> str:
-    """Normalize raw DMIA strings to DMIA_ORDER format: '3J'→'J+3', '4H'→'H+4', '0H'/'H0'→'H0'."""
+    """
+    Normalize raw DMIA strings to DMIA_ORDER format: '3J'→'J+3', '4H'→'H+4', '0H'/'H0'→'H0'.
+
+    Handles the real-world variants found in these fiches beyond the clean
+    "3J"/"4H" case, all confirmed present in real workbooks:
+      - a space between the number and the unit ("1 J", "2 H") — common when
+        the cell was typed rather than copied from a template
+      - the unit written before the number ("H8" instead of "8H")
+      - a multi-value cell carrying a primary duration plus a footnoted
+        exception on a second line ("5J*\\n1J**") — the first value is taken
+        as the primary commitment; the footnote qualifies it, it doesn't
+        replace it
+    """
     if not v:
         return v
     v = v.strip()
     if re.match(r'^[HhJj]\+\d', v):   # already J+N or H+N
         return v.upper().replace('J+', 'J+').replace('H+', 'H+')
-    m = re.match(r'^(\d+)[Jj]$', v)   # NJ → J+N
+    if re.match(r'^[Hh]0$', v):        # H0 already
+        return "H0"
+
+    # Multi-value cell: take the first line as the primary duration, with any
+    # trailing footnote marker (*, °) stripped before pattern matching.
+    first = re.split(r'[\n;]', v)[0].strip()
+    first = re.sub(r'[*°]+$', '', first).strip()
+    candidate = first if first else v
+
+    m = re.match(r'^(\d+)\s*[Jj]$', candidate)   # NJ / N J → J+N
     if m:
         return f"J+{m.group(1)}"
-    m = re.match(r'^(\d+)[Hh]$', v)   # NH → H+N
+    m = re.match(r'^(\d+)\s*[Hh]$', candidate)   # NH / N H → H+N
     if m:
         n = int(m.group(1))
         return "H0" if n == 0 else f"H+{n}"
-    if re.match(r'^[Hh]0$', v):        # H0 already
-        return "H0"
+    m = re.match(r'^[Jj]\s*(\d+)$', candidate)   # JN (inverted) → J+N
+    if m:
+        return f"J+{m.group(1)}"
+    m = re.match(r'^[Hh]\s*(\d+)$', candidate)   # HN (inverted) → H+N
+    if m:
+        n = int(m.group(1))
+        return "H0" if n == 0 else f"H+{n}"
+
     return v
 
 
@@ -52,6 +79,58 @@ def _dmia_days(v: str) -> Optional[float]:
     if m:
         return float(m.group(1).replace(",", "."))
     return None
+
+
+_DMIA_ORDER_DAYS: Optional[dict] = None   # lazily built cache; DMIA_ORDER is fixed
+
+
+def _dmia_order_days() -> dict:
+    days = {}
+    for lbl in DMIA_ORDER:
+        if lbl == "Au-delà":
+            days[lbl] = float("inf")
+        elif lbl == "H0":
+            days[lbl] = 0.0
+        else:
+            days[lbl] = _dmia_days(lbl)
+    return days
+
+
+def _normalize_and_bucket_dmia(v: Any) -> str:
+    """
+    Full pipeline for one raw "DMIA Exprimée" cell: normalize the formatting,
+    then snap onto the fixed DMIA_ORDER scale if it parses to a real duration
+    that just isn't one of the standard horizons — e.g. "J+7" or "J+20",
+    values a department wrote that don't fall on the official H0/H+1/.../J+30
+    scale everyone else uses.
+
+    Snapping always rounds UP to the next bucket, never down. DMIA is a
+    maximum acceptable outage — an activity due back by day 7 is covered by
+    (must not exceed) the J+10 horizon; rounding it down to J+5 would
+    understate how urgent it actually is.
+
+    A cell that doesn't parse to any duration at all (blank, "-", free text)
+    is returned as "" — deliberately NOT forced into a bucket, since that
+    would misrepresent "no DMIA was ever committed" as "committed, just far
+    out". Those stay excluded from DMIA_ORDER and are reported separately.
+    """
+    global _DMIA_ORDER_DAYS
+    if pd.isna(v):
+        return ""
+    normalized = _normalize_dmia(_safe(v))
+    if not normalized:
+        return ""
+    if normalized in DMIA_ORDER:
+        return normalized
+    days = _dmia_days(normalized)
+    if days is None:
+        return normalized   # unparseable text — leave as-is, stays excluded from DMIA_ORDER
+    if _DMIA_ORDER_DAYS is None:
+        _DMIA_ORDER_DAYS = _dmia_order_days()
+    for lbl in DMIA_ORDER:
+        if _DMIA_ORDER_DAYS[lbl] >= days:
+            return lbl
+    return "Au-delà"
 
 
 def _safe(v: Any) -> str:
@@ -148,10 +227,11 @@ def extract_slides_data(xlsx_bytes: bytes) -> dict:
                 _df[col] = _df[col].ffill()
 
     # Normalize DMIA values to standard format (e.g. "3J"→"J+3", "4H"→"H+4")
+    # and snap any off-scale-but-valid value (e.g. "J+7") onto the fixed
+    # DMIA_ORDER horizon scale. See _normalize_and_bucket_dmia for why this is
+    # not just a straight normalize.
     if not imp_df.empty and "DMIA Exprimée" in imp_df.columns:
-        imp_df["DMIA Exprimée"] = imp_df["DMIA Exprimée"].apply(
-            lambda v: _normalize_dmia(_safe(v)) if pd.notna(v) else ""
-        )
+        imp_df["DMIA Exprimée"] = imp_df["DMIA Exprimée"].apply(_normalize_and_bucket_dmia)
 
     company = _detect_company(xl)
 

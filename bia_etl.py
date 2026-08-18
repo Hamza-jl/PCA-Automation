@@ -476,7 +476,7 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
 
     # Collect impact matrix tables separately (one per activity, identified together)
     raw_impact_tables = []
-    dmia_map: dict[str, str] = {}  # activity_name → dmia_expressed
+    dmia_rows: list[tuple[str, str]] = []  # (label as written in the DMIA table, value)
 
     # ── §5.1 weight table detection ───────────────────────────────────────────
     # Pre-scan for the Matrice d'impact (§5.1) weight table before the main loop
@@ -549,11 +549,7 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
             for row in table.rows[1:]:
                 cells = _row_texts(row)
                 if len(cells) >= 2 and cells[0]:
-                    # Store with both original and lowercased key so lookup is
-                    # case-insensitive (e.g. "Affaires" vs "affaires" mismatch).
-                    key = cells[0].strip()
-                    dmia_map[key] = cells[1].strip()
-                    dmia_map[key.lower()] = cells[1].strip()
+                    dmia_rows.append((cells[0].strip(), cells[1].strip()))
 
         elif _is_exchange_table(table):
             headers = _row_texts(table.rows[0])
@@ -1032,6 +1028,89 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
     # activity name (separated by / , ; or newlines) and replicate the ImpactRow
     # for every matched activity rather than just the first one.
 
+    def _match_dmia_to_activities(
+        activity_names: list[str], rows: list[tuple[str, str]]
+    ) -> dict[str, str]:
+        """
+        Resolve each DMIA-table row to the fiche activity it describes.
+
+        The DMIA summary table (§5.3-style) routinely spells an activity
+        differently from the main activities table it's meant to annotate —
+        a dropped qualifier ("Gestion des affaires facultatives" vs "... de la
+        STAR"), singular/plural ("Renouvellement" vs "Renouvellements"), a
+        stray bullet character, or a full acronym expansion ("Veille en
+        matière de lutte contre le blanchiment ... (LBAFT)" vs "Veille
+        LBAFT"). An exact-string lookup drops the DMIA silently in every one
+        of these cases even though the value is right there in the document.
+
+        Two passes:
+          1. Exact match (case/whitespace-insensitive) — zero ambiguity,
+             claims both sides so they're removed from the fuzzy pass.
+          2. Remaining rows matched by fuzzy similarity, assigned strongest
+             pair first (classic greedy matching) so a clear winner claims
+             its activity before a weaker candidate can be considered for it.
+             This matters because activity names within one fiche often share
+             generic words ("Structure", "Gestion des ...") — scored against
+             each other in isolation, a wrong sibling can score uncomfortably
+             close to the right one (observed: 88 vs 96 for two RH
+             activities differing only in their last word). Claiming pairs in
+             descending score order sidesteps that: the correct pair is
+             scored higher and is claimed first, which removes both the
+             activity and the row from contention before the weaker,
+             incorrect pairing is ever reached.
+        """
+
+        def _norm_exact(s: str) -> str:
+            return re.sub(r"\s+", " ", s.strip().lower())
+
+        resolved: dict[str, str] = {}
+        remaining_acts = list(activity_names)
+        remaining_rows: list[tuple[str, str]] = []
+
+        for label, value in rows:
+            key = _norm_exact(label)
+            match = next((a for a in remaining_acts if _norm_exact(a) == key), None)
+            if match:
+                resolved[match] = value
+                remaining_acts.remove(match)
+            else:
+                remaining_rows.append((label, value))
+
+        if not remaining_acts or not remaining_rows:
+            return resolved
+
+        def _norm_fuzzy(s: str) -> str:
+            return _strip_accents_local(s.lower()).strip()
+
+        candidates = []  # (score, activity, label, value)
+        for act in remaining_acts:
+            an = _norm_fuzzy(act)
+            for label, value in remaining_rows:
+                ln = _norm_fuzzy(label)
+                score = max(fuzz.token_sort_ratio(an, ln), fuzz.token_set_ratio(an, ln))
+                candidates.append((score, act, label, value))
+        candidates.sort(key=lambda c: -c[0])
+
+        FUZZY_FLOOR = 60   # below this, treat as no relationship at all
+        used_acts: set = set()
+        used_labels: set = set()
+        for score, act, label, value in candidates:
+            if score < FUZZY_FLOOR:
+                break                       # sorted descending — nothing after this clears the floor
+            if act in used_acts or label in used_labels:
+                continue
+            resolved[act] = value
+            used_acts.add(act)
+            used_labels.add(label)
+
+        return resolved
+
+    def _strip_accents_local(s: str) -> str:
+        import unicodedata as _ud
+        return "".join(
+            c for c in _ud.normalize("NFD", s) if _ud.category(c) != "Mn"
+        )
+
     activity_names_lower = {a.name.lower(): a.name for a in fiche.activities}
 
     def _resolve_activities_for_table(t_idx: int, t) -> list[str]:
@@ -1076,8 +1155,29 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
         # Last resort: use header text
         return [header_text] if header_text else []
 
+    # Pre-resolve every impact table's target name(s) before building the DMIA
+    # match pool. Most are real fiche.activities entries, but a table with no
+    # matching §4 row falls through to its own raw header text as a stand-in
+    # "activity" (rare, but real — e.g. a lone "Gestion des appels d'offres"
+    # impact table with no formal activity of that name). That stand-in name
+    # still needs to be resolvable against the DMIA table, so it has to be in
+    # the candidate pool _match_dmia_to_activities works from, not just
+    # fiche.activities.
+    _resolved_targets: dict[int, list[str]] = {}
+    _all_target_names: list[str] = [a.name for a in fiche.activities]
+    _seen_targets = set(_all_target_names)
     for t_idx, t in enumerate(raw_impact_tables):
-        target_activities = _resolve_activities_for_table(t_idx, t)
+        targets = _resolve_activities_for_table(t_idx, t)
+        _resolved_targets[t_idx] = targets
+        for name in targets:
+            if name not in _seen_targets:
+                _seen_targets.add(name)
+                _all_target_names.append(name)
+
+    dmia_map = _match_dmia_to_activities(_all_target_names, dmia_rows)
+
+    for t_idx, t in enumerate(raw_impact_tables):
+        target_activities = _resolved_targets[t_idx]
 
         # Bug fix 5: GAT has 4 data columns (1H, 4H, 1J, 2-3J).
         # Detect format from header: count non-label columns.
@@ -1114,7 +1214,7 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                 di_a=_s("di","a"), di_b=_s("di","b"), di_c=_s("di","c"), di_d=_s("di","d"),
                 jr_a=_s("jr","a"), jr_b=_s("jr","b"), jr_c=_s("jr","c"), jr_d=_s("jr","d"),
                 fin_a=_s("fin","a"), fin_b=_s("fin","b"), fin_c=_s("fin","c"), fin_d=_s("fin","d"),
-                dmia_expressed=dmia_map.get(activity_name, "") or dmia_map.get(activity_name.lower(), ""),
+                dmia_expressed=dmia_map.get(activity_name, ""),
                 is_4col=is_4col,
                 scenario_headers=scenario_headers,
             ))
