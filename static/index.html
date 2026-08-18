@@ -7609,36 +7609,19 @@ function sgFitSlides() {
       /* In-flow content only. The Devoteam footer, page number and accent bar
          are absolutely positioned against the slide's bottom edge by design;
          their subtrees are skipped whole, since those children are laid out
-         relative to the absolute parent rather than the slide.
-
-         The d+ mark is absolute chrome too, so it never counts toward
-         `lowest` — nothing pushes it or reserves space for it. That's how a
-         caption ends up sitting right under it: text is free to lay out as
-         if the mark weren't there at all. Rather than special-casing every
-         slide builder to leave a gap, treat any in-flow text leaf whose box
-         actually reaches into the mark's footprint as its own kind of
-         overflow — measured the same way (how far it would need to lift to
-         clear), and folded into the same `over` value so one scale pass
-         fixes both. */
-      const markEl = slide.querySelector('[data-dv-mark]');
-      const markRect = markEl ? markEl.getBoundingClientRect() : null;
+         relative to the absolute parent rather than the slide. */
       const overflowNow = () => {
-        let lowest = 0, footerOver = 0;
+        let lowest = 0;
         (function walk(node) {
           for (const el of node.children) {
             const pos = getComputedStyle(el).position;
             if (pos === 'absolute' || pos === 'fixed') continue;
             const r = el.getBoundingClientRect();
             if (r.height > 0) lowest = Math.max(lowest, r.bottom);
-            if (markRect && el.children.length === 0 && el.textContent.trim() &&
-                r.left < markRect.right && r.right > markRect.left &&
-                r.top < markRect.bottom && r.bottom > markRect.top) {
-              footerOver = Math.max(footerOver, r.bottom - markRect.top);
-            }
             walk(el);
           }
         })(slide);
-        return Math.max(lowest - box.bottom, footerOver);
+        return lowest - box.bottom;
       };
 
       const inFlow = kids.filter(k => getComputedStyle(k).position !== 'absolute');
@@ -7653,9 +7636,57 @@ function sgFitSlides() {
          so one pass lands it. The cost is a small margin either side, which is
          a far better outcome than content cut off at the border. */
       const over = overflowNow();
-      if (over <= 4) return;
+      const kVert = over > 4 ? Math.max(0.5, (box.height - 4) / (box.height - 4 + over)) : 1;
 
-      const k = Math.max(0.5, (box.height - 4) / (box.height - 4 + over));
+      /* The d+ mark is absolute chrome, so it never counts toward `lowest`
+         above — nothing pushes it or reserves space for it, which is how a
+         caption ends up sitting right under it: text lays out as if the
+         mark weren't there. This needs its OWN scale factor rather than
+         folding into `over`: the vertical-overflow ratio above is calibrated
+         against the box's own (fixed) bottom edge, but the mark is a sibling
+         of the scaled content, not the edge — a caption near the bottom sits
+         at a different distance from the top than "the box height", so the
+         same ratio over-corrects or under-corrects depending on how close
+         the caption already is. Solved directly instead: for whichever
+         intruding text sits lowest, find the scale that lands its bottom
+         edge exactly at the mark's top (plus a small buffer).
+
+         Measuring by TEXT NODE (via Range, not by element box) matters: a
+         caption is often "label: <span>value</span>" — a bare text node
+         sitting next to a child element, not a leaf element itself — so an
+         element-level leaf check would miss exactly this shape. Range rects
+         follow the actual wrapped glyphs regardless of how the markup nests. */
+      const markEl = slide.querySelector('[data-dv-mark]');
+      const markRect = markEl ? markEl.getBoundingClientRect() : null;
+      const FOOTER_BUFFER = 3;
+      let kFooter = 1;
+      if (markRect) {
+        (function walk(node) {
+          for (const el of node.children) {
+            const pos = getComputedStyle(el).position;
+            if (pos === 'absolute' || pos === 'fixed') continue;
+            for (const child of el.childNodes) {
+              if (child.nodeType !== 3 || !child.textContent.trim()) continue;
+              const range = document.createRange();
+              range.selectNodeContents(child);
+              for (const tr of range.getClientRects()) {
+                if (tr.width <= 0 || tr.height <= 0) continue;
+                const xHit = tr.left < markRect.right && tr.right > markRect.left;
+                const yHit = tr.top < markRect.bottom && tr.bottom > markRect.top;
+                if (!xHit || !yHit) continue;
+                const fromTop = tr.bottom - box.top;
+                const allowed = markRect.top - FOOTER_BUFFER - box.top;
+                if (fromTop > allowed && fromTop > 0) kFooter = Math.min(kFooter, allowed / fromTop);
+              }
+            }
+            walk(el);
+          }
+        })(slide);
+        kFooter = Math.max(0.5, kFooter);
+      }
+
+      const k = Math.min(kVert, kFooter);
+      if (k >= 1) return;
       /* The child being scaled down is what actually carries the slide's own
          background (sl('#fff') etc. is set on it, not on this wrapper) — so
          shrinking it toward top-center leaves gaps on the sides and bottom
