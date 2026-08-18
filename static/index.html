@@ -2732,7 +2732,9 @@
         <div id="sg-sec-grid" style="display:none;"></div>
       </div>
 
-      <div id="sg-nav" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.4rem;"></div>
+      <div id="sg-nav" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1.4rem;
+           position:sticky;top:0;z-index:50;background:#efeeee;padding:.85rem 0;
+           border-bottom:1px solid rgba(60,60,58,.1);"></div>
       <div id="sg-sections"></div>
     </div><!-- /rp-slides-panel -->
 
@@ -7351,7 +7353,13 @@ function sgRender(data) {
       font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;`;
     pill.onmouseenter=()=>{ if(pill.style.background==='transparent'||!pill.style.background.includes('1A')){pill.style.background='rgba(60,60,58,.06)';} };
     pill.onmouseleave=()=>{ if(si>0) pill.style.background='transparent'; };
-    pill.onclick=()=>document.getElementById(sec.id)?.scrollIntoView({behavior:'smooth',block:'start'});
+    /* 'smooth' does not animate at all in some environments when the scroll
+       container is a position:fixed + overflow:auto element (which #main-app
+       is) — scrollIntoView silently no-ops rather than jumping. 'auto' (an
+       instant jump) is what actually moves the viewport reliably; since the
+       nav's whole point is fast section-to-section jumps, instant is no
+       worse a fit for the feature than an animation would have been. */
+    pill.onclick=()=>document.getElementById(sec.id)?.scrollIntoView({behavior:'auto',block:'start'});
     nav.appendChild(pill);
 
     const wrap=document.createElement('div');
