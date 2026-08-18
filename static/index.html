@@ -7226,7 +7226,12 @@ function rpDraw4Charts(main, compare) {
   if (svgRhCurve) {
     const tc26   = main.time_cols || [];
     const tots26 = main.totals || {};
-    const nominal26 = tots26.effectif ? Math.max(...tots26.effectif.filter(v=>v>0), 1) : 1;
+    /* Total workforce is static (each activity's Nominal headcount, summed
+       server-side into main.nominal_total) — there is no per-horizon
+       "effectif" total to divide by, and totals.effectif never existed on
+       the backend response, so reading it here always produced undefined,
+       which silently rendered as 0% at every point. */
+    const nominal26 = main.nominal_total > 0 ? main.nominal_total : 1;
 
     /* pick 4 time col positions for the curve */
     const targetCols = ['H+4','J+5','J+10','J+15'];
@@ -7237,11 +7242,12 @@ function rpDraw4Charts(main, compare) {
     }).filter(i=>i>=0);
     const xLabels = idxMap.map(i=>tc26[i]);
 
-    /* combine TT + Position as "collaborateurs présents" → % of effectif */
+    /* combine TT + Position as "collaborateurs présents" → % of nominal */
     function combinedPct(tots, norm) {
-      const eff = tots.effectif || [];
+      const pos = tots.positions   || [];
+      const tt  = tots.teletravail || [];
       return idxMap.map(i => {
-        const v = eff[i] || 0;
+        const v = (pos[i] || 0) + (tt[i] || 0);
         return norm > 0 ? Math.round(v / norm * 100) : 0;
       });
     }
@@ -7250,7 +7256,7 @@ function rpDraw4Charts(main, compare) {
 
     if (compare) {
       const tots25 = compare.totals || {};
-      const nominal25 = tots25.effectif ? Math.max(...tots25.effectif.filter(v=>v>0), 1) : 1;
+      const nominal25 = compare.nominal_total > 0 ? compare.nominal_total : 1;
       const tc25 = compare.time_cols || tc26;
       const idxMap25 = targetCols.map(t => {
         let i = tc25.indexOf(t);
@@ -7260,7 +7266,7 @@ function rpDraw4Charts(main, compare) {
       const vals25 = xLabels.map((lbl, li) => {
         const i25 = idxMap25[li];
         if (i25 == null || i25 < 0) return null;
-        const v = (tots25.effectif||[])[i25] || 0;
+        const v = ((tots25.positions||[])[i25] || 0) + ((tots25.teletravail||[])[i25] || 0);
         return nominal25 > 0 ? Math.round(v / nominal25 * 100) : 0;
       });
       series.unshift({label:'2025', color:'#5ab891', values: vals25});

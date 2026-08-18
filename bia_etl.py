@@ -2515,6 +2515,14 @@ def extract_rapport_bia(synthese_path: str | Path) -> dict:
 
     total_activities = len(activities)
 
+    # Total workforce (static, not per-horizon) — the "collaborateurs présents"
+    # % the RH dashboard curve reports is (positions+teletravail returned by
+    # this horizon) ÷ this figure. It has to be pulled from each activity's
+    # "Nominal" headcount; there is no per-horizon "Effectif" total to divide
+    # by, and the frontend's earlier attempt to read one has always returned
+    # undefined — "totals" never carried an "effectif" key at all.
+    nominal_total = sum(a["nominal"] for a in activities if a.get("nominal"))
+
     # ── Build recovery_steps (cumulative, for the curve chart) ────────────────
     # An activity is "operational at step i" if it has pos+tt > 0 at step i
     # OR at any earlier step (cumulative).
@@ -2562,10 +2570,9 @@ def extract_rapport_bia(synthese_path: str | Path) -> dict:
         })
 
     # Activities with no positions/télétravail in any tracked column are assumed
-    # to recover at J+30 or beyond. Add them as a final step so the curve reaches 100%.
+    # to recover at J+30 or beyond. Folded into the step so the curve reaches 100%.
     never_op = [j for j, fo in enumerate(first_op) if fo is None]
     if never_op:
-        last_count = recovery_steps[-1]["count"] if recovery_steps else 0
         late_ops = []
         for j in never_op:
             act = activities[j]
@@ -2578,15 +2585,30 @@ def extract_rapport_bia(synthese_path: str | Path) -> dict:
                 "teletravail":  0,
                 "dmia":         "J+30",
             })
-        total_late = last_count + len(late_ops)
-        pct_late = round(total_late / total_activities * 100) if total_activities else 100
-        recovery_steps.append({
-            "label":      "J+30",
-            "hours":      720,
-            "count":      total_late,
-            "percent":    pct_late,
-            "activities": (recovery_steps[-1]["activities"] if recovery_steps else []) + late_ops,
-        })
+
+        if recovery_steps and recovery_steps[-1]["label"] == "J+30":
+            # The natural per-horizon loop above already produced a real
+            # "J+30" step (the sheet has an actual J+30 column) — fold these
+            # activities into it rather than appending a second step with the
+            # same label. Appending unconditionally used to put two "J+30"
+            # ticks on the x-axis, with the percentage dipping back down
+            # between them before climbing to 100% on the duplicate.
+            last = recovery_steps[-1]
+            last["count"] += len(late_ops)
+            last["activities"] = last["activities"] + late_ops
+            last["percent"] = (round(last["count"] / total_activities * 100)
+                               if total_activities else 100)
+        else:
+            last_count = recovery_steps[-1]["count"] if recovery_steps else 0
+            total_late = last_count + len(late_ops)
+            pct_late = round(total_late / total_activities * 100) if total_activities else 100
+            recovery_steps.append({
+                "label":      "J+30",
+                "hours":      720,
+                "count":      total_late,
+                "percent":    pct_late,
+                "activities": (recovery_steps[-1]["activities"] if recovery_steps else []) + late_ops,
+            })
 
     # ── Equipment (Logistiques sheet) ──────────────────────────────────────────
     equipment: list[dict] = []
@@ -2614,6 +2636,7 @@ def extract_rapport_bia(synthese_path: str | Path) -> dict:
 
     return {
         "total_activities": total_activities,
+        "nominal_total":    nominal_total,
         "time_cols":        time_cols,
         "activities":       activities,
         "totals": {
