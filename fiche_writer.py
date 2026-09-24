@@ -454,13 +454,25 @@ def _fill_section52_impacts_full(doc: Document, activities: list[dict]) -> None:
         insert_after = new_tbl
 
 
+def _strip_accents_fw(txt: str) -> str:
+    import unicodedata
+    return unicodedata.normalize("NFKD", txt).encode("ascii", "ignore").decode()
+
+
 def _fill_section53_dmia(doc: Document, activities: list[dict]) -> None:
     """§5.3 DMIA – Processus | DMIA Exprimée | Premières actions."""
     for table in doc.tables:
         if not table.rows:
             continue
         combined = " ".join(_cell_text(c) for c in table.rows[0].cells).lower()
-        if "processus" in combined and "dmia" in combined:
+        # Le nouveau format titre cette colonne "Désignation de l'activité"
+        # au lieu de "Processus" : sans cette tolérance le tableau n'était
+        # jamais retrouvé, et la DMIA modifiée dans l'éditeur n'était pas
+        # réécrite dans le .docx.
+        if "dmia" in combined and (
+                "processus" in combined
+                or "designation" in _strip_accents_fw(combined)
+                or "activit" in combined):
             template_tr = (
                 deepcopy(table.rows[1]._tr) if len(table.rows) > 1 else None
             )
@@ -622,7 +634,12 @@ def _fill_app_availability(doc: Document, app_avail: list[dict]) -> None:
         if not table.rows:
             continue
         combined = " ".join(_cell_text(c) for c in table.rows[0].cells).lower()
-        if "d" in combined and "signation" in combined and "h+2" in combined:
+        # Ancien tableau : colonnes d'horizon (H+2…). Nouveau tableau :
+        # "Désignation du matériel / consommable" face à "Justification du
+        # besoin", sans horizon — on accepte les deux formes.
+        if "signation" in combined and (
+                "h+2" in combined or "h+" in combined
+                or "justification" in combined):
             col_headers = [_cell_text(c).strip() for c in table.rows[0].cells]
             col_idx_map = {h: i for i, h in enumerate(col_headers) if h}
             n_cols = len(col_headers)

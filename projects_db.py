@@ -1018,6 +1018,13 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
         if ("interruption" in r0_txt
                 and len(table.rows) >= 4 and len(table.columns) >= 3):
             act_name = r0[0].strip() if r0 else ""
+            # Nouveau format : l'en-tête ne porte plus le nom de l'activité
+            # mais un libellé générique ("Impacts / Sévérité"), qui se
+            # retrouvait ajouté comme activité fantôme.
+            _an = act_name.lower()
+            if ("impact" in _an and ("sévérité" in _an or "severite" in _an
+                                     or "/" in act_name)) or not act_name:
+                act_name = ""
             impacts: dict = {lbl: {"A": "", "B": ""} for lbl in IMPACT_LABELS}
             kw_map = {
                 "image":        "Image de marque",
@@ -1040,13 +1047,18 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
                             "B": "" if is_junk(b_val) else b_val,
                         }
                         break
-            impact_tables.append({"act_name": act_name, "impacts": impacts})
+            if act_name:
+                impact_tables.append({"act_name": act_name, "impacts": impacts})
             continue
 
         # ══ 5.  DMIA PAR PROCESSUS ════════════════════════════════════════════
-        # Identified by: R0[0]~"Processus" AND a "DMIA" column exists
-        if (r0 and "processus" in r0[0].lower()
-                and any("dmia" in c.lower() for c in r0)):
+        # Le nouveau format intitule la première colonne "Désignation de
+        # l'activité" et non "Processus" : sans cette tolérance, aucune DMIA
+        # n'était rattachée aux activités et l'éditeur les effaçait à
+        # l'enregistrement.
+        if (r0 and any("dmia" in c.lower() for c in r0)
+                and any(k in r0[0].lower() for k in
+                        ("processus", "désignation", "designation", "activit"))):
             for row in table.rows[1:]:
                 cells = row_cells(row)
                 if not cells:
@@ -1226,22 +1238,46 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
             continue
 
         # ══ 11. DOCUMENTS ET FICHIERS CRITIQUES ═══════════════════════════════
-        # Identified by: R0[0] contains "document" or "fichier", 3 cols
+        # Repérage et colonnes par en-tête, pas par position : le nouveau
+        # format place "Processus" en première colonne — le nom du document
+        # passe alors en colonne 1 — et ajoute "Localisation". Avec l'ancienne
+        # lecture positionnelle, aucun document n'était remonté.
         if (r0
-                and ("document" in r0[0].lower() or "fichier" in r0[0].lower())
+                and ("document" in r0_txt or "fichier" in r0_txt)
                 and len(table.columns) >= 3
                 and "stockage" in r0_txt):
+
+            def _doc_col(*keywords):
+                for ci, h in enumerate(r0):
+                    hl = h.lower()
+                    if any(k in hl for k in keywords):
+                        return ci
+                return -1
+
+            ci_doc   = _doc_col("document", "fichier", "data")
+            ci_stock = _doc_col("stockage")
+            ci_dupl  = _doc_col("duplication")
+            ci_loc   = _doc_col("localisation")
+            ci_proc  = _doc_col("processus")
+            if ci_doc < 0:
+                ci_doc = 0
+
+            def _dc(cells, idx):
+                return cells[idx].strip() if 0 <= idx < len(cells) else ""
+
             for row in table.rows[1:]:
                 cells = row_cells(row)
                 if not cells:
                     continue
-                doc_name = cells[0].strip()
+                doc_name = _dc(cells, ci_doc)
                 if is_junk(doc_name):
                     continue
                 form["documents"].append({
-                    "document":    doc_name,
-                    "stockage":    cells[1].strip() if len(cells) > 1 else "",
-                    "duplication": cells[2].strip() if len(cells) > 2 else "",
+                    "document":     doc_name,
+                    "stockage":     _dc(cells, ci_stock),
+                    "duplication":  _dc(cells, ci_dupl),
+                    "localisation": _dc(cells, ci_loc),
+                    "processus":    _dc(cells, ci_proc),
                 })
             continue
 
