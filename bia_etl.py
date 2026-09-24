@@ -56,6 +56,10 @@ class Activity:
     critical_period: str
     criticality: str
     volume: str = ""
+    # "État des lieux" (MANSA) : les activités y sont regroupées par domaine
+    # métier, et les contraintes sont une colonne à part entière.
+    domain: str = ""
+    constraints: str = ""
 
 @dataclass
 class ImpactRow:
@@ -123,6 +127,8 @@ class ITApplication:
     pmdt: str
     workaround: str = ""
     comments: str = ""
+    # "État des lieux" : l'inventaire applicatif y est rattaché à un processus.
+    activity: str = ""
 
 @dataclass
 class OtherEquipment:
@@ -155,6 +161,22 @@ class EquipmentNeed:
 
 
 @dataclass
+class ContextAnswer:
+    """
+    Une ligne "Question / Réponse" du document "État des lieux" (MANSA).
+
+    Ce format n'est pas une fiche BIA : c'est l'entretien de cadrage qui la
+    précède. Il ne porte ni DMIA, ni matrice d'impact, ni montée en charge —
+    seulement du contexte rédigé (gouvernance, effectifs, incidents passés,
+    projets à venir). On le conserve tel quel, sans chercher à le plier au
+    schéma BIA : la synthèse n'a rien à en tirer, l'éditeur et le rapport si.
+    """
+    section: str = ""       # titre de la section qui précède le tableau
+    question: str = ""
+    answer: str = ""
+
+
+@dataclass
 class BIAFiche:
     """All structured data extracted from one BIA fiche word document."""
     entity_name: str
@@ -171,6 +193,8 @@ class BIAFiche:
     critical_docs: list[CriticalDoc] = field(default_factory=list)
     # Weights read from §5.1 Matrice d'impact (overrides hardcoded defaults)
     impact_weights: dict = field(default_factory=dict)
+    # Format "État des lieux" : entretien de cadrage (Question / Réponse)
+    context_answers: list = field(default_factory=list)
     # Nouveau format de fiche : sections absentes de l'ancien modèle
     dependencies: list = field(default_factory=list)
     equipment_needs: list = field(default_factory=list)
@@ -539,6 +563,57 @@ def _is_equipment_needs_table(table) -> bool:
             and "justification" in joined)
 
 
+# ── Format "État des lieux" (MANSA) ──────────────────────────────────────────
+# Trois grilles y partagent les deux mêmes premières colonnes, Domaine et
+# Processus : la liste des activités, leurs contraintes, et l'inventaire
+# applicatif. On les reconnaît donc par leur *troisième* colonne, et on les
+# recoud ensuite sur le nom du processus (voir extract()).
+
+def _etat_des_lieux_grid(table) -> bool:
+    """Grille "Domaine | Processus | …" du document État des lieux."""
+    if len(table.rows) < 2 or len(table.columns) < 3:
+        return False
+    h = [_strip_accents(x.lower()) for x in _row_texts(table.rows[0])]
+    return len(h) >= 2 and "domaine" in h[0] and "processus" in h[1]
+
+
+def _is_eal_activity_table(table) -> bool:
+    """Domaine | Processus | Macro activité."""
+    if not _etat_des_lieux_grid(table):
+        return False
+    h = _strip_accents(" ".join(_row_texts(table.rows[0])).lower())
+    return "macro activite" in h or "macro-activite" in h
+
+
+def _is_eal_constraints_table(table) -> bool:
+    """Domaine | Processus | Contraintes opérationnelles | Périodes critiques."""
+    if not _etat_des_lieux_grid(table):
+        return False
+    h = _strip_accents(" ".join(_row_texts(table.rows[0])).lower())
+    return "contrainte" in h and "periodes critiques" in h
+
+
+def _is_eal_app_table(table) -> bool:
+    """Domaine | Processus | Inventaire des applications | … | Criticité SI | …"""
+    if not _etat_des_lieux_grid(table):
+        return False
+    h = _strip_accents(" ".join(_row_texts(table.rows[0])).lower())
+    return "inventaire des applications" in h or ("application" in h and "criticite si" in h)
+
+
+def _is_qr_table(table) -> bool:
+    """
+    Tableau "Question | Réponse" de l'entretien de cadrage.
+
+    Deux colonnes exactement : on exige les deux en-têtes pour ne pas happer
+    un tableau d'identification, qui est lui aussi en deux colonnes.
+    """
+    if len(table.rows) < 2 or len(table.columns) != 2:
+        return False
+    h = [_strip_accents(x.lower()) for x in _row_texts(table.rows[0])]
+    return len(h) >= 2 and h[0].startswith("question") and h[1].startswith("reponse")
+
+
 def _is_identification_table(table) -> bool:
     if len(table.rows) < 2:
         return False
@@ -657,6 +732,68 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                 if len(cells) >= 2 and cells[0].strip():
                     fiche.equipment_needs.append(EquipmentNeed(
                         designation=cells[0], justification=cells[1]))
+
+        elif _is_eal_activity_table(table):
+            # Domaine | Processus | Macro activité
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) < 3 or _is_subheader_row(cells):
+                    continue
+                domaine, processus = cells[0].strip(), cells[1].strip()
+                if not processus:
+                    continue
+                fiche.activities.append(Activity(
+                    name=processus, resources=cells[2].strip(),
+                    critical_period="", criticality="", domain=domaine))
+
+        elif _is_eal_constraints_table(table):
+            # Domaine | Processus | Contraintes opérationnelles | Périodes critiques
+            # Se recoud sur la grille précédente via le nom du processus ; si
+            # celle-ci était vide, la ligne crée l'activité à son tour.
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) < 4 or _is_subheader_row(cells):
+                    continue
+                domaine, processus = cells[0].strip(), cells[1].strip()
+                if not processus:
+                    continue
+                target = next((a for a in fiche.activities
+                               if a.name.strip().lower() == processus.lower()), None)
+                if target is None:
+                    target = Activity(name=processus, resources="", critical_period="",
+                                      criticality="", domain=domaine)
+                    fiche.activities.append(target)
+                target.constraints = cells[2].strip()
+                target.critical_period = cells[3].strip()
+
+        elif _is_eal_app_table(table):
+            # Domaine | Processus | Inventaire | Couverture | Criticité SI | Contournements
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) < 5 or _is_subheader_row(cells):
+                    continue
+                nom = cells[2].strip()
+                if not nom:
+                    continue
+                fiche.it_applications.append(ITApplication(
+                    name=nom,
+                    criticality=cells[4].strip(),
+                    dmia="", pmdt="",
+                    workaround=cells[5].strip() if len(cells) > 5 else "",
+                    comments=cells[3].strip(),
+                    activity=cells[1].strip()))
+
+        elif _is_qr_table(table):
+            section = _captions.get(_doc_pos, "")
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) < 2:
+                    continue
+                question, answer = cells[0].strip(), cells[1].strip()
+                if not question:
+                    continue
+                fiche.context_answers.append(ContextAnswer(
+                    section=section, question=question, answer=answer))
 
         elif _is_dmia_table(table):
             for row in table.rows[1:]:
@@ -1406,7 +1543,11 @@ def transform_activites(fiche: BIAFiche) -> list[dict]:
             "Période critique": a.critical_period,
             "Niveau de criticité": a.criticality,
             "Volume": a.volume,
-            "Commentaires": "",
+            # La synthèse n'a pas de colonne "Contraintes" : celles du format
+            # "État des lieux" atterrissent en commentaire plutôt que d'être
+            # perdues, ou de squatter "Ressources Utilisées" qui veut dire
+            # autre chose. Vide pour les autres formats, comme avant.
+            "Commentaires": getattr(a, "constraints", ""),
         }
         for a in fiche.activities
     ]

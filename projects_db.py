@@ -876,12 +876,134 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
     # ── deferred: impact tables to match to activities later ──────────────────
     impact_tables: list[dict] = []   # [{act_name, impacts{}}]
 
+    # Réponses rédigées de l'entretien de cadrage ("État des lieux"), versées
+    # dans les observations : c'est la seule section de l'éditeur qui accueille
+    # du texte libre.
+    eal_notes: list[str] = []
+
     # ── iterate all tables ─────────────────────────────────────────────────────
     for table in doc.tables:
         if not table.rows:
             continue
         r0 = row_cells(table.rows[0])
         r0_txt = " ".join(r0).lower()
+
+        # ══ 0.  FORMAT "ÉTAT DES LIEUX" ══════════════════════════════════════
+        # L'entretien de cadrage (MANSA) n'a ni DMIA, ni matrice d'impact, ni
+        # montée en charge. Ses tableaux ne ressemblent à aucun de ceux de la
+        # fiche BIA et sont donc traités ici, avant tout le reste, pour ne pas
+        # être happés par une détection voisine.
+
+        def _eal_norm(txt: str) -> str:
+            return (txt.lower()
+                    .replace("é", "e").replace("è", "e").replace("ê", "e")
+                    .replace("à", "a").replace("î", "i").replace("ô", "o"))
+
+        _h = [_eal_norm(c) for c in r0]
+
+        # 0a. Identification : "Date de l'entretien" en tête, "Entité" en dessous
+        if _h and "date de l" in _h[0] and "entretien" in _h[0]:
+            for row in table.rows:
+                cells = row_cells(row)
+                if len(cells) < 2:
+                    continue
+                label, val = _eal_norm(cells[0]), cells[1].strip()
+                if is_junk(val):
+                    continue
+                if "entite" in label:
+                    form["suivi"]["entite"] = val
+                elif "redacteur" in label:
+                    form["suivi"]["redacteur"] = val
+                elif label.strip() == "version":
+                    form["suivi"]["version"] = val
+                elif "reference" in label:
+                    form["suivi"]["reference"] = val
+                elif "date de l" in label:
+                    form["suivi"]["date_maj"] = val
+                elif "responsable" in label:
+                    form["entity"]["nom_responsable"] = val
+                elif "vis-a-vis" in label or "vis a vis" in label:
+                    # Une cellule, un interlocuteur par ligne.
+                    for nom in (n.strip() for n in val.splitlines()):
+                        if nom and not is_junk(nom):
+                            form["participants"].append({
+                                "nom": nom, "fonction": "", "present": "Vis-à-vis"})
+            continue
+
+        # 0b/0c/0d. Grilles "Domaine | Processus | …"
+        if len(_h) >= 3 and "domaine" in _h[0] and "processus" in _h[1]:
+            _joined = " ".join(_h)
+
+            def _eal_activity(nom: str) -> dict:
+                """Retrouve l'activité déjà créée par une grille précédente."""
+                for a in form["activities"]:
+                    if a["name"].strip().lower() == nom.lower():
+                        return a
+                entry = {
+                    "name": nom, "description": "", "ressources_utilisees": "",
+                    "periode_critique": "", "criticite": "", "dmia_exprimee": "",
+                    "premieres_actions": "", "domaine": "",
+                    "impacts": {lbl: {"A": "", "B": ""} for lbl in IMPACT_LABELS},
+                }
+                form["activities"].append(entry)
+                return entry
+
+            for row in table.rows[1:]:
+                cells = row_cells(row)
+                if len(cells) < 3:
+                    continue
+                proc = cells[1].strip()
+                if not proc or is_junk(proc):
+                    continue
+
+                if "macro activite" in _joined or "macro-activite" in _joined:
+                    entry = _eal_activity(proc)
+                    entry["description"] = cells[2].strip()
+                    entry["domaine"] = cells[0].strip()
+
+                elif "contrainte" in _joined:
+                    entry = _eal_activity(proc)
+                    entry["domaine"] = entry["domaine"] or cells[0].strip()
+                    entry["ressources_utilisees"] = cells[2].strip()
+                    if len(cells) > 3:
+                        entry["periode_critique"] = cells[3].strip()
+
+                elif "application" in _joined:
+                    nom_app = cells[2].strip()
+                    if nom_app and not is_junk(nom_app):
+                        couverture    = cells[3].strip() if len(cells) > 3 else ""
+                        contournement = cells[5].strip() if len(cells) > 5 else ""
+                        form["applications"].append({
+                            "application":  nom_app,
+                            "criticite":    cells[4].strip() if len(cells) > 4 else "",
+                            "dmia":         "",
+                            "pmdt":         "",
+                            "domaine":      cells[0].strip(),
+                            "activity":     proc,
+                            # Champs distincts : les recoller en une seule chaîne
+                            # puis les rescinder à l'écriture casserait dès qu'un
+                            # consultant saisit lui-même le séparateur.
+                            "couverture":    couverture,
+                            "contournement": contournement,
+                            "commentaires": " — ".join(
+                                x for x in (couverture, contournement)
+                                if x and not is_junk(x)),
+                        })
+            continue
+
+        # 0e. Tableaux "Question | Réponse" → observations
+        if (len(r0) == 2 and _h and _h[0].startswith("question")
+                and _h[1].startswith("reponse")):
+            for row in table.rows[1:]:
+                cells = row_cells(row)
+                if len(cells) < 2:
+                    continue
+                q, a = cells[0].strip(), cells[1].strip()
+                if q and a and not is_junk(a):
+                    q_court = (q.splitlines() or [""])[0].strip()
+                    eal_notes.append(f"{q_court} {a}" if q_court.endswith(":")
+                                     else f"{q_court} : {a}")
+            continue
 
         # ══ 1.  FICHE DE SUIVI / PARTICIPANTS ════════════════════════════════
         # Identified by: first row has exactly 2 unique cells, col0="Entité"
@@ -1304,6 +1426,13 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
                 "impacts":              imp["impacts"],
             })
 
+    # Les réponses de l'entretien de cadrage complètent les observations sans
+    # jamais écraser un texte déjà relevé sous le titre "Observations".
+    if eal_notes:
+        existant = form["observations"].strip()
+        lignes = ([existant] + eal_notes) if existant else eal_notes
+        form["observations"] = chr(10).join(lignes)
+
     return form
 
 
@@ -1349,6 +1478,35 @@ def extract_dmias_from_fiche(fiche_path: Path) -> list[dict]:
                         "dmia_minutes":  parse_dmia_minutes(dmia),
                     })
             break   # only one §5.3 table
+
+    # ── Format "État des lieux" ──────────────────────────────────────────────
+    # Ce document n'a pas de §5.3 : ses processus vivent dans la grille
+    # "Domaine | Processus | Macro activité". On les enregistre avec une DMIA
+    # vide — parse_dmia_minutes("") vaut -1, et l'explorateur DMIA ne retient
+    # que les valeurs >= 0. Le document entre donc dans la bibliothèque et le
+    # tableau de bord sans polluer les suggestions de DMIA.
+    if not results:
+        vus: set = set()
+        for table in doc.tables:
+            if not table.rows or len(table.columns) < 3:
+                continue
+            hdr = [c.text.strip().lower() for c in table.rows[0].cells]
+            if len(hdr) < 2 or "domaine" not in hdr[0] or "processus" not in hdr[1]:
+                continue
+            for row in table.rows[1:]:
+                cells = row.cells
+                if len(cells) < 2:
+                    continue
+                nom = cells[1].text.strip()
+                cle = nom.lower()
+                if not nom or cle in vus or cle in ("processus", "xx"):
+                    continue
+                vus.add(cle)
+                results.append({
+                    "activity_name": nom,
+                    "dmia_exprimee": "",
+                    "dmia_minutes":  -1,
+                })
 
     return results
 

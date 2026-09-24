@@ -219,6 +219,12 @@ def fill_fiche(template_path: Path, form_data: dict, output_path: Path) -> None:
     docs         = form_data.get("documents", [])
     observations = form_data.get("observations", "")
 
+    # Le document "État des lieux" (entretien de cadrage) a ses propres
+    # tableaux : aucun des _fill_* de la fiche BIA ne s'y applique.
+    if _fill_etat_des_lieux(doc, form_data):
+        doc.save(str(output_path))
+        return
+
     # Participants (Fiche de suivi)
     if participants:
         _fill_participants(doc, participants)
@@ -683,6 +689,113 @@ def _fill_documents(doc: Document, docs: list[dict]) -> None:
                     vals = (vals + [""] * n_cols)[:n_cols]
                     table._tbl.append(_clone_row_with_values(template_tr, vals))
             return
+
+
+def _fill_etat_des_lieux(doc: Document, form_data: dict) -> bool:
+    """
+    Réécrit un document "État des lieux" (entretien de cadrage MANSA).
+
+    Ce format n'a ni DMIA, ni matrice d'impact, ni montée en charge : les
+    fonctions _fill_* de la fiche BIA ne trouvent aucun de leurs tableaux et
+    laisseraient le document inchangé. On écrit donc ici dans ses tableaux à
+    lui — identification, puis les trois grilles "Domaine | Processus | …".
+
+    Renvoie True si le document est bien un "État des lieux", auquel cas
+    fill_fiche s'arrête là.
+    """
+    activities = form_data.get("activities", [])
+    apps       = form_data.get("applications", [])
+    entity     = form_data.get("entity", {})
+    suivi      = form_data.get("suivi", {})
+
+    def norm(txt: str) -> str:
+        return _strip_accents_fw(txt.lower())
+
+    grids: dict = {}
+    identification = None
+
+    for table in doc.tables:
+        if not table.rows:
+            continue
+        hdr = [norm(_cell_text(c)) for c in table.rows[0].cells]
+        if not hdr:
+            continue
+        joined = " ".join(hdr)
+        if "date de l" in hdr[0] and "entretien" in hdr[0]:
+            identification = table
+        elif len(hdr) >= 3 and "domaine" in hdr[0] and "processus" in hdr[1]:
+            if "macro activite" in joined or "macro-activite" in joined:
+                grids["activites"] = table
+            elif "contrainte" in joined:
+                grids["contraintes"] = table
+            elif "application" in joined:
+                grids["applications"] = table
+
+    if identification is None and not grids:
+        return False
+
+    # ── identification ───────────────────────────────────────────────────────
+    if identification is not None:
+        champs = [
+            ("entite",      suivi.get("entite", "")),
+            ("redacteur",   suivi.get("redacteur", "")),
+            ("version",     suivi.get("version", "")),
+            ("reference",   suivi.get("reference", "")),
+            ("responsable", entity.get("nom_responsable", "")),
+        ]
+        for row in identification.rows:
+            cells = row.cells
+            if len(cells) < 2:
+                continue
+            label = norm(_cell_text(cells[0]))
+            for cle, valeur in champs:
+                # "reference" ne doit pas capter "date de l'entretien" : on
+                # compare sur le libellé complet, pas sur un fragment.
+                if cle in label and valeur:
+                    _set_cell_text(cells[1], valeur)
+                    break
+
+    # ── grilles Domaine | Processus | … ──────────────────────────────────────
+    def remplir(table, lignes: list[list[str]]) -> None:
+        """Écrit les lignes, en clonant la première ligne de données au besoin."""
+        if not lignes:
+            return
+        gabarit = table.rows[1]._tr if len(table.rows) > 1 else None
+        _clear_data_rows(table, header_rows=1)
+        for valeurs in lignes:
+            if gabarit is None:
+                break
+            table._tbl.append(_clone_row_with_values(gabarit, valeurs))
+
+    if "activites" in grids:
+        remplir(grids["activites"], [
+            [a.get("domaine", ""), a.get("name", ""), a.get("description", "")]
+            for a in activities if a.get("name")])
+
+    if "contraintes" in grids:
+        remplir(grids["contraintes"], [
+            [a.get("domaine", ""), a.get("name", ""),
+             a.get("ressources_utilisees", ""), a.get("periode_critique", "")]
+            for a in activities if a.get("name")])
+
+    if "applications" in grids:
+        lignes = []
+        for app in apps:
+            if not app.get("application"):
+                continue
+            # Couverture et contournement sont deux champs distincts. On ne
+            # retombe sur "commentaires" que pour une application saisie
+            # ailleurs dans l'application, qui n'a pas ces deux colonnes.
+            couverture    = app.get("couverture", "")
+            contournement = app.get("contournement", "")
+            if not couverture and not contournement:
+                couverture = app.get("commentaires", "")
+            lignes.append([app.get("domaine", ""), app.get("activity", ""),
+                           app["application"], couverture,
+                           app.get("criticite", ""), contournement])
+        remplir(grids["applications"], lignes)
+
+    return True
 
 
 def _fill_observations(doc: Document, observations: str) -> None:
