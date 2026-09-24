@@ -90,6 +90,8 @@ class Exchange:
     criticality: str = ""   # A / B / C / D  (may be absent in some fiche formats)
     tr_type: str = ""       # "T" = transmis, "R" = reçu
     si_resources: str = ""
+    typology: str = ""      # Mono / Multi — colonne propre au tableau "externes"
+    fallback: str = ""      # Alternative en cas de défaillance du tiers
 
 @dataclass
 class RampUpRow:
@@ -138,6 +140,21 @@ class CriticalDoc:
     duplication_method: str = ""   # where it's duplicated (e.g. "AVERROES")
 
 @dataclass
+class ProcessDependency:
+    """§6 Dépendances métiers inter-processus (nouveau format de fiche)."""
+    activity: str = ""
+    upstream: str = ""
+    downstream: str = ""
+
+
+@dataclass
+class EquipmentNeed:
+    """§7 Matériels spécifiques et consommables (nouveau format de fiche)."""
+    designation: str = ""
+    justification: str = ""
+
+
+@dataclass
 class BIAFiche:
     """All structured data extracted from one BIA fiche word document."""
     entity_name: str
@@ -154,6 +171,9 @@ class BIAFiche:
     critical_docs: list[CriticalDoc] = field(default_factory=list)
     # Weights read from §5.1 Matrice d'impact (overrides hardcoded defaults)
     impact_weights: dict = field(default_factory=dict)
+    # Nouveau format de fiche : sections absentes de l'ancien modèle
+    dependencies: list = field(default_factory=list)
+    equipment_needs: list = field(default_factory=list)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -397,6 +417,53 @@ def _table_fingerprint(table) -> str:
                 return text
     return ""
 
+def _table_captions(doc) -> dict:
+    """
+    Légende ("Tableau N°X : …") précédant chaque tableau, indexée par position.
+
+    Le nouveau format sort le nom de l'activité de l'en-tête du tableau
+    d'impacts — celui-ci affiche "Impacts / Sévérité" — et le place dans la
+    légende au-dessus : "Tableau N°3.a : Evaluation des impacts : Gestion des
+    actifs". Sans cette lecture, les impacts ne peuvent plus être rattachés à
+    leur activité. On parcourt le corps du document dans l'ordre pour associer
+    à chaque tableau le dernier paragraphe non vide qui le précède.
+    """
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+    captions, last_text, t_idx = {}, "", 0
+    for child in doc.element.body.iterchildren():
+        tag = child.tag.split('}')[-1]
+        if tag == 'p':
+            txt = Paragraph(child, doc).text.strip()
+            if txt:
+                last_text = txt
+        elif tag == 'tbl':
+            captions[t_idx] = last_text
+            last_text = ""
+            t_idx += 1
+    return captions
+
+
+def _activity_from_caption(caption: str) -> str:
+    """
+    Nom d'activité porté par une légende de tableau d'impacts.
+
+    "Tableau N°3.a : Evaluation des impacts : Gestion des actifs"
+        -> "Gestion des actifs"
+    Retourne "" si la légende ne contient pas de nom exploitable.
+    """
+    if not caption or "impact" not in caption.lower():
+        return ""
+    parts = [p.strip() for p in caption.split(":") if p.strip()]
+    if len(parts) < 3:
+        return ""
+    tail = parts[-1]
+    # Écarte une queue qui n'est qu'un rappel générique
+    if _strip_accents(tail.lower()) in ("evaluation des impacts", "matrice d impact"):
+        return ""
+    return tail
+
+
 def _is_activity_list_table(table) -> bool:
     if len(table.columns) < 4:
         return False
@@ -446,6 +513,32 @@ def _is_doc_table(table) -> bool:
     headers = _row_texts(table.rows[0])
     return any("Documents" in h or "Fichiers" in h for h in headers) and any("stockage" in h.lower() for h in headers)
 
+def _is_dependencies_table(table) -> bool:
+    """§6 Dépendances métiers inter-processus (nouveau format)."""
+    if len(table.rows) < 2:
+        return False
+    headers = _row_texts(table.rows[0])
+    joined = " ".join(headers).lower()
+    return "amont" in joined and "aval" in joined
+
+
+def _is_equipment_needs_table(table) -> bool:
+    """
+    §7 Matériels spécifiques, équipements et consommables (nouveau format).
+
+    L'ancien tableau d'équipements se reconnaissait à ses colonnes d'horizon
+    (H+, J+) ; celui-ci n'en a pas : "Désignation du matériel / consommable"
+    face à "Justification du besoin".
+    """
+    if len(table.rows) < 2:
+        return False
+    headers = _row_texts(table.rows[0])
+    joined = _strip_accents(" ".join(headers).lower())
+    return ("designation" in joined
+            and ("materiel" in joined or "consommable" in joined)
+            and "justification" in joined)
+
+
 def _is_identification_table(table) -> bool:
     if len(table.rows) < 2:
         return False
@@ -473,6 +566,11 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
     """
     doc = Document(str(docx_path))
     fiche = BIAFiche(entity_name="")
+
+    # Légendes des tableaux : le nouveau format y place le nom de l'activité
+    # des tableaux d'impacts (voir _activity_from_caption).
+    _captions = _table_captions(doc)
+    _impact_table_pos: dict = {}   # index dans raw_impact_tables -> index doc
 
     # Collect impact matrix tables separately (one per activity, identified together)
     raw_impact_tables = []
@@ -514,7 +612,7 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                     break
         break  # only one weight table per fiche
 
-    for table in doc.tables:
+    for _doc_pos, table in enumerate(doc.tables):
         if _is_identification_table(table) and not fiche.entity_name:
             # Bug fix: GAT has "Entité" label at row 1 col 0 (not row 0 col 0).
             # Scan all rows: find the cell that contains "Entit" and read the adjacent value cell.
@@ -543,7 +641,22 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                     ))
 
         elif _is_impact_matrix_table(table):
+            _impact_table_pos[len(raw_impact_tables)] = _doc_pos
             raw_impact_tables.append(table)
+
+        elif _is_dependencies_table(table):
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) >= 3 and any(c.strip() for c in cells[:3]):
+                    fiche.dependencies.append(ProcessDependency(
+                        activity=cells[0], upstream=cells[1], downstream=cells[2]))
+
+        elif _is_equipment_needs_table(table):
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) >= 2 and cells[0].strip():
+                    fiche.equipment_needs.append(EquipmentNeed(
+                        designation=cells[0], justification=cells[1]))
 
         elif _is_dmia_table(table):
             for row in table.rows[1:]:
@@ -577,12 +690,18 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
             ci_info = _find_col([
                 lambda n, h: "type" in n and "inform" in n,
             ])
-            ci_crit = _find_col([
-                # In externes tables this column carries the Typologie label
-                # (Mono / Multi). We capture it in the same field; the transform
-                # routes it to either "Niveau de criticité" or "Typologie" based
-                # on the table's I/E flag.
-                lambda n, h: "critici" in n or "typolog" in n,
+            # La criticité prime : le tableau "externes" du nouveau format
+            # porte les deux colonnes (Typologie *et* Niveau de criticité), et
+            # "typolog" apparaît en premier — sans cette priorité, "Mono" se
+            # retrouvait enregistré comme niveau de criticité.
+            ci_crit = _find_col([lambda n, h: "critici" in n])
+            if ci_crit is None:
+                ci_crit = _find_col([lambda n, h: "typolog" in n])
+            ci_typo = _find_col([lambda n, h: "typolog" in n])
+            if ci_typo == ci_crit:
+                ci_typo = None
+            ci_fallback = _find_col([
+                lambda n, h: "alternative" in n or "defaillance" in _strip_accents(n),
             ])
             ci_tr = _find_col([
                 lambda n, h: (
@@ -597,10 +716,18 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                 lambda n, h: "ressource" in n,
             ])
 
-            # Infer I/E from table-level header text when no explicit column
+            # Interne / externe : d'abord l'en-tête du tableau, puis le titre
+            # de section qui le précède. Le nouveau format scinde les échanges
+            # en deux tableaux sans colonne I/E — seul le titre "… avec les
+            # correspondants externes" porte l'information.
+            _caption_ctx = _strip_accents(_captions.get(_doc_pos, "").lower())
             if "externe" in header_text:
                 default_ie = "E"
             elif "interne" in header_text:
+                default_ie = "I"
+            elif "externe" in _caption_ctx:
+                default_ie = "E"
+            elif "interne" in _caption_ctx:
                 default_ie = "I"
             else:
                 default_ie = "I"
@@ -631,6 +758,8 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                     criticality=_gcell(ci_crit),
                     tr_type=_gcell(ci_tr),
                     si_resources=_gcell(ci_resources),
+                    typology=_gcell(ci_typo),
+                    fallback=_gcell(ci_fallback),
                 ))
 
         elif _is_ramp_up_table(table):
@@ -1126,6 +1255,18 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
         """
         header_text = _cell(t, 0, 0).strip()
 
+        # Nouveau format : l'en-tête ne porte plus le nom de l'activité
+        # ("Impacts / Sévérité"), il est dans la légende au-dessus du tableau.
+        cap_name = _activity_from_caption(_captions.get(_impact_table_pos.get(t_idx, -1), ""))
+        if cap_name:
+            cap_low = cap_name.lower()
+            if cap_low in activity_names_lower:
+                return [activity_names_lower[cap_low]]
+            for act_low, act_name in activity_names_lower.items():
+                if cap_low in act_low or act_low in cap_low:
+                    return [act_name]
+            return [cap_name]
+
         # Split on common separators: / , ; and newline
         import re as _re_local
         parts = [p.strip() for p in _re_local.split(r"[/,;\n]+", header_text) if p.strip()]
@@ -1218,6 +1359,18 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                 is_4col=is_4col,
                 scenario_headers=scenario_headers,
             ))
+
+    # Nouveau format : quand la cellule "Entité" de la fiche de suivi est vide
+    # (fiche encore à l'état de trame), le nom figure dans l'en-tête du
+    # document sous la forme "Entité : OPCVM".
+    if not fiche.entity_name:
+        for _p in doc.paragraphs[:40]:
+            _txt = _p.text.strip()
+            if _strip_accents(_txt.lower()).startswith("entite") and ":" in _txt:
+                _val = _txt.split(":", 1)[1].strip()
+                if _val:
+                    fiche.entity_name = _val
+                    break
 
     # Resolve Division / Unité / Département from entity name.
     # Convention: the fiche typically describes ONE top-level org unit (a
