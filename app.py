@@ -43,8 +43,11 @@ from fiche_generator import generate_all_fiches
 from bia_compare import compare_bia_files
 from activity_filler import fill_activities as _fill_activities
 from fiche_writer import fill_fiche as _fill_fiche
+from PIL import Image, ImageOps
 import projects_db as _pdb
 import risk_analysis as _risk
+import risk_components as _risk_comp
+import db_backup as _backup
 import questionnaires_db as _quest
 import orgchart_vision as _ov
 import orgchart_ocr as _ocr
@@ -2269,8 +2272,314 @@ async def questionnaires_export(qid: int):
     )
 
 
+@app.get("/api/backup/status")
+async def backup_status():
+    """Liste des sauvegardes disponibles et état de la base courante."""
+    return _backup.status()
+
+
+@app.post("/api/backup/now")
+async def backup_now():
+    """Force une sauvegarde immédiate, sans attendre la détection automatique."""
+    return _backup.sync(reason="manuel (interface)")
+
+
+@app.post("/api/backup/restore/{backup_name}")
+async def backup_restore(backup_name: str):
+    """Restaure une sauvegarde ; la base courante est mise de côté avant."""
+    if "/" in backup_name or "\\" in backup_name or ".." in backup_name:
+        raise HTTPException(400, "Nom de sauvegarde invalide")
+    res = _backup.restore(backup_name)
+    if res.get("status") == "erreur":
+        raise HTTPException(404, res["raison"])
+    return res
+
+
+@app.on_event("startup")
+async def _startup_backup():
+    """
+    Sauvegarde au démarrage, puis surveillance continue : toute écriture dans
+    projects.db est répercutée sur les copies dans les secondes qui suivent.
+    """
+    try:
+        res = _backup.sync(reason="démarrage du serveur")
+        if res.get("status") == "ok":
+            print(f"[sauvegarde] {res['fichier']} — référence {res['reference']}")
+        _backup.start_watcher()
+        print(f"[sauvegarde] surveillance active — {_backup.BACKUP_DIR}")
+    except Exception as exc:
+        print(f"[sauvegarde] échec au démarrage : {exc}")
+
+
 if __name__ == "__main__":
     import uvicorn
     # reload=False avoids the Windows multiprocessing crash where the
     # reloader worker can't find app.py when cwd differs from the file's location
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  Analyse des risques — relevé photo par étage
+#
+#  Hiérarchie : évaluation → étage → composant → note → photos
+#  Chaque photo est étiquetée (étage, composant, état, niveau de risque) afin
+#  qu'un agent puisse la rattacher au bon constat lors de la synthèse.
+# ══════════════════════════════════════════════════════════════════════════════
+
+_RA_PHOTO_MAX_BYTES = 15 * 1024 * 1024      # 15 Mo par photo en entrée
+_RA_MAX_EDGE        = 2048                  # côté max après compression
+_RA_THUMB_EDGE      = 320
+_RA_CONDITIONS      = {"bon", "moyen", "mauvais", "non_renseigne"}
+_RA_RISK_LEVELS     = {"faible", "moyen", "eleve", "critique", "non_renseigne"}
+
+
+def _ra_photo_dir(assessment: dict) -> Path:
+    d = _pdb.project_dir(assessment["sector"], assessment["client"],
+                         "analyse_risques") / str(assessment["id"]) / "photos"
+    (d / "vignettes").mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _ra_exif(img) -> dict:
+    """Horodatage et orientation EXIF, quand l'appareil les fournit."""
+    meta = {"timestamp": None, "orientation": 1}
+    try:
+        exif = img.getexif()
+        if exif:
+            # 36867 = DateTimeOriginal, 306 = DateTime, 274 = Orientation
+            raw = exif.get(36867) or exif.get(306)
+            if raw:
+                meta["timestamp"] = str(raw).replace(":", "-", 2)
+            meta["orientation"] = int(exif.get(274) or 1)
+    except Exception:
+        pass
+    return meta
+
+
+@app.get("/api/risk-assessment/building-types")
+async def ra_building_types():
+    """Types de bâtiment : catalogue standard + types ajoutés par l'utilisateur."""
+    standard = _risk_comp.building_types()
+    known    = {b["label"] for b in standard}
+    custom   = [c for c in _pdb.list_custom_building_types() if c["label"] not in known]
+    return {"building_types": standard + custom}
+
+
+@app.post("/api/risk-assessment/building-types")
+async def ra_add_building_type(request: Request):
+    """Ajoute un type de bâtiment personnalisé."""
+    body  = await request.json()
+    label = (body.get("label") or "").strip()
+    if not label:
+        raise HTTPException(400, "Le libellé du type de bâtiment est requis.")
+    if len(label) > 60:
+        raise HTTPException(400, "Le libellé ne doit pas dépasser 60 caractères.")
+    _pdb.add_custom_building_type(label, (body.get("icon") or "fa-building").strip())
+    return {"label": label, "status": "cree"}
+
+
+@app.get("/api/risk-assessment/list")
+async def ra_list(sector: Optional[str] = None, client: Optional[str] = None):
+    """Évaluations existantes, pour reprendre une visite en cours."""
+    return {"assessments": _pdb.list_risk_assessments(sector, client)}
+
+
+def _ra_payload(assessment_id: int) -> dict:
+    data = _pdb.get_risk_assessment(assessment_id)
+    if not data:
+        raise HTTPException(404, "Évaluation introuvable.")
+    data["components"] = _risk_comp.components_grouped(data["building_type"])
+    return data
+
+
+@app.post("/api/risk-assessment/start")
+async def ra_start(request: Request):
+    """Crée une évaluation et ses étages."""
+    body          = await request.json()
+    sector        = (body.get("sector") or "").strip()
+    client        = (body.get("client") or "").strip()
+    building_type = (body.get("building_type") or "").strip()
+
+    if not building_type:
+        raise HTTPException(400, "Le type de bâtiment est requis.")
+    if not client:
+        raise HTTPException(400, "Le nom du client est requis.")
+    try:
+        num_floors = int(body.get("num_floors", 1))
+    except (TypeError, ValueError):
+        raise HTTPException(400, "Le nombre de niveaux doit être un entier.")
+    if not 1 <= num_floors <= 50:
+        raise HTTPException(400, "Le nombre de niveaux doit être compris entre 1 et 50.")
+
+    assessment_id = _pdb.create_risk_assessment(
+        sector=sector or "non_precise", client=client,
+        building_type=building_type, num_floors=num_floors,
+    )
+    return _ra_payload(assessment_id)
+
+
+@app.get("/api/risk-assessment/{assessment_id}")
+async def ra_get(assessment_id: int):
+    """Évaluation, ses étages et les composants proposés pour ce bâtiment."""
+    return _ra_payload(assessment_id)
+
+
+@app.put("/api/risk-assessment/{assessment_id}/floors/{floor_number}")
+async def ra_rename_floor(assessment_id: int, floor_number: int, request: Request):
+    """Renomme un niveau (« Salle serveur », « Archives », …)."""
+    body  = await request.json()
+    label = (body.get("floor_label") or "").strip()
+    if not label:
+        raise HTTPException(400, "Le libellé du niveau est requis.")
+    if not _pdb.rename_floor(assessment_id, floor_number, label[:80]):
+        raise HTTPException(404, "Niveau introuvable.")
+    return {"floor_number": floor_number, "floor_label": label[:80]}
+
+
+@app.get("/api/risk-assessment/{assessment_id}/floors/{floor_number}/notes")
+async def ra_floor_notes(assessment_id: int, floor_number: int):
+    """Notes déjà saisies sur un niveau, avec leurs photos."""
+    floor = _pdb.get_floor(assessment_id, floor_number)
+    if not floor:
+        raise HTTPException(404, "Niveau introuvable.")
+    notes = _pdb.list_floor_notes(floor["id"])
+    for n in notes:
+        for p in n["photos"]:
+            p["url"]   = f"/api/risk-assessment/{assessment_id}/photos/{p['id']}"
+            p["thumb"] = p["url"] + "?vignette=1"
+    return {"floor": floor, "notes": notes}
+
+
+@app.post("/api/risk-assessment/{assessment_id}/notes")
+async def ra_create_note(
+    assessment_id: int,
+    floor_number: int        = Form(...),
+    component: str           = Form(...),
+    note_text: str           = Form(...),
+    condition: str           = Form("non_renseigne"),
+    risk_level: str          = Form("non_renseigne"),
+    photos: List[UploadFile] = File(default=[]),
+):
+    """Crée une note sur un composant d'un niveau et y rattache les photos."""
+    assessment = _pdb.get_risk_assessment(assessment_id)
+    if not assessment:
+        raise HTTPException(404, "Évaluation introuvable.")
+
+    # Le niveau est résolu par son numéro AU SEIN de cette évaluation : une note
+    # ne peut pas atterrir sur le niveau d'une autre évaluation.
+    floor = _pdb.get_floor(assessment_id, floor_number)
+    if not floor:
+        raise HTTPException(404, "Niveau introuvable pour cette évaluation.")
+
+    component = (component or "").strip()
+    note_text = (note_text or "").strip()
+    if not component:
+        raise HTTPException(400, "Le composant est requis.")
+    if not note_text:
+        raise HTTPException(400, "L'observation ne peut pas être vide.")
+    if condition not in _RA_CONDITIONS:
+        condition = "non_renseigne"
+    if risk_level not in _RA_RISK_LEVELS:
+        risk_level = "non_renseigne"
+
+    note_id = _pdb.create_note(floor["id"], component, note_text,
+                               condition, risk_level)
+
+    photo_dir = _ra_photo_dir(assessment)
+    thumb_dir = photo_dir / "vignettes"
+    saved, rejetees = [], []
+
+    for upload in photos or []:
+        if not upload or not upload.filename:
+            continue
+        raw = await upload.read()
+        if not raw:
+            continue
+        if len(raw) > _RA_PHOTO_MAX_BYTES:
+            rejetees.append({"fichier": upload.filename, "motif": "fichier trop volumineux"})
+            continue
+
+        try:
+            img = Image.open(io.BytesIO(raw))
+            img.load()
+        except Exception:
+            rejetees.append({"fichier": upload.filename, "motif": "format d'image non reconnu"})
+            continue
+
+        meta = _ra_exif(img)
+        img  = ImageOps.exif_transpose(img)          # redresse la photo
+        if img.mode not in ("RGB", "L"):
+            img = img.convert("RGB")
+
+        base  = f"p{note_id}_{_uuid_mod.uuid4().hex[:8]}.jpg"
+        full  = photo_dir / base
+        thumb = thumb_dir / base
+
+        grande = img.copy()
+        grande.thumbnail((_RA_MAX_EDGE, _RA_MAX_EDGE), Image.LANCZOS)
+        grande.save(full, format="JPEG", quality=85, optimize=True)
+
+        img.thumbnail((_RA_THUMB_EDGE, _RA_THUMB_EDGE), Image.LANCZOS)
+        img.save(thumb, format="JPEG", quality=75, optimize=True)
+
+        meta.update({
+            "width":     grande.width,
+            "height":    grande.height,
+            "filesize":  full.stat().st_size,
+            "mime_type": "image/jpeg",
+        })
+
+        photo_id = _pdb.add_photo_to_note(
+            note_id, upload.filename,
+            str(full.relative_to(_pdb.PROJECTS_DIR)),
+            str(thumb.relative_to(_pdb.PROJECTS_DIR)),
+            meta, condition, risk_level,
+        )
+        saved.append({
+            "photo_id": photo_id,
+            "url":      f"/api/risk-assessment/{assessment_id}/photos/{photo_id}",
+            "thumb":    f"/api/risk-assessment/{assessment_id}/photos/{photo_id}?vignette=1",
+        })
+
+    return {
+        "note_id":      note_id,
+        "floor_number": floor_number,
+        "component":    component,
+        "photos":       saved,
+        "rejetees":     rejetees,
+    }
+
+
+@app.delete("/api/risk-assessment/{assessment_id}/notes/{note_id}")
+async def ra_delete_note(assessment_id: int, note_id: int):
+    """Supprime une note et ses photos."""
+    if not _pdb.delete_note(note_id):
+        raise HTTPException(404, "Note introuvable.")
+    return {"status": "supprimee"}
+
+
+@app.get("/api/risk-assessment/{assessment_id}/photos/{photo_id}")
+async def ra_photo(assessment_id: int, photo_id: int, vignette: int = 0):
+    """Sert une photo (vignette=1 pour la miniature)."""
+    photo = _pdb.get_photo(photo_id)
+    if not photo:
+        raise HTTPException(404, "Photo introuvable.")
+
+    rel  = photo["thumbnail_path"] if vignette else photo["original_path"]
+    root = _pdb.PROJECTS_DIR.resolve()
+    path = (root / rel).resolve()
+
+    # Le chemin vient de la base, mais on refuse toute sortie du dossier projet.
+    if root not in path.parents or not path.is_file():
+        raise HTTPException(404, "Fichier photo introuvable.")
+
+    return Response(content=path.read_bytes(), media_type="image/jpeg",
+                    headers={"Cache-Control": "private, max-age=3600"})
+
+
+@app.get("/api/risk-assessment/{assessment_id}/export")
+async def ra_export(assessment_id: int):
+    """Export structuré de l'évaluation, destiné à l'agent de synthèse."""
+    data = _pdb.get_assessment_export(assessment_id)
+    if not data:
+        raise HTTPException(404, "Évaluation introuvable.")
+    return data

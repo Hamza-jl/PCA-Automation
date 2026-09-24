@@ -1,0 +1,658 @@
+<title>Anatomie de la base BIA</title>
+<style>
+  :root{
+    --paper:#F6F7F9;
+    --surface:#FFFFFF;
+    --surface-2:#EFF1F4;
+    --ink:#1B1E23;
+    --ink-dim:#5C636E;
+    --line:#DFE3E8;
+    --accent:#E8384F;
+    --accent-soft:#FCE9EC;
+    --steel:#39424F;
+    --steel-dim:#8B939F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#15171A;
+      --surface:#1D2024;
+      --surface-2:#24282D;
+      --ink:#E9ECF0;
+      --ink-dim:#98A0AC;
+      --line:#2F343A;
+      --accent:#FF6B7E;
+      --accent-soft:#3A2127;
+      --steel:#C3CAD4;
+      --steel-dim:#6B747F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#15171A;
+    --surface:#1D2024;
+    --surface-2:#24282D;
+    --ink:#E9ECF0;
+    --ink-dim:#98A0AC;
+    --line:#2F343A;
+    --accent:#FF6B7E;
+    --accent-soft:#3A2127;
+    --steel:#C3CAD4;
+    --steel-dim:#6B747F;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+    margin:0 auto;
+    padding:3rem 1.5rem 5rem;
+    max-width:1080px;
+  }
+
+  code,.mono{font-family:ui-monospace,"SF Mono",SFMono-Regular,Consolas,"Liberation Mono",monospace;}
+
+  .eyebrow{
+    font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 .6rem;
+  }
+  h1{
+    font-size:2rem; font-weight:800; letter-spacing:-.02em; line-height:1.15;
+    margin:0 0 .6rem; text-wrap:balance;
+  }
+  .lede{
+    color:var(--ink-dim); font-size:1rem; line-height:1.6; max-width:64ch; margin:0 0 2.5rem;
+  }
+  .lede code{font-size:.86em; background:var(--surface-2); padding:.12em .38em; border-radius:4px; color:var(--ink);}
+
+  section{margin-bottom:2.5rem;}
+  h2{
+    font-size:.72rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-dim); margin:0 0 1.1rem;
+    padding-bottom:.6rem; border-bottom:1px solid var(--line);
+  }
+  h3{font-size:.95rem; font-weight:700; margin:0 0 .3rem; letter-spacing:-.005em;}
+
+  .panel{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:1.6rem;
+  }
+
+  .fig-scroll{overflow-x:auto;}
+  .fig-scroll svg{min-width:700px; display:block; margin:0 auto; max-width:100%; height:auto;}
+  figure{margin:0;}
+  figcaption{
+    font-size:.82rem; color:var(--ink-dim); line-height:1.6; max-width:70ch;
+    margin:1.4rem auto 0; padding-top:1.2rem; border-top:1px solid var(--line);
+  }
+  figcaption code{font-size:.85em; background:var(--surface-2); padding:.1em .35em; border-radius:4px; color:var(--ink);}
+
+  /* SVG text roles */
+  .t-table{font-size:12.5px; font-weight:800; letter-spacing:.04em;}
+  .t-col{font-size:11.5px;}
+  .t-meta{font-size:9.5px; letter-spacing:.04em;}
+  .t-edge{font-size:9.5px;}
+  .t-note{font-size:9.5px; font-style:italic;}
+  .t-badge{font-size:9px; font-weight:800; letter-spacing:.09em;}
+
+  /* standalone table cards */
+  .pair{display:grid; grid-template-columns:repeat(auto-fit,minmax(238px,1fr)); gap:1rem;}
+  .loose{
+    border:1.5px dashed var(--line); border-radius:10px; padding:1.1rem 1.2rem;
+    background:var(--surface-2);
+  }
+  .loose .tname{font-size:.82rem; font-weight:800; letter-spacing:.06em; margin-bottom:.7rem;}
+  .loose ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:.35rem;}
+  .loose li{font-size:.78rem; color:var(--ink-dim);}
+  .loose li .k{font-size:.95em; color:var(--ink);}
+
+  .callout{
+    margin-top:1rem; padding:1rem 1.15rem; border-radius:10px;
+    background:var(--accent-soft); font-size:.85rem; line-height:1.6;
+  }
+  .callout b{color:var(--accent);}
+  .callout code{font-size:.85em; background:var(--surface); padding:.1em .35em; border-radius:4px;}
+
+  /* relationship cards */
+  .rels{display:flex; flex-direction:column; gap:.9rem;}
+  .rel{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:1.2rem 1.35rem;
+    display:grid; grid-template-columns:auto 1fr; gap:0 1.3rem; align-items:start;
+  }
+  .rel .num{
+    font-size:.68rem; font-weight:800; letter-spacing:.06em; color:var(--accent);
+    padding-top:.28rem; font-variant-numeric:tabular-nums;
+  }
+  .rel .sig{
+    font-size:.79rem; color:var(--ink-dim); margin:.15rem 0 .7rem;
+    display:flex; flex-wrap:wrap; align-items:center; gap:.4rem;
+  }
+  .rel .sig .a{color:var(--ink); font-weight:600;}
+  .rel .sig .arw{color:var(--accent);}
+  .rel p{margin:0 0 .55rem; font-size:.86rem; line-height:1.62;}
+  .rel p:last-child{margin-bottom:0;}
+  .rel code{font-size:.85em; background:var(--surface-2); padding:.1em .35em; border-radius:4px;}
+  .rel .hot{color:var(--accent); font-weight:600;}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface);}
+  table{width:100%; border-collapse:collapse; font-size:.83rem; min-width:640px;}
+  thead th{
+    text-align:left; font-size:.66rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--ink-dim); padding:.85rem 1rem; border-bottom:1px solid var(--line);
+    background:var(--surface-2); white-space:nowrap;
+  }
+  tbody td{padding:.8rem 1rem; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.55;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.op{font-size:.78rem; color:var(--ink); white-space:nowrap;}
+  td.dim{color:var(--ink-dim);}
+  code.tag{
+    font-size:.74rem; background:var(--surface-2); padding:.14em .45em; border-radius:4px;
+    white-space:nowrap; color:var(--ink);
+  }
+  .flag{
+    display:inline-block; font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    padding:.16em .5em; border-radius:100px; white-space:nowrap;
+  }
+  .flag-casc{background:var(--accent-soft); color:var(--accent);}
+  .flag-none{background:var(--surface-2); color:var(--ink-dim);}
+  .flag-disk{background:var(--surface-2); color:var(--steel);}
+
+  footer{
+    margin-top:3rem; padding-top:1.2rem; border-top:1px solid var(--line);
+    font-size:.72rem; color:var(--ink-dim); text-align:center;
+  }
+</style>
+
+<p class="eyebrow">BIA Automatique · SQLite · projects.db</p>
+<h1>Anatomie de la base BIA</h1>
+<p class="lede">Douze tables dans un seul fichier. Quatre forment un graphe relationnel autour de <code>projects</code>. Cinq de plus composent la chaîne de relevé de visite, où chaque photo hérite de son contexte par construction. Les trois dernières sont autonomes : rien ne pointe vers elles, et elles ne sont rattachées à un client que par convention textuelle.</p>
+
+<section>
+  <h2>1 · Le noyau relationnel</h2>
+  <div class="panel">
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 800 566" role="img" aria-label="La table projects est le pivot. Trois branches partent d'elle : project_id vers activity_dmia, project_id vers fiche_equipment, et deux clés distinctes, synthese_project_id et fiche_project_id, vers la table de liaison synthese_fiche_links. Les quatre branches sont en suppression cascade.">
+
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--steel-dim)"/>
+            </marker>
+          </defs>
+
+          <!-- ============ PROJECTS (hub) ============ -->
+          <rect x="34" y="190" width="268" height="176" rx="9"
+                fill="var(--surface)" stroke="var(--accent)" stroke-width="1.8"/>
+          <path d="M34 199 a9 9 0 0 1 9 -9 h250 a9 9 0 0 1 9 9 v25 h-268 z"
+                fill="var(--accent-soft)"/>
+          <text x="168" y="214" text-anchor="middle" class="t-table" fill="var(--ink)">PROJECTS</text>
+
+          <text x="52" y="248" class="t-col mono" fill="var(--accent)">id</text>
+          <text x="284" y="248" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">PK</text>
+
+          <text x="52" y="272" class="t-col mono" fill="var(--ink)">sector, client</text>
+          <text x="52" y="296" class="t-col mono" fill="var(--ink)">project_name</text>
+          <text x="52" y="320" class="t-col mono" fill="var(--ink)">file_type</text>
+          <text x="284" y="320" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">fiche · synthese</text>
+          <text x="52" y="344" class="t-col mono" fill="var(--ink)">form_data_path</text>
+
+          <text x="168" y="384" text-anchor="middle" class="t-note" fill="var(--ink-dim)">une ligne par fichier importé</text>
+
+          <!-- ============ bus ============ -->
+          <line x1="302" y1="277" x2="342" y2="277" stroke="var(--steel-dim)" stroke-width="1.4"/>
+          <line x1="342" y1="110" x2="342" y2="426" stroke="var(--steel-dim)" stroke-width="1.4"/>
+          <circle cx="342" cy="277" r="3.2" fill="var(--steel-dim)"/>
+
+          <!-- ============ branch 1 : activity_dmia ============ -->
+          <line x1="342" y1="110" x2="459" y2="110" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar)"/>
+          <text x="400" y="103" text-anchor="middle" class="t-edge mono" fill="var(--ink-dim)">project_id</text>
+
+          <rect x="466" y="50" width="300" height="120" rx="9"
+                fill="var(--surface)" stroke="var(--steel-dim)" stroke-width="1.3"/>
+          <path d="M466 59 a9 9 0 0 1 9 -9 h282 a9 9 0 0 1 9 9 v23 h-300 z" fill="var(--surface-2)"/>
+          <text x="616" y="72" text-anchor="middle" class="t-table" fill="var(--ink)">ACTIVITY_DMIA</text>
+          <text x="484" y="104" class="t-col mono" fill="var(--steel)">project_id</text>
+          <text x="748" y="104" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK</text>
+          <text x="484" y="127" class="t-col mono" fill="var(--ink)">activity_name</text>
+          <text x="484" y="150" class="t-col mono" fill="var(--ink)">dmia_exprimee, dmia_minutes</text>
+
+          <!-- ============ branch 2 : fiche_equipment ============ -->
+          <line x1="342" y1="260" x2="459" y2="260" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar)"/>
+          <text x="400" y="253" text-anchor="middle" class="t-edge mono" fill="var(--ink-dim)">project_id</text>
+
+          <rect x="466" y="200" width="300" height="120" rx="9"
+                fill="var(--surface)" stroke="var(--steel-dim)" stroke-width="1.3"/>
+          <path d="M466 209 a9 9 0 0 1 9 -9 h282 a9 9 0 0 1 9 9 v23 h-300 z" fill="var(--surface-2)"/>
+          <text x="616" y="222" text-anchor="middle" class="t-table" fill="var(--ink)">FICHE_EQUIPMENT</text>
+          <text x="484" y="254" class="t-col mono" fill="var(--steel)">project_id</text>
+          <text x="748" y="254" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK</text>
+          <text x="484" y="277" class="t-col mono" fill="var(--ink)">designation, entity</text>
+          <text x="484" y="300" class="t-col mono" fill="var(--ink)">horizons</text>
+
+          <!-- ============ branches 3 + 4 : synthese_fiche_links ============ -->
+          <line x1="342" y1="404" x2="459" y2="404" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar)"/>
+          <text x="400" y="397" text-anchor="middle" class="t-edge mono" fill="var(--ink-dim)">synthese_project_id</text>
+
+          <line x1="342" y1="426" x2="459" y2="426" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar)"/>
+          <text x="400" y="440" text-anchor="middle" class="t-edge mono" fill="var(--ink-dim)">fiche_project_id</text>
+
+          <rect x="466" y="350" width="300" height="142" rx="9"
+                fill="var(--surface)" stroke="var(--steel-dim)" stroke-width="1.3"/>
+          <path d="M466 359 a9 9 0 0 1 9 -9 h282 a9 9 0 0 1 9 9 v23 h-300 z" fill="var(--surface-2)"/>
+          <text x="616" y="372" text-anchor="middle" class="t-table" fill="var(--ink)">SYNTHESE_FICHE_LINKS</text>
+          <text x="484" y="404" class="t-col mono" fill="var(--steel)">synthese_project_id</text>
+          <text x="748" y="404" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK</text>
+          <text x="484" y="427" class="t-col mono" fill="var(--steel)">fiche_project_id</text>
+          <text x="748" y="427" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK</text>
+          <text x="484" y="452" class="t-meta mono" fill="var(--ink-dim)">UNIQUE(synthese_project_id, fiche_project_id)</text>
+          <text x="616" y="474" text-anchor="middle" class="t-note" fill="var(--ink-dim)">deux IDs, aucune donnée métier</text>
+
+          <!-- ============ cascade badge ============ -->
+          <line x1="342" y1="426" x2="342" y2="514" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="3 3"/>
+          <rect x="196" y="514" width="196" height="26" rx="13" fill="var(--accent-soft)"/>
+          <text x="294" y="531" text-anchor="middle" class="t-badge" fill="var(--accent)">ON DELETE CASCADE · ×4</text>
+
+        </svg>
+      </div>
+      <figcaption>Les quatre flèches sont toutes <strong>1 ligne <code>projects</code> → N lignes filles</strong>, et toutes déclarées <code>ON DELETE CASCADE</code>. La cascade fonctionne réellement parce que <code>projects_db.py</code> exécute <code>PRAGMA foreign_keys = ON</code> sur chaque connexion — sans cela SQLite ignorerait silencieusement les contraintes. <code>synthese_fiche_links</code> reçoit deux flèches parce qu'elle référence <code>projects</code> deux fois : une ligne y associe une synthèse à une fiche, les deux étant des lignes de la même table. Une cinquième branche existe, volontairement absente du schéma : <code>risk_assessments.project_id</code> référence <code>projects</code> mais reste <em>nullable</em>, et vide pour toute visite lancée depuis le terrain — elle est traitée en section 2.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>2 · La chaîne de relevé de visite</h2>
+  <div class="panel">
+    <figure>
+      <div class="fig-scroll">
+        <svg viewBox="0 0 800 772" role="img" aria-label="Cinq tables enchaînées verticalement : risk_assessments contient assessment_floors, qui contient assessment_notes, qui contient assessment_photos, à laquelle photo_tags est rattachée. Chaque table porte la clé étrangère de celle qui la précède, et les quatre liens sont en suppression cascade.">
+
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--steel-dim)"/>
+            </marker>
+          </defs>
+
+          <!-- ============ 1 · RISK_ASSESSMENTS ============ -->
+          <rect x="250" y="40" width="330" height="104" rx="9"
+                fill="var(--surface)" stroke="var(--accent)" stroke-width="1.8"/>
+          <path d="M250 49 a9 9 0 0 1 9 -9 h312 a9 9 0 0 1 9 9 v23 h-330 z" fill="var(--accent-soft)"/>
+          <text x="415" y="62" text-anchor="middle" class="t-table" fill="var(--ink)">RISK_ASSESSMENTS</text>
+          <text x="268" y="92" class="t-col mono" fill="var(--accent)">id</text>
+          <text x="562" y="92" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">PK</text>
+          <text x="268" y="114" class="t-col mono" fill="var(--ink)">sector, client, building_type</text>
+          <text x="268" y="136" class="t-col mono" fill="var(--steel)">project_id</text>
+          <text x="562" y="136" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK · nullable</text>
+          <text x="600" y="92" class="t-note" fill="var(--ink-dim)">une visite = un bâtiment</text>
+
+          <line x1="415" y1="144" x2="415" y2="170" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar2)"/>
+          <text x="428" y="163" class="t-edge mono" fill="var(--ink-dim)">assessment_id</text>
+
+          <!-- ============ 2 · ASSESSMENT_FLOORS ============ -->
+          <rect x="250" y="176" width="330" height="104" rx="9"
+                fill="var(--surface)" stroke="var(--steel-dim)" stroke-width="1.3"/>
+          <path d="M250 185 a9 9 0 0 1 9 -9 h312 a9 9 0 0 1 9 9 v23 h-330 z" fill="var(--surface-2)"/>
+          <text x="415" y="198" text-anchor="middle" class="t-table" fill="var(--ink)">ASSESSMENT_FLOORS</text>
+          <text x="268" y="228" class="t-col mono" fill="var(--steel)">assessment_id</text>
+          <text x="562" y="228" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK</text>
+          <text x="268" y="250" class="t-col mono" fill="var(--ink)">floor_number, floor_label</text>
+          <text x="268" y="272" class="t-col mono" fill="var(--ink)">notes_count</text>
+          <text x="562" y="272" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">dénormalisé</text>
+          <text x="600" y="228" class="t-note" fill="var(--ink-dim)">créés d'office au démarrage</text>
+
+          <line x1="415" y1="280" x2="415" y2="306" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar2)"/>
+          <text x="428" y="299" class="t-edge mono" fill="var(--ink-dim)">floor_id</text>
+
+          <!-- ============ 3 · ASSESSMENT_NOTES ============ -->
+          <rect x="250" y="312" width="330" height="104" rx="9"
+                fill="var(--surface)" stroke="var(--steel-dim)" stroke-width="1.3"/>
+          <path d="M250 321 a9 9 0 0 1 9 -9 h312 a9 9 0 0 1 9 9 v23 h-330 z" fill="var(--surface-2)"/>
+          <text x="415" y="334" text-anchor="middle" class="t-table" fill="var(--ink)">ASSESSMENT_NOTES</text>
+          <text x="268" y="364" class="t-col mono" fill="var(--steel)">floor_id</text>
+          <text x="562" y="364" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK</text>
+          <text x="268" y="386" class="t-col mono" fill="var(--ink)">component</text>
+          <text x="268" y="408" class="t-col mono" fill="var(--ink)">note_text</text>
+          <text x="600" y="364" class="t-note" fill="var(--ink-dim)">une par composant observé</text>
+
+          <line x1="415" y1="416" x2="415" y2="442" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar2)"/>
+          <text x="428" y="435" class="t-edge mono" fill="var(--ink-dim)">note_id</text>
+
+          <!-- ============ 4 · ASSESSMENT_PHOTOS ============ -->
+          <rect x="250" y="448" width="330" height="104" rx="9"
+                fill="var(--surface)" stroke="var(--steel-dim)" stroke-width="1.3"/>
+          <path d="M250 457 a9 9 0 0 1 9 -9 h312 a9 9 0 0 1 9 9 v23 h-330 z" fill="var(--surface-2)"/>
+          <text x="415" y="470" text-anchor="middle" class="t-table" fill="var(--ink)">ASSESSMENT_PHOTOS</text>
+          <text x="268" y="500" class="t-col mono" fill="var(--steel)">note_id</text>
+          <text x="562" y="500" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK</text>
+          <text x="268" y="522" class="t-col mono" fill="var(--ink)">filename, width, height</text>
+          <text x="268" y="544" class="t-col mono" fill="var(--ink)">original_path, thumbnail_path</text>
+          <text x="600" y="500" class="t-note" fill="var(--ink-dim)">chemins vers le disque</text>
+
+          <line x1="415" y1="552" x2="415" y2="578" stroke="var(--steel-dim)" stroke-width="1.4" marker-end="url(#ar2)"/>
+          <text x="428" y="571" class="t-edge mono" fill="var(--ink-dim)">photo_id</text>
+
+          <!-- ============ 5 · PHOTO_TAGS ============ -->
+          <rect x="250" y="584" width="330" height="104" rx="9"
+                fill="var(--surface)" stroke="var(--steel-dim)" stroke-width="1.3"/>
+          <path d="M250 593 a9 9 0 0 1 9 -9 h312 a9 9 0 0 1 9 9 v23 h-330 z" fill="var(--surface-2)"/>
+          <text x="415" y="606" text-anchor="middle" class="t-table" fill="var(--ink)">PHOTO_TAGS</text>
+          <text x="268" y="636" class="t-col mono" fill="var(--steel)">photo_id</text>
+          <text x="562" y="636" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">FK · 1:1</text>
+          <text x="268" y="658" class="t-col mono" fill="var(--ink)">floor_number, component_type</text>
+          <text x="562" y="658" text-anchor="end" class="t-meta mono" fill="var(--ink-dim)">recopiés</text>
+          <text x="268" y="680" class="t-col mono" fill="var(--ink)">condition, risk_level</text>
+          <text x="600" y="636" class="t-note" fill="var(--ink-dim)">lisible sans jointure</text>
+
+          <!-- ============ cascade badge ============ -->
+          <line x1="200" y1="92" x2="200" y2="716" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="3 3"/>
+          <line x1="200" y1="92" x2="244" y2="92" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="3 3"/>
+          <rect x="102" y="716" width="196" height="26" rx="13" fill="var(--accent-soft)"/>
+          <text x="200" y="733" text-anchor="middle" class="t-badge" fill="var(--accent)">ON DELETE CASCADE · ×4</text>
+
+        </svg>
+      </div>
+      <figcaption>Une chaîne d'appartenance, pas un graphe : une photo ne peut pas exister sans note, ni une note sans niveau, ni un niveau sans visite. <strong>Le contexte d'une observation est porté par la structure</strong> — c'est précisément ce qui empêche, au retour de visite, de ne plus savoir à quel étage et à quel équipement se rapporte une photo. Supprimer la visite efface toute la descendance en un seul <code>DELETE</code>. <code>photo_tags</code> recopie volontairement <code>floor_number</code> et <code>component_type</code> à côté de l'état et du niveau de risque : l'agent de synthèse lit une photo entièrement étiquetée sans remonter quatre jointures.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>3 · Les trois tables autonomes</h2>
+  <p class="lede" style="margin-bottom:1.2rem;">Elles n'apparaissent dans aucun des diagrammes ci-dessus parce qu'elles n'ont aucune arête à dessiner : ni <code>project_id</code>, ni <code>REFERENCES</code>, ni cascade.</p>
+  <div class="pair">
+    <div class="loose">
+      <div class="tname mono">QUESTIONNAIRES</div>
+      <ul>
+        <li><span class="k mono">sector, client</span> — texte libre, non-FK</li>
+        <li><span class="k mono">qtype</span> — 7 types fixes</li>
+        <li><span class="k mono">is_template</span> — un seul modèle par type</li>
+        <li><span class="k mono">rows_json</span> — colonnes + lignes en JSON</li>
+        <li><span class="k mono">file_path</span> — .xlsx d'origine sur disque</li>
+      </ul>
+    </div>
+    <div class="loose">
+      <div class="tname mono">RISK_FILES</div>
+      <ul>
+        <li><span class="k mono">sector, client</span> — texte libre, non-FK</li>
+        <li><span class="k mono">rows_json</span> — la grille de risques</li>
+        <li><span class="k mono">scale_json</span> — échelle propre au fichier</li>
+        <li><span class="k mono">source_sheet</span> — feuille d'origine</li>
+        <li>aucun fichier persisté en parallèle</li>
+      </ul>
+    </div>
+    <div class="loose">
+      <div class="tname mono">ASSESSMENT_BUILDING_TYPES</div>
+      <ul>
+        <li><span class="k mono">label</span> — contrainte <span class="k mono">UNIQUE</span></li>
+        <li><span class="k mono">icon</span> — classe Font Awesome</li>
+        <li>ne stocke que les types <em>ajoutés</em></li>
+        <li>les 7 types standard vivent dans <span class="k mono">risk_components.py</span></li>
+        <li>aucune ligne ne la référence</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout">
+    <b>Pourquoi ça marche quand même.</b> Le menu déroulant secteur/client de toute l'application est alimenté par <code>list_sectors_clients()</code>, qui fait un <code>SELECT DISTINCT sector, client FROM projects</code>. Les questionnaires et les fichiers de risques héritent donc des mêmes chaînes de caractères que les projets — non pas parce que la base l'impose, mais parce que l'interface propose les mêmes valeurs. Saisissez un client à la main, ou renommez-le, et le rapprochement casse sans qu'aucune erreur ne soit levée.
+  </div>
+</section>
+
+<section>
+  <h2>4 · Chaque relation, en détail</h2>
+  <div class="rels">
+
+    <div class="rel">
+      <div class="num">01</div>
+      <div>
+        <h3>Un projet et ses activités</h3>
+        <div class="sig"><span class="a mono">projects</span><span class="arw">— 1 : N →</span><span class="a mono">activity_dmia</span></div>
+        <p>À l'import d'un fichier, chaque activité extraite (avec son DMIA) devient une ligne fille. Ces lignes ne sont jamais modifiées une par une : quand une fiche est ré-enregistrée, <code>save_fiche_form()</code> <span class="hot">supprime toutes</span> les lignes du projet puis les réinsère.</p>
+        <p><strong>Portée inattendue :</strong> cette table sert aussi d'index de suggestions inter-clients. <code>get_dmia_suggestions()</code> et <code>get_lower_dmia_alerts()</code> la parcourent <span class="hot">tous projets confondus</span>. Ajouter ou supprimer des lignes ici change donc ce qui est proposé sur des dossiers sans aucun rapport.</p>
+      </div>
+    </div>
+
+    <div class="rel">
+      <div class="num">02</div>
+      <div>
+        <h3>Un projet et son matériel</h3>
+        <div class="sig"><span class="a mono">projects</span><span class="arw">— 1 : N →</span><span class="a mono">fiche_equipment</span></div>
+        <p>Même mécanique de remplacement intégral via <code>store_fiche_equipment()</code> : purge puis réinsertion, jamais de mise à jour partielle. <code>horizons</code> est un blob JSON, donc invisible pour toute requête SQL.</p>
+        <p>La recherche de matériel (<code>get_equipment_by_filter()</code>) fait une jointure retour vers <code>projects</code> pour filtrer par secteur/client : le matériel se comporte comme un inventaire partagé entre fiches, pas comme une donnée privée.</p>
+      </div>
+    </div>
+
+    <div class="rel">
+      <div class="num">03</div>
+      <div>
+        <h3>Une synthèse et ses fiches</h3>
+        <div class="sig"><span class="a mono">projects</span><span class="arw">— N : N →</span><span class="a mono">projects</span><span style="color:var(--ink-dim);">via</span><span class="a mono">synthese_fiche_links</span></div>
+        <p>La seule relation plusieurs-à-plusieurs, et la seule où la même table est référencée deux fois. <code>link_fiche_to_synthese()</code> fait un <code>INSERT OR IGNORE</code> : relier deux fois le même couple ne produit rien, grâce à la contrainte <code>UNIQUE</code>.</p>
+        <p><strong>Double cascade :</strong> supprimer <span class="hot">l'une ou l'autre</span> extrémité efface la ligne de liaison, sans jamais toucher le projet d'en face. Supprimer une fiche référencée par trois synthèses détruit silencieusement trois liens.</p>
+        <p>Cette table ne stocke aucune donnée métier. Elle répond seulement à « quelles fiches dois-je ouvrir ? » lorsque la propagation d'une édition de synthèse réécrit les fichiers <code>.docx</code> sur disque.</p>
+      </div>
+    </div>
+
+    <div class="rel">
+      <div class="num">04</div>
+      <div>
+        <h3>Questionnaires et risques</h3>
+        <div class="sig"><span class="a mono">questionnaires</span><span style="color:var(--ink-dim);">·</span><span class="a mono">risk_files</span><span class="arw">— aucune contrainte —</span><span class="a mono">projects</span></div>
+        <p>Rapprochement par égalité de texte sur <code>sector</code> et <code>client</code> (<code>COLLATE NOCASE</code> côté questionnaires). Aucune intégrité référentielle : un questionnaire peut exister pour un couple secteur/client qui n'a plus aucun projet, et inversement.</p>
+        <p><strong>Règle appliquée hors base :</strong> l'unicité du modèle par type n'est pas une contrainte SQL. C'est le code Python qui exécute un <code>UPDATE … SET is_template = 0</code> juste avant d'insérer le nouveau modèle.</p>
+      </div>
+    </div>
+
+    <div class="rel">
+      <div class="num">05</div>
+      <div>
+        <h3>Une visite et sa descendance</h3>
+        <div class="sig"><span class="a mono">risk_assessments</span><span class="arw">— 1 : N →</span><span class="a mono">assessment_floors</span><span class="arw">— 1 : N →</span><span class="a mono">assessment_notes</span><span class="arw">— 1 : N →</span><span class="a mono">assessment_photos</span></div>
+        <p>Trois relations enchaînées plutôt qu'un éventail depuis un pivot. Les niveaux sont créés <span class="hot">d'un bloc</span> au démarrage du relevé, à partir du seul nombre d'étages saisi ; les notes et les photos arrivent ensuite, au fil de la visite.</p>
+        <p><strong>Le niveau est résolu par son numéro, jamais par son rang.</strong> L'API reçoit un <code>floor_number</code> et le traduit en <code>assessment_floors.id</code> <em>au sein de cette évaluation</em>. Passer directement un identifiant de ligne écrirait la note sur le niveau d'une autre visite, dont les identifiants sont simplement plus petits.</p>
+        <p><code>notes_count</code> est un compteur dénormalisé sur <code>assessment_floors</code>, recalculé à chaque écriture ou suppression de note. Il n'existe que pour afficher la pastille de chaque niveau sans compter les lignes à chaque rendu.</p>
+      </div>
+    </div>
+
+    <div class="rel">
+      <div class="num">06</div>
+      <div>
+        <h3>Une photo et son étiquette</h3>
+        <div class="sig"><span class="a mono">assessment_photos</span><span class="arw">— 1 : 1 →</span><span class="a mono">photo_tags</span></div>
+        <p>Une ligne d'étiquette est insérée pour chaque photo, dans la même transaction. La séparation en deux tables laisse la place à un ré-étiquetage — automatique ou manuel — sans toucher aux métadonnées du fichier.</p>
+        <p><strong>Duplication assumée :</strong> <code>floor_number</code> et <code>component_type</code> sont recopiés depuis l'amont de la chaîne. Une photo devient ainsi lisible d'une seule lecture, avec son étage, son composant, son état et son niveau de risque — c'est cette table que consomme la génération de synthèse.</p>
+        <p>Les fichiers JPEG eux-mêmes vivent sur disque. <span class="hot">La cascade efface les lignes, pas les images :</span> supprimer une note laisse ses fichiers dans <code>projects_data/</code>.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>5 · Effet de chaque modification</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Ce que vous faites</th>
+          <th>Écriture directe</th>
+          <th>Répercussion</th>
+          <th style="text-align:right;">Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="op">Importer un fichier BIA</td>
+          <td class="dim">1 ligne <code class="tag">projects</code> + N lignes <code class="tag">activity_dmia</code>, dans la même transaction</td>
+          <td class="dim">Le secteur/client apparaît dans tous les menus déroulants. Les activités entrent dans l'index de suggestions global.</td>
+          <td style="text-align:right;"><span class="flag flag-none">insert</span></td>
+        </tr>
+        <tr>
+          <td class="op">Supprimer un projet</td>
+          <td class="dim">1 ligne <code class="tag">projects</code></td>
+          <td class="dim"><strong>Cascade automatique :</strong> toutes ses lignes <code class="tag">activity_dmia</code>, <code class="tag">fiche_equipment</code>, et toute ligne <code class="tag">synthese_fiche_links</code> le citant <em>dans l'une ou l'autre colonne</em>. En revanche le fichier sur disque reste, et les questionnaires / risques du même client sont intacts.</td>
+          <td style="text-align:right;"><span class="flag flag-casc">cascade</span></td>
+        </tr>
+        <tr>
+          <td class="op">Enregistrer une fiche<br><span class="dim" style="font-size:.9em;">éditeur de fiche</span></td>
+          <td class="dim">Purge puis réinsertion de <code class="tag">activity_dmia</code> ; <code class="tag">projects.form_data_path</code> et <code class="tag">file_type</code> mis à jour</td>
+          <td class="dim">Les DMIA proposés sur d'autres dossiers changent, puisque l'index de suggestions est global.</td>
+          <td style="text-align:right;"><span class="flag flag-casc">purge</span></td>
+        </tr>
+        <tr>
+          <td class="op">Indexer le matériel</td>
+          <td class="dim">Purge puis réinsertion de <code class="tag">fiche_equipment</code> pour chaque fiche traitée</td>
+          <td class="dim">La recherche de matériel par secteur/client renvoie de nouveaux résultats.</td>
+          <td style="text-align:right;"><span class="flag flag-casc">purge</span></td>
+        </tr>
+        <tr>
+          <td class="op">Lier une fiche à une synthèse</td>
+          <td class="dim">1 ligne <code class="tag">synthese_fiche_links</code>, en <code>INSERT OR IGNORE</code></td>
+          <td class="dim">Cette fiche devient une cible de la propagation. Aucune donnée n'est copiée à ce moment-là.</td>
+          <td style="text-align:right;"><span class="flag flag-none">insert</span></td>
+        </tr>
+        <tr>
+          <td class="op">Délier une fiche</td>
+          <td class="dim">1 ligne <code class="tag">synthese_fiche_links</code> supprimée</td>
+          <td class="dim">Les deux projets restent intacts. La fiche cesse simplement de recevoir les éditions de la synthèse.</td>
+          <td style="text-align:right;"><span class="flag flag-none">delete</span></td>
+        </tr>
+        <tr>
+          <td class="op">Éditer « Impact DMIA »<br><span class="dim" style="font-size:.9em;">dans une synthèse</span></td>
+          <td class="dim"><strong>Aucune écriture en base.</strong></td>
+          <td class="dim">Le <code>.xlsx</code> de la synthèse est réécrit, puis chaque fiche liée dont le nom d'activité correspond voit sa cellule DMIA réécrite dans son <code>.docx</code>. Sans correspondance de nom, rien n'est écrit et l'activité part dans la liste « à réconcilier ».</td>
+          <td style="text-align:right;"><span class="flag flag-disk">disque</span></td>
+        </tr>
+        <tr>
+          <td class="op">Éditer « Applications IT »</td>
+          <td class="dim"><strong>Aucune écriture en base.</strong></td>
+          <td class="dim">Même trajet : criticité, DMIA, PMDT et contournement sont poussés dans le tableau Applications de chaque fiche liée.</td>
+          <td style="text-align:right;"><span class="flag flag-disk">disque</span></td>
+        </tr>
+        <tr>
+          <td class="op">Définir un modèle de questionnaire</td>
+          <td class="dim"><code>UPDATE</code> de l'ancien modèle à <code>is_template = 0</code>, puis insertion du nouveau</td>
+          <td class="dim">Limité au même <code>qtype</code>. L'unicité repose sur ces deux instructions Python, pas sur une contrainte SQL.</td>
+          <td style="text-align:right;"><span class="flag flag-none">update</span></td>
+        </tr>
+        <tr>
+          <td class="op">Supprimer un questionnaire</td>
+          <td class="dim">1 ligne <code class="tag">questionnaires</code> + le <code>.xlsx</code> associé sur disque</td>
+          <td class="dim">Aucune. Rien ne pointe vers cette table.</td>
+          <td style="text-align:right;"><span class="flag flag-none">delete</span></td>
+        </tr>
+        <tr>
+          <td class="op">Démarrer un relevé de visite</td>
+          <td class="dim">1 ligne <code class="tag">risk_assessments</code> + N lignes <code class="tag">assessment_floors</code>, N = nombre de niveaux saisi</td>
+          <td class="dim">Aucune. Les niveaux sont créés vides ; <code>project_id</code> reste <code>NULL</code> tant que la visite n'est pas rattachée à un fichier importé.</td>
+          <td style="text-align:right;"><span class="flag flag-none">insert</span></td>
+        </tr>
+        <tr>
+          <td class="op">Enregistrer une observation<br><span class="dim" style="font-size:.9em;">note + photos</span></td>
+          <td class="dim">1 ligne <code class="tag">assessment_notes</code>, N lignes <code class="tag">assessment_photos</code> et autant de <code class="tag">photo_tags</code> ; <code>notes_count</code> du niveau recalculé</td>
+          <td class="dim">Chaque photo est redressée selon son EXIF, compressée en 2048 px et vignettée en 320 px : <strong>deux fichiers écrits sur disque</strong> par photo, dans <code>projects_data/…/analyse_risques/</code>.</td>
+          <td style="text-align:right;"><span class="flag flag-disk">disque</span></td>
+        </tr>
+        <tr>
+          <td class="op">Supprimer une observation</td>
+          <td class="dim">1 ligne <code class="tag">assessment_notes</code></td>
+          <td class="dim"><strong>Cascade :</strong> ses <code class="tag">assessment_photos</code> et leurs <code class="tag">photo_tags</code> partent avec elle, et <code>notes_count</code> est recalculé. Les fichiers JPEG, eux, restent sur disque.</td>
+          <td style="text-align:right;"><span class="flag flag-casc">cascade</span></td>
+        </tr>
+        <tr>
+          <td class="op">Supprimer une visite</td>
+          <td class="dim">1 ligne <code class="tag">risk_assessments</code></td>
+          <td class="dim"><strong>Cascade sur quatre niveaux :</strong> niveaux, notes, photos et étiquettes disparaissent d'un seul <code>DELETE</code>.</td>
+          <td style="text-align:right;"><span class="flag flag-casc">cascade</span></td>
+        </tr>
+        <tr>
+          <td class="op">Ajouter un type de bâtiment</td>
+          <td class="dim">1 ligne <code class="tag">assessment_building_types</code>, en <code>INSERT OR IGNORE</code></td>
+          <td class="dim">Le type s'ajoute aux sept types standard dans le sélecteur. Il hérite du catalogue de composants du Siège, le plus large.</td>
+          <td style="text-align:right;"><span class="flag flag-none">insert</span></td>
+        </tr>
+        <tr>
+          <td class="op">Enregistrer une analyse de risques</td>
+          <td class="dim"><code class="tag">rows_json</code> et <code>updated_at</code> uniquement</td>
+          <td class="dim"><code>scale_json</code> n'est <em>pas</em> réécrit : l'échelle est figée à la création, volontairement, car chaque client peut avoir la sienne.</td>
+          <td style="text-align:right;"><span class="flag flag-none">update</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>6 · Quelle fonctionnalité touche quelle table</h2>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Fonctionnalité de l'application</th>
+          <th>Route</th>
+          <th>Tables lues / écrites</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="op">Bibliothèque de projets</td>
+          <td class="dim"><code class="tag">/api/projects/upload · list · delete</code></td>
+          <td class="dim"><code class="tag">projects</code> <code class="tag">activity_dmia</code> — et par cascade les trois tables filles à la suppression</td>
+        </tr>
+        <tr>
+          <td class="op">Suggestions et alertes DMIA</td>
+          <td class="dim"><code class="tag">/api/dmia-suggestions · dmia-alerts</code></td>
+          <td class="dim"><code class="tag">activity_dmia</code> en lecture seule, <strong>tous projets confondus</strong></td>
+        </tr>
+        <tr>
+          <td class="op">Recherche et indexation du matériel</td>
+          <td class="dim"><code class="tag">/api/index-equipment · fiches-equipment</code></td>
+          <td class="dim"><code class="tag">fiche_equipment</code> en écriture, jointure vers <code class="tag">projects</code> en lecture</td>
+        </tr>
+        <tr>
+          <td class="op">Liaison synthèse ↔ fiches</td>
+          <td class="dim"><code class="tag">/api/synthese/{id}/linked-fiches · link-fiches</code></td>
+          <td class="dim"><code class="tag">synthese_fiche_links</code> ; auto-liaison initiale par secteur/client depuis <code class="tag">projects</code></td>
+        </tr>
+        <tr>
+          <td class="op">Édition de synthèse et propagation</td>
+          <td class="dim"><code class="tag">/api/synthese/{id}/save-impact-dmia · save-applications-it · apply-mapping</code></td>
+          <td class="dim"><code class="tag">synthese_fiche_links</code> en lecture seule, pour savoir quels fichiers ouvrir. <strong>Les données modifiées vont sur le disque, pas en base.</strong></td>
+        </tr>
+        <tr>
+          <td class="op">Éditeur de fiche</td>
+          <td class="dim"><code class="tag">/api/project-form/{id} · save-fiche-project</code></td>
+          <td class="dim"><code class="tag">projects</code> (<code>form_data_path</code>, <code>file_type</code>) et remplacement de <code class="tag">activity_dmia</code></td>
+        </tr>
+        <tr>
+          <td class="op">Filtres secteur / client</td>
+          <td class="dim"><code class="tag">/api/sectors-clients</code></td>
+          <td class="dim"><code class="tag">projects</code> — <strong>c'est la source qui fait tenir le rapprochement textuel</strong> des deux tables autonomes</td>
+        </tr>
+        <tr>
+          <td class="op">Questionnaires (7 types, modèles)</td>
+          <td class="dim"><code class="tag">/api/questionnaires/*</code></td>
+          <td class="dim"><code class="tag">questionnaires</code> seule</td>
+        </tr>
+        <tr>
+          <td class="op">Cartographie des risques</td>
+          <td class="dim"><code class="tag">/api/risk/*</code></td>
+          <td class="dim"><code class="tag">risk_files</code> seule</td>
+        </tr>
+        <tr>
+          <td class="op">Analyse des risques — relevé de visite</td>
+          <td class="dim"><code class="tag">/api/risk-assessment/*</code></td>
+          <td class="dim">Les cinq tables de la chaîne, plus <code class="tag">assessment_building_types</code> pour les types ajoutés. Les photos sont servies depuis le disque via <code class="tag">/photos/{id}</code>.</td>
+        </tr>
+        <tr>
+          <td class="op">Génération du rapport et du PPTX</td>
+          <td class="dim"><code class="tag">/api/rapport-bia/*</code></td>
+          <td class="dim">Aucune. Travaille sur les fichiers, pas sur la base.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>Relevé depuis projects_db.py · questionnaires_db.py · risk_analysis.py · risk_components.py · app.py</footer>

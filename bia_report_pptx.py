@@ -22,6 +22,8 @@ from pptx.oxml.ns import qn
 from pptx.util import Inches, Pt
 from lxml import etree
 
+from bia_etl import _dmia_to_hours
+
 
 # ── palette ────────────────────────────────────────────────────────────────
 RED   = RGBColor(0xE8, 0x39, 0x4C)
@@ -312,19 +314,36 @@ def _slides_applications(prs: Presentation, apps_df: pd.DataFrame, max_rows=16):
     apps_df = apps_df.copy()
     apps_df["DMIA"] = apps_df["DMIA"].fillna("Au-delà")
 
-    def _lot(dmia: str) -> str:
-        if dmia in ("H0","H+1","H+2","H+4","J+1"):
-            return "Lot 1 — Reprise ≤ J+1"
-        elif dmia in ("J+2","J+3","J+4","J+5"):
-            return "Lot 2 — Reprise J+2 à J+5"
-        else:
-            return "Lot 3 — Reprise au-delà de J+5"
+    # Parse each DMIA to a duration in hours once, then use it for both the
+    # lot split and the ordering. Unparseable values ("Au-delà", "-", blank)
+    # carry no committed deadline: they land in Lot 3 and sort last.
+    def _hours(dmia: str) -> float:
+        h = _dmia_to_hours(dmia)
+        return h if h is not None else float("inf")
 
-    apps_df["Lot"] = apps_df["DMIA"].apply(_lot)
+    def _lot(hours: float) -> str:
+        # Classified on the parsed duration, not on a fixed list of
+        # spellings. These workbooks overwhelmingly write the raw form —
+        # "3J", "4H", "10J" — so matching literal "J+3" strings dropped
+        # nearly everything into Lot 3 and left Lot 2 empty.
+        if hours <= 24:
+            return "Lot 1 — Reprise ≤ J+1"
+        if hours <= 120:
+            return "Lot 2 — Reprise J+2 à J+5"
+        return "Lot 3 — Reprise au-delà de J+5"
+
+    apps_df["_dmia_hours"] = apps_df["DMIA"].apply(_hours)
+    apps_df["Lot"] = apps_df["_dmia_hours"].apply(_lot)
     lot_order = ["Lot 1 — Reprise ≤ J+1","Lot 2 — Reprise J+2 à J+5","Lot 3 — Reprise au-delà de J+5"]
 
     for lot in lot_order:
-        grp = apps_df[apps_df["Lot"] == lot].sort_values("DMIA").reset_index(drop=True)
+        # Ascending by real delay, not by DMIA text — a plain string sort
+        # puts "J+10" before "J+2", comparing '1' against '2' character by
+        # character. Stable, so equal DMIAs keep their source order.
+        grp = (apps_df[apps_df["Lot"] == lot]
+              .sort_values("_dmia_hours", kind="stable")
+              .drop(columns="_dmia_hours")
+              .reset_index(drop=True))
         if grp.empty:
             continue
         pages = math.ceil(len(grp) / max_rows)

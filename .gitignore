@@ -1,5 +1,29 @@
-﻿__pycache__/
+__pycache__/
 *.pyc
 *.pyo
 .env
 *.tmp
+
+# ── Données client — NE JAMAIS committer ─────────────────────────────────────
+# projects_data contient les fiches et synthèses réelles des clients
+# (STAR, GAT, AMI, COMAR…). Rien de tout cela ne doit partir sur GitHub.
+projects_data/
+Test_files/
+
+# Base de données et ses sauvegardes : mêmes données client à l'intérieur
+*.db
+*.db.avant-*
+*.db-shm
+*.db-wal
+backups/
+
+# Outillage local
+.claude/
+.superpowers/
+
+# Livrables client et médias lourds non référencés par l'application
+static/GAT*.pptx
+static/*.mp4
+static/Presentation/Logo_STAR.png
+static/Presentation/logo-star-*.jpg
+server.log

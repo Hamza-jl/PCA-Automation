@@ -1,0 +1,91 @@
+﻿xx[ 0]: MARKER_DERNIERE_MàJ_FOUND
+xx[ 1]: MARKER_REFERENCE_FOUND
+xx[ 2]: Nom du (des) responsable(s)
+xx[ 3]: L&#x2019;entité se compose d&#x2019;un (01) manager et de trois (
+xx[ 4]: Les activités principales de l&#x2019;entité sont les suivantes :
+xx[ 5]: Les contraintes de l&#x2019;activité sont les suivantes :
+xx[ 6]: Les périodes critiques de l&#x2019;activité sont les suivantes :
+xx[ 7]: Historique des interruptions majeures
+xx[ 8]: Période critique
+xx[ 9]: (no long text found near)
+xx[10]: (no long text found near)
+xx[11]: (no long text found near)
+xx[12]: (no long text found near)
+xx[13]: (no long text found near)
+xx[14]: (no long text found near)
+xx[15]: (no long text found near)
+xx[16]: Pour cela, il faut prendre en considération la période la plus critique (début o
+xx[17]: (no long text found near)
+xx[18]: Image de marque
+xx[19]: Image de marque
+xx[20]: Désorganisation interne
+xx[21]: Désorganisation interne
+xx[22]: Juridique et réglementaire
+xx[23]: Juridique et réglementaire
+xx[24]: (no long text found near)
+xx[25]: (no long text found near)
+xx[26]: Premières actions à mener en cas de survenance d&#x2019;un sinistre
+xx[27]: Premières actions à mener en cas de survenance d&#x2019;un sinistre
+xx[28]: (no long text found near)
+xx[29]: (no long text found near)
+xx[30]: Ressources SI utilisées
+xx[31]: Ressources SI utilisées
+xx[32]: (no long text found near)
+xx[33]: (no long text found near)
+xx[34]: (no long text found near)
+xx[35]: (no long text found near)
+xx[36]: (no long text found near)
+xx[37]: (no long text found near)
+xx[38]: (no long text found near)
+xx[39]: (no long text found near)
+xx[40]: (no long text found near)
+xx[41]: (no long text found near)
+xx[42]: (no long text found near)
+xx[43]: (no long text found near)
+xx[44]: (no long text found near)
+xx[45]: (no long text found near)
+xx[46]: (no long text found near)
+xx[47]: (no long text found near)
+xx[48]: (no long text found near)
+xx[49]: (no long text found near)
+xx[50]: (no long text found near)
+xx[51]: (no long text found near)
+xx[52]: (no long text found near)
+xx[53]: (no long text found near)
+xx[54]: (no long text found near)
+xx[55]: (no long text found near)
+xx[56]: (no long text found near)
+xx[57]: (no long text found near)
+xx[58]: (no long text found near)
+xx[59]: (no long text found near)
+xx[60]: Commentaires
+xx[61]: (no long text found near)
+xx[62]: Télétravail
+xx[63]: (no long text found near)
+xx[64]: Commentaires
+xx[65]: Commentaires
+xx[66]: (no long text found near)
+xx[67]: (no long text found near)
+xx[68]: (no long text found near)
+xx[69]: (no long text found near)
+xx[70]: (no long text found near)
+xx[71]: (no long text found near)
+xx[72]: (no long text found near)
+xx[73]: (no long text found near)
+xx[74]: (no long text found near)
+xx[75]: (no long text found near)
+xx[76]: (no long text found near)
+xx[77]: (no long text found near)
+xx[78]: (no long text found near)
+xx[79]: (no long text found near)
+xx[80]: (no long text found near)
+xx[81]: (no long text found near)
+xx[82]: (no long text found near)
+xx[83]: (no long text found near)
+xx[84]: (no long text found near)
+xx[85]: (no long text found near)
+xx[86]: (no long text found near)
+xx[87]: (no long text found near)
+xx[88]: (no long text found near)
+xx[89]: Si oui, où ?
+xx[90]: Si oui, où ?

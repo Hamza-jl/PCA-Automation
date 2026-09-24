@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Base de projets BIA — Devoteam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAF8F4;--surface:#F0EDE6;--panel:#ECEAE4;
+  --border:rgba(26,24,20,.12);--text:#1A1814;--muted:#6B6860;
+  --accent:#F2485E;--accent-d:#d63448;--accent-bg:rgba(242,72,94,.08);
+  --blue:#1565C0;--blue-bg:#EFF6FF;--blue-border:#BFDBFE;
+  --green:#2E7D32;--green-bg:#E8F5E9;
+  --r:9px;--sh:0 2px 12px rgba(0,0,0,.07);
+}
+body{font-family:'Montserrat',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── topbar ── */
+#topbar{position:sticky;top:0;z-index:300;height:52px;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;padding:0 24px}
+#topbar .back{text-decoration:none;color:var(--muted);font-size:12px;
+  display:flex;align-items:center;gap:6px;transition:color .14s;white-space:nowrap}
+#topbar .back:hover{color:var(--accent)}
+#topbar .title{font-weight:800;font-size:14px;letter-spacing:.02em;flex:1}
+#topbar .title span{color:var(--accent)}
+.top-actions{display:flex;align-items:center;gap:10px}
+
+/* ── layout ── */
+#wrap{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:calc(100vh - 52px)}
+
+/* ── left panel ── */
+#panel-left{background:var(--surface);border-right:1px solid var(--border);
+  padding:24px 20px;display:flex;flex-direction:column;gap:20px;
+  position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto}
+.pnl-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px}
+
+/* stats bar */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat-box{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 10px;text-align:center}
+.stat-num{font-size:22px;font-weight:800;line-height:1}
+.stat-lbl{font-size:10px;font-weight:600;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.04em}
+.stat-box.blue .stat-num{color:var(--blue)}
+.stat-box.green .stat-num{color:var(--green)}
+.stat-box.accent .stat-num{color:var(--accent)}
+
+/* upload form */
+.upload-form{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;display:flex;flex-direction:column;gap:12px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
+input[type=text],select{
+  width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;
+  background:#fff;color:var(--text);font-family:inherit;font-size:13px;
+  transition:border-color .13s,box-shadow .13s;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(242,72,94,.1)}
+
+/* drop zone */
+.upzone{border:2px dashed var(--border);border-radius:var(--r);
+  padding:20px 16px;text-align:center;cursor:pointer;
+  transition:border-color .14s,background .14s;position:relative}
+.upzone:hover,.upzone.drag{border-color:var(--blue);background:var(--blue-bg)}
+.upzone.done{border-color:var(--green);background:var(--green-bg)}
+.upzone i{font-size:24px;color:var(--muted);margin-bottom:6px;display:block}
+.upzone.done i{color:var(--green)}
+.upzone p{font-size:12px;color:var(--muted);line-height:1.5}
+.upzone .file-list{font-size:11px;font-weight:600;color:var(--blue);margin-top:6px;line-height:1.7}
+.upzone.done p{color:var(--green)}
+
+.btn-upload{width:100%;padding:11px;background:var(--blue);color:#fff;
+  border:none;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .14s,transform .1s}
+.btn-upload:hover{background:#0D47A1;transform:translateY(-1px)}
+.btn-upload:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.up-result{font-size:11.5px;border-radius:7px;padding:9px 12px;line-height:1.6;display:none}
+.up-result.ok{background:var(--green-bg);border:1px solid #A5D6A7;color:#1B5E20}
+.up-result.err{background:#FFF3E0;border:1px solid #FFCC80;color:#E65100}
+
+/* ── right panel ── */
+#panel-right{padding:28px 32px;overflow-y:auto}
+.pg-title{font-size:20px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+.pg-sub{font-size:12.5px;color:var(--muted);margin-bottom:24px}
+
+/* search bar */
+.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.search-wrap{position:relative;flex:1}
+.search-wrap i{position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:13px;pointer-events:none}
+.search-wrap input{padding-left:32px;width:100%}
+.filter-sel{padding:8px 10px;border:1px solid var(--border);border-radius:7px;
+  background:#fff;color:var(--text);font-family:inherit;font-size:12.5px;outline:none;
+  transition:border-color .13s}
+.filter-sel:focus{border-color:var(--accent)}
+
+/* sector group */
+.sector-grp{margin-bottom:24px}
+.sector-hd{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);padding:8px 0 6px;border-bottom:1px solid var(--border);margin-bottom:10px;
+  display:flex;align-items:center;gap:8px}
+.sector-hd .sector-cnt{background:var(--muted);color:#fff;font-size:9.5px;font-weight:700;
+  border-radius:99px;padding:1px 6px}
+
+/* client group */
+.client-grp{margin-bottom:14px}
+.client-hd{font-size:13px;font-weight:700;padding:7px 12px;background:var(--panel);
+  border-radius:7px;margin-bottom:6px;display:flex;align-items:center;gap:8px;
+  border:1px solid var(--border)}
+.client-hd i{color:var(--muted);font-size:12px}
+.client-cnt{font-size:11px;font-weight:400;color:var(--muted);margin-left:auto}
+
+/* project cards */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.proj-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:12px 14px;display:flex;flex-direction:column;gap:8px;
+  transition:border-color .14s,box-shadow .14s;box-shadow:var(--sh)}
+.proj-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(21,101,192,.1)}
+.pc-top{display:flex;align-items:flex-start;gap:8px}
+.pc-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:14px;flex-shrink:0}
+.pc-icon.fiche{background:#E3F2FD;color:var(--blue)}
+.pc-icon.synthese{background:#E8F5E9;color:var(--green)}
+.pc-name{font-size:12.5px;font-weight:700;flex:1;word-break:break-word;line-height:1.4}
+.pc-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:3px 5px;
+  border-radius:5px;font-size:12px;flex-shrink:0;transition:background .1s,color .1s}
+.pc-del:hover{background:#fde8eb;color:var(--accent)}
+.pc-meta{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;
+  font-size:10.5px;font-weight:700}
+.tag.fiche{background:#E3F2FD;color:var(--blue)}
+.tag.synthese{background:#E8F5E9;color:var(--green)}
+.tag.acts{background:var(--accent-bg);color:var(--accent)}
+.pc-date{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+/* dmia explorer */
+.dmia-search-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;margin-bottom:20px}
+.dmia-search-row{display:flex;gap:10px;align-items:flex-end}
+.dmia-search-row .fg{flex:1}
+.btn-sm{padding:7px 14px;border-radius:7px;background:var(--blue);color:#fff;
+  border:none;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  white-space:nowrap;transition:background .14s}
+.btn-sm:hover{background:#0D47A1}
+.dmia-results{margin-top:12px}
+.dmia-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border:1px solid var(--border);border-radius:7px;margin-bottom:6px;background:#fff;
+  font-size:12px}
+.dmia-row:hover{background:var(--blue-bg);border-color:var(--blue-border)}
+.dmia-val{font-size:16px;font-weight:800;color:var(--blue);min-width:52px}
+.dmia-info{flex:1}
+.dmia-act{font-weight:600}
+.dmia-src{color:var(--muted);font-size:11px}
+.dmia-freq{background:var(--blue-bg);color:var(--blue);padding:1px 6px;
+  border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap}
+
+/* empty */
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.empty i{font-size:32px;display:block;margin-bottom:10px;opacity:.5}
+.empty p{font-size:13px}
+
+/* toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:#1A1814;color:#fff;padding:10px 20px;border-radius:99px;
+  font-size:12.5px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.22);
+  opacity:0;transition:opacity .2s;pointer-events:none;z-index:8000;white-space:nowrap}
+#toast.on{opacity:1}
+#toast.ok{background:var(--green)}
+#toast.err{background:var(--accent)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* confirm dialog */
+#confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:600;
+  display:none;align-items:center;justify-content:center}
+#confirm-overlay.on{display:flex}
+#confirm-box{background:#fff;border-radius:12px;padding:24px 28px;width:340px;
+  box-shadow:0 16px 40px rgba(0,0,0,.18)}
+#confirm-box h3{font-size:15px;font-weight:800;margin-bottom:8px}
+#confirm-box p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.confirm-btns{display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel{padding:8px 16px;border-radius:7px;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.btn-del-confirm{padding:8px 16px;border-radius:7px;background:var(--accent);border:none;
+  color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  transition:background .14s}
+.btn-del-confirm:hover{background:var(--accent-d)}
+
+@media(max-width:860px){
+  #wrap{grid-template-columns:1fr}
+  #panel-left{position:static;height:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- topbar -->
+<div id="topbar">
+  <a class="back" href="/"><i class="fa-solid fa-arrow-left"></i> Accueil</a>
+  <div class="title">Base de projets <span>BIA</span></div>
+  <div class="top-actions">
+    <a href="/static/fiche-editor.html" style="text-decoration:none;
+       display:flex;align-items:center;gap:6px;padding:7px 14px;
+       border-radius:7px;background:var(--accent);color:#fff;
+       font-size:12px;font-weight:700;transition:background .14s"
+       onmouseover="this.style.background='var(--accent-d)'"
+       onmouseout="this.style.background='var(--accent)'">
+      <i class="fa-solid fa-file-pen"></i> Éditeur de fiche
+    </a>
+  </div>
+</div>
+
+<!-- main layout -->
+<div id="wrap">
+
+  <!-- ── LEFT — upload panel ── -->
+  <aside id="panel-left">
+
+    <!-- stats -->
+    <div>
+      <div class="pnl-title"><i class="fa-solid fa-chart-simple fa-xs"></i> Statistiques</div>
+      <div class="stats-row">
+        <div class="stat-box blue">
+          <div class="stat-num" id="st-projects">0</div>
+          <div class="stat-lbl">Projets</div>
+        </div>
+        <div class="stat-box accent">
+          <div class="stat-num" id="st-activities">0</div>
+          <div class="stat-lbl">Activités</div>
+        </div>
+        <div class="stat-box green">
+          <div class="stat-num" id="st-clients">0</div>
+          <div class="stat-lbl">Clients</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DMIA Explorer -->
+    <div>
+      <div class="pnl-title"><i class="fa-solid fa-magnifying-glass fa-xs"></i> Explorateur DMIA</div>
+      <div class="dmia-search-wrap">
+        <div class="dmia-search-row">
+          <div class="fg">
+            <label>Nom de l'activité</label>
+            <input type="text" id="dmia-query" placeholder="ex. Paie, Comptabilité…"
+                   onkeydown="if(event.key==='Enter')searchDmia()">
+          </div>
+          <button class="btn-sm" onclick="searchDmia()"><i class="fa-solid fa-search"></i> Chercher</button>
+        </div>
+        <div class="fg" style="margin-top:10px">
+          <label>Filtrer par secteur</label>
+          <select id="dmia-sector">
+            <option value="">Tous les secteurs</option>
+            <option value="assurances">Assurances</option>
+            <option value="bancaire">Bancaire</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div id="dmia-results" class="dmia-results"></div>
+      </div>
+    </div>
+
+    <!-- upload form -->
+    <div>
+      <div class="pnl-title"><i class="fa-solid fa-cloud-arrow-up fa-xs"></i> Ajouter un projet</div>
+      <div class="upload-form">
+        <div class="fg">
+          <label>Secteur</label>
+          <select id="up-sector">
+            <option value="assurances">Assurances</option>
+            <option value="bancaire">Bancaire</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Nom du client</label>
+          <input type="text" id="up-client" placeholder="ex. STAR, BIAT, STB…">
+        </div>
+        <div class="fg">
+          <label>Type de document</label>
+          <select id="up-type" onchange="updateZoneLabel()">
+            <option value="fiche">Fiche BIA (.docx)</option>
+            <option value="synthese">Synthèse BIA (.xlsx)</option>
+          </select>
+        </div>
+
+        <div class="upzone" id="upzone"
+             onclick="document.getElementById('up-inp').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="handleDrop(event)">
+          <i class="fa-solid fa-file-arrow-up" id="up-icon"></i>
+          <p id="up-label">Cliquez ou glissez vos fichiers <strong>.docx</strong> ici</p>
+          <div class="file-list" id="up-file-list"></div>
+        </div>
+        <input type="file" id="up-inp" multiple accept=".docx,.xlsx"
+               style="display:none" onchange="pickFiles(this.files)">
+
+        <div id="up-result" class="up-result"></div>
+
+        <button class="btn-upload" id="btn-upload" onclick="doUpload()" disabled>
+          <i class="fa-solid fa-database"></i> Enregistrer dans la base
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── RIGHT — project library ── -->
+  <section id="panel-right">
+    <div class="pg-title">Bibliothèque de projets</div>
+    <div class="pg-sub">Fiches BIA et synthèses enregistrées — utilisées pour les suggestions DMIA et les alertes</div>
+
+    <!-- search + filter -->
+    <div class="search-bar">
+      <div class="search-wrap">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" id="search-inp" placeholder="Rechercher par client, fichier, secteur…"
+               oninput="renderTree()" style="padding-left:34px">
+      </div>
+      <select class="filter-sel" id="filter-sector" onchange="renderTree()">
+        <option value="">Tous les secteurs</option>
+        <option value="assurances">Assurances</option>
+        <option value="bancaire">Bancaire</option>
+        <option value="autre">Autre</option>
+      </select>
+      <select class="filter-sel" id="filter-type" onchange="renderTree()">
+        <option value="">Tous les types</option>
+        <option value="fiche">Fiches</option>
+        <option value="synthese">Synthèses</option>
+      </select>
+    </div>
+
+    <div id="tree-area"></div>
+  </section>
+</div>
+
+<!-- confirm dialog -->
+<div id="confirm-overlay" onclick="if(event.target===this)closeConfirm()">
+  <div id="confirm-box">
+    <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent);margin-right:8px"></i>Supprimer le projet ?</h3>
+    <p id="confirm-msg">Cette action supprimera le projet et toutes ses données DMIA associées. Elle est irréversible.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Annuler</button>
+      <button class="btn-del-confirm" id="btn-del-confirm">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let projectTree = {};     // raw {sector:{client:[{id,project_name,file_type,activity_count,created_at}]}}
+let pickedFiles = [];
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+async function init(){
+  await loadProjects();
+}
+
+async function loadProjects(){
+  try{
+    const r = await fetch('/api/projects/list');
+    projectTree = await r.json();
+    renderTree();
+    renderStats();
+  } catch(e){
+    showToast('Erreur de chargement','err');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════════
+function renderStats(){
+  let projects=0, activities=0, clients=new Set();
+  for(const [sec,cmap] of Object.entries(projectTree)){
+    for(const [cl,projs] of Object.entries(cmap)){
+      clients.add(cl);
+      projects += projs.length;
+      activities += projs.reduce((s,p)=>s+(p.activity_count||0),0);
+    }
+  }
+  document.getElementById('st-projects').textContent = projects;
+  document.getElementById('st-activities').textContent = activities;
+  document.getElementById('st-clients').textContent = clients.size;
+}
+
+// ══════════════════════════════════════════════════════════════
+// TREE RENDERING
+// ══════════════════════════════════════════════════════════════
+function renderTree(){
+  const area = document.getElementById('tree-area');
+  const q = document.getElementById('search-inp').value.toLowerCase().trim();
+  const fSec = document.getElementById('filter-sector').value;
+  const fType = document.getElementById('filter-type').value;
+
+  const sectors = Object.entries(projectTree).filter(([sec])=> !fSec || sec===fSec);
+  if(!sectors.length){
+    area.innerHTML = `<div class="empty"><i class="fa-solid fa-database"></i><p>Aucun projet enregistré.<br>Utilisez le formulaire pour en ajouter.</p></div>`;
+    return;
+  }
+
+  let html = '';
+  let anyVisible = false;
+
+  for(const [sec, cmap] of sectors){
+    let sectorHtml = '';
+    let sectorCount = 0;
+
+    for(const [cl, projs] of Object.entries(cmap)){
+      let filtered = projs.filter(p=>{
+        if(fType && p.file_type !== fType) return false;
+        if(q && !cl.toLowerCase().includes(q) && !p.project_name.toLowerCase().includes(q) && !sec.toLowerCase().includes(q)) return false;
+        return true;
+      });
+      if(!filtered.length) continue;
+      sectorCount += filtered.length;
+      anyVisible = true;
+
+      sectorHtml += `<div class="client-grp">
+        <div class="client-hd">
+          <i class="fa-solid fa-building"></i>
+          <span>${esc(cl)}</span>
+          <span class="client-cnt">${filtered.length} document${filtered.length>1?'s':''}</span>
+        </div>
+        <div class="proj-grid">
+          ${filtered.map(p=>projCard(p, sec, cl)).join('')}
+        </div>
+      </div>`;
+    }
+
+    if(!sectorHtml) continue;
+    const secLabel = sec.charAt(0).toUpperCase()+sec.slice(1);
+    html += `<div class="sector-grp">
+      <div class="sector-hd">
+        <i class="fa-solid fa-layer-group fa-xs"></i>
+        ${esc(secLabel)}
+        <span class="sector-cnt">${sectorCount}</span>
+      </div>
+      ${sectorHtml}
+    </div>`;
+  }
+
+  if(!anyVisible){
+    area.innerHTML = `<div class="empty"><i class="fa-solid fa-search"></i><p>Aucun résultat pour "<strong>${esc(q||'ce filtre')}</strong>".</p></div>`;
+  } else {
+    area.innerHTML = html;
+  }
+}
+
+function projCard(p, sec, cl){
+  const isF = p.file_type==='fiche' || p.file_type==='fiche_editor';
+  const dt = p.created_at ? p.created_at.slice(0,10) : '';
+  return `<div class="proj-card">
+    <div class="pc-top">
+      <div class="pc-icon ${p.file_type}">
+        <i class="fa-solid fa-${isF?'file-word':'file-excel'}"></i>
+      </div>
+      <div class="pc-name">${esc(p.project_name||'Sans nom')}</div>
+      <button class="pc-del" title="Supprimer" onclick="confirmDelete(${p.id},'${esc(p.project_name)}')">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    </div>
+    <div class="pc-meta">
+      <span class="tag ${isF?'fiche':'synthese'}">${isF?'Fiche':'Synthèse'}</span>
+      <span class="tag acts"><i class="fa-solid fa-list fa-xs"></i> ${p.activity_count} activité${p.activity_count!==1?'s':''}</span>
+    </div>
+    <div class="pc-date"><i class="fa-regular fa-clock fa-xs"></i> ${dt}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILE PICK / UPLOAD
+// ══════════════════════════════════════════════════════════════
+function updateZoneLabel(){
+  const t = document.getElementById('up-type').value;
+  document.getElementById('up-label').innerHTML =
+    t==='fiche'
+      ? 'Cliquez ou glissez vos fichiers <strong>.docx</strong> ici'
+      : 'Cliquez ou glissez vos fichiers <strong>.xlsx</strong> ici';
+  document.getElementById('up-icon').className =
+    t==='fiche' ? 'fa-solid fa-file-word' : 'fa-solid fa-file-excel';
+  // reset picked files if type changed
+  pickedFiles = [];
+  document.getElementById('up-file-list').textContent = '';
+  document.getElementById('upzone').classList.remove('done');
+  document.getElementById('btn-upload').disabled = true;
+}
+
+function pickFiles(files){
+  pickedFiles = Array.from(files);
+  applyPickedFiles();
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upzone').classList.remove('drag');
+  pickedFiles = Array.from(e.dataTransfer.files);
+  applyPickedFiles();
+}
+
+function applyPickedFiles(){
+  const zone = document.getElementById('upzone');
+  const list = document.getElementById('up-file-list');
+  if(!pickedFiles.length){ zone.classList.remove('done'); list.textContent=''; return; }
+  zone.classList.add('done');
+  list.innerHTML = pickedFiles.map(f=>`<div><i class="fa-solid fa-check" style="color:var(--green);margin-right:4px"></i>${esc(f.name)}</div>`).join('');
+  document.getElementById('btn-upload').disabled = false;
+  document.getElementById('up-result').style.display='none';
+}
+
+async function doUpload(){
+  const sector = document.getElementById('up-sector').value;
+  const client = document.getElementById('up-client').value.trim();
+  const ftype  = document.getElementById('up-type').value;
+  const btn    = document.getElementById('btn-upload');
+  const res    = document.getElementById('up-result');
+
+  if(!client){ showToast('Saisissez un nom de client','err'); return; }
+  if(!pickedFiles.length){ showToast('Sélectionnez au moins un fichier','err'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Traitement…';
+  res.style.display='none';
+
+  const fd = new FormData();
+  fd.append('sector', sector);
+  fd.append('client', client);
+  fd.append('file_type', ftype);
+  pickedFiles.forEach(f=>fd.append('files', f));
+
+  try{
+    const r = await fetch('/api/projects/upload', {method:'POST', body:fd});
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.detail||'Erreur serveur');
+
+    const ok = j.saved||[];
+    const err = j.errors||[];
+    let msg = ok.map(s=>`<div><i class="fa-solid fa-check"></i> <strong>${esc(s.file)}</strong> — ${s.activities} activités extraites</div>`).join('');
+    if(err.length) msg += err.map(e=>`<div style="color:#E65100"><i class="fa-solid fa-triangle-exclamation"></i> ${esc(e)}</div>`).join('');
+
+    res.className = 'up-result '+(ok.length?'ok':'err');
+    res.innerHTML = msg || 'Aucun fichier traité.';
+    res.style.display='block';
+
+    if(ok.length){
+      showToast(`${ok.length} fichier${ok.length>1?'s':''} enregistré${ok.length>1?'s':''}`, 'ok');
+      // reset
+      pickedFiles=[];
+      document.getElementById('up-file-list').textContent='';
+      document.getElementById('upzone').classList.remove('done');
+      document.getElementById('up-inp').value='';
+      await loadProjects();
+    }
+  } catch(e){
+    res.className='up-result err';
+    res.innerHTML=`<i class="fa-solid fa-triangle-exclamation"></i> ${esc(e.message)}`;
+    res.style.display='block';
+    showToast(e.message||'Erreur','err');
+  } finally{
+    btn.disabled=false;
+    btn.innerHTML='<i class="fa-solid fa-database"></i> Enregistrer dans la base';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// DELETE
+// ══════════════════════════════════════════════════════════════
+let pendingDeleteId = null;
+
+function confirmDelete(id, name){
+  pendingDeleteId = id;
+  document.getElementById('confirm-msg').innerHTML =
+    `Supprimer <strong>${esc(name)}</strong> ?<br><span style="color:var(--muted);font-size:12px">Toutes les données DMIA associées seront perdues.</span>`;
+  document.getElementById('confirm-overlay').classList.add('on');
+  document.getElementById('btn-del-confirm').onclick = doDelete;
+}
+
+function closeConfirm(){
+  pendingDeleteId=null;
+  document.getElementById('confirm-overlay').classList.remove('on');
+}
+
+async function doDelete(){
+  if(!pendingDeleteId) return;
+  const id = pendingDeleteId;
+  closeConfirm();
+  try{
+    const r = await fetch(`/api/projects/${id}`, {method:'DELETE'});
+    if(!r.ok) throw new Error('Erreur serveur');
+    showToast('Projet supprimé','ok');
+    await loadProjects();
+  } catch(e){
+    showToast(e.message||'Erreur suppression','err');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// DMIA EXPLORER
+// ══════════════════════════════════════════════════════════════
+async function searchDmia(){
+  const q = document.getElementById('dmia-query').value.trim();
+  const sec = document.getElementById('dmia-sector').value;
+  const area = document.getElementById('dmia-results');
+  if(!q){ area.innerHTML=''; return; }
+
+  area.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0"><span class="spin" style="border-top-color:var(--blue);border-color:rgba(21,101,192,.3)"></span> Recherche…</div>';
+  try{
+    const url = `/api/dmia-suggestions?activity=${encodeURIComponent(q)}`+(sec?`&sector=${encodeURIComponent(sec)}`:'');
+    const r = await fetch(url);
+    const data = await r.json();
+    if(!data.length){
+      area.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0;text-align:center"><i class="fa-solid fa-magnifying-glass"></i> Aucun résultat</div>';
+      return;
+    }
+    area.innerHTML = data.map(s=>`
+      <div class="dmia-row">
+        <div class="dmia-val">${esc(s.dmia_exprimee)}</div>
+        <div class="dmia-info">
+          <div class="dmia-act">${esc(s.activity_name)}</div>
+          <div class="dmia-src">${esc(s.client||'')} · ${esc(s.sector||'')}</div>
+        </div>
+        ${s.freq>1?`<span class="dmia-freq">×${s.freq}</span>`:''}
+      </div>`).join('');
+  } catch(e){
+    area.innerHTML=`<div style="font-size:12px;color:var(--accent);padding:6px 0">Erreur: ${esc(e.message)}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s||''); return d.innerHTML; }
+
+let _tt;
+function showToast(msg,cls){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='on'+(cls?' '+cls:'');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('on'),3600);
+}
+
+// ══════════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>

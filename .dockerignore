@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.log
+*.xlsx
+*.docx
+*.pptx
+*.pdf
+*.mp4
+Test_files/
+projects_data/
+node_modules/
+.env
+.git/

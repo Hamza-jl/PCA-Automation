@@ -1,0 +1,2094 @@
+<?xml version="1.0" encoding="utf-8"?>
+<w:styles xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:w16cex="http://schemas.microsoft.com/office/word/2018/wordml/cex" xmlns:w16cid="http://schemas.microsoft.com/office/word/2016/wordml/cid" xmlns:w16="http://schemas.microsoft.com/office/word/2018/wordml" xmlns:w16du="http://schemas.microsoft.com/office/word/2023/wordml/word16du" xmlns:w16sdtdh="http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash" xmlns:w16sdtfl="http://schemas.microsoft.com/office/word/2024/wordml/sdtformatlock" xmlns:w16se="http://schemas.microsoft.com/office/word/2015/wordml/symex" mc:Ignorable="w14 w15 w16se w16cid w16 w16cex w16sdtdh w16sdtfl w16du">
+  <w:docDefaults>
+    <w:rPrDefault>
+      <w:rPr>
+        <w:rFonts w:asciiTheme="minorHAnsi" w:eastAsiaTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorBidi"/>
+        <w:color w:val="56555A" w:themeColor="text1"/>
+        <w:sz w:val="22"/>
+        <w:szCs w:val="22"/>
+        <w:lang w:val="fr-FR" w:eastAsia="en-US" w:bidi="ar-SA"/>
+      </w:rPr>
+    </w:rPrDefault>
+    <w:pPrDefault>
+      <w:pPr>
+        <w:spacing w:after="200" w:line="276" w:lineRule="auto"/>
+      </w:pPr>
+    </w:pPrDefault>
+  </w:docDefaults>
+  <w:latentStyles w:defLockedState="0" w:defUIPriority="99" w:defSemiHidden="0" w:defUnhideWhenUsed="0" w:defQFormat="0" w:count="376">
+    <w:lsdException w:name="Normal" w:uiPriority="0"/>
+    <w:lsdException w:name="heading 1" w:uiPriority="0" w:qFormat="1"/>
+    <w:lsdException w:name="heading 2" w:uiPriority="0" w:qFormat="1"/>
+    <w:lsdException w:name="heading 3" w:uiPriority="9" w:qFormat="1"/>
+    <w:lsdException w:name="heading 4" w:uiPriority="9" w:qFormat="1"/>
+    <w:lsdException w:name="heading 5" w:semiHidden="1" w:uiPriority="9" w:qFormat="1"/>
+    <w:lsdException w:name="heading 6" w:semiHidden="1" w:uiPriority="9" w:qFormat="1"/>
+    <w:lsdException w:name="heading 7" w:semiHidden="1" w:uiPriority="9" w:qFormat="1"/>
+    <w:lsdException w:name="heading 8" w:semiHidden="1" w:uiPriority="9" w:qFormat="1"/>
+    <w:lsdException w:name="heading 9" w:semiHidden="1" w:uiPriority="9" w:qFormat="1"/>
+    <w:lsdException w:name="index 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 6" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 7" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 8" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index 9" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 1" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 2" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 3" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 4" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 5" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 6" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 7" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 8" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toc 9" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Normal Indent" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="annotation text" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="header" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="footer" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="index heading" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="caption" w:uiPriority="35"/>
+    <w:lsdException w:name="table of figures" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="envelope address" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="envelope return" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="footnote reference" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="annotation reference" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="line number" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="page number" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="endnote reference" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="endnote text" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="table of authorities" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="macro" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="toa heading" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Bullet" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Number" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Bullet 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Bullet 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Bullet 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Bullet 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Number 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Number 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Number 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Number 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Title" w:uiPriority="10" w:qFormat="1"/>
+    <w:lsdException w:name="Closing" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Signature" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Default Paragraph Font" w:semiHidden="1" w:uiPriority="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text Indent" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Continue" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Continue 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Continue 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Continue 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="List Continue 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Message Header" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Subtitle" w:semiHidden="1" w:uiPriority="11"/>
+    <w:lsdException w:name="Salutation" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Date" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text First Indent" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text First Indent 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Note Heading" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text Indent 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Body Text Indent 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Block Text" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Hyperlink" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="FollowedHyperlink" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Strong" w:uiPriority="22"/>
+    <w:lsdException w:name="Emphasis" w:uiPriority="20"/>
+    <w:lsdException w:name="Document Map" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Plain Text" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="E-mail Signature" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Top of Form" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Bottom of Form" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Normal (Web)" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Acronym" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Address" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Cite" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Code" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Definition" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Keyboard" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Preformatted" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Sample" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Typewriter" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="HTML Variable" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Normal Table" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="annotation subject" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="No List" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Outline List 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Outline List 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Outline List 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Simple 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Simple 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Simple 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Classic 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Classic 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Classic 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Classic 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Colorful 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Colorful 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Colorful 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Columns 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Columns 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Columns 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Columns 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Columns 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 6" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 7" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid 8" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 4" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 5" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 6" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 7" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table List 8" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table 3D effects 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table 3D effects 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table 3D effects 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Contemporary" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Elegant" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Professional" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Subtle 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Subtle 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Web 1" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Web 2" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Web 3" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Balloon Text" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Table Grid" w:uiPriority="0"/>
+    <w:lsdException w:name="Table Theme" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Placeholder Text" w:semiHidden="1"/>
+    <w:lsdException w:name="No Spacing" w:semiHidden="1" w:uiPriority="1"/>
+    <w:lsdException w:name="Light Shading" w:uiPriority="60"/>
+    <w:lsdException w:name="Light List" w:uiPriority="61"/>
+    <w:lsdException w:name="Light Grid" w:uiPriority="62"/>
+    <w:lsdException w:name="Medium Shading 1" w:uiPriority="63"/>
+    <w:lsdException w:name="Medium Shading 2" w:uiPriority="64"/>
+    <w:lsdException w:name="Medium List 1" w:uiPriority="65"/>
+    <w:lsdException w:name="Medium List 2" w:uiPriority="66"/>
+    <w:lsdException w:name="Medium Grid 1" w:uiPriority="67"/>
+    <w:lsdException w:name="Medium Grid 2" w:uiPriority="68"/>
+    <w:lsdException w:name="Medium Grid 3" w:uiPriority="69"/>
+    <w:lsdException w:name="Dark List" w:uiPriority="70"/>
+    <w:lsdException w:name="Colorful Shading" w:uiPriority="71"/>
+    <w:lsdException w:name="Colorful List" w:uiPriority="72"/>
+    <w:lsdException w:name="Colorful Grid" w:uiPriority="73"/>
+    <w:lsdException w:name="Light Shading Accent 1" w:uiPriority="60"/>
+    <w:lsdException w:name="Light List Accent 1" w:uiPriority="61"/>
+    <w:lsdException w:name="Light Grid Accent 1" w:uiPriority="62"/>
+    <w:lsdException w:name="Medium Shading 1 Accent 1" w:uiPriority="63"/>
+    <w:lsdException w:name="Medium Shading 2 Accent 1" w:uiPriority="64"/>
+    <w:lsdException w:name="Medium List 1 Accent 1" w:uiPriority="65"/>
+    <w:lsdException w:name="Revision" w:semiHidden="1"/>
+    <w:lsdException w:name="List Paragraph" w:uiPriority="34" w:qFormat="1"/>
+    <w:lsdException w:name="Quote" w:uiPriority="29"/>
+    <w:lsdException w:name="Intense Quote" w:uiPriority="30"/>
+    <w:lsdException w:name="Medium List 2 Accent 1" w:uiPriority="66"/>
+    <w:lsdException w:name="Medium Grid 1 Accent 1" w:uiPriority="67"/>
+    <w:lsdException w:name="Medium Grid 2 Accent 1" w:uiPriority="68"/>
+    <w:lsdException w:name="Medium Grid 3 Accent 1" w:uiPriority="69"/>
+    <w:lsdException w:name="Dark List Accent 1" w:uiPriority="70"/>
+    <w:lsdException w:name="Colorful Shading Accent 1" w:uiPriority="71"/>
+    <w:lsdException w:name="Colorful List Accent 1" w:uiPriority="72"/>
+    <w:lsdException w:name="Colorful Grid Accent 1" w:uiPriority="73"/>
+    <w:lsdException w:name="Light Shading Accent 2" w:uiPriority="60"/>
+    <w:lsdException w:name="Light List Accent 2" w:uiPriority="61"/>
+    <w:lsdException w:name="Light Grid Accent 2" w:uiPriority="62"/>
+    <w:lsdException w:name="Medium Shading 1 Accent 2" w:uiPriority="63"/>
+    <w:lsdException w:name="Medium Shading 2 Accent 2" w:uiPriority="64"/>
+    <w:lsdException w:name="Medium List 1 Accent 2" w:uiPriority="65"/>
+    <w:lsdException w:name="Medium List 2 Accent 2" w:uiPriority="66"/>
+    <w:lsdException w:name="Medium Grid 1 Accent 2" w:uiPriority="67"/>
+    <w:lsdException w:name="Medium Grid 2 Accent 2" w:uiPriority="68"/>
+    <w:lsdException w:name="Medium Grid 3 Accent 2" w:uiPriority="69"/>
+    <w:lsdException w:name="Dark List Accent 2" w:uiPriority="70"/>
+    <w:lsdException w:name="Colorful Shading Accent 2" w:uiPriority="71"/>
+    <w:lsdException w:name="Colorful List Accent 2" w:uiPriority="72"/>
+    <w:lsdException w:name="Colorful Grid Accent 2" w:uiPriority="73"/>
+    <w:lsdException w:name="Light Shading Accent 3" w:uiPriority="60"/>
+    <w:lsdException w:name="Light List Accent 3" w:uiPriority="61"/>
+    <w:lsdException w:name="Light Grid Accent 3" w:uiPriority="62"/>
+    <w:lsdException w:name="Medium Shading 1 Accent 3" w:uiPriority="63"/>
+    <w:lsdException w:name="Medium Shading 2 Accent 3" w:uiPriority="64"/>
+    <w:lsdException w:name="Medium List 1 Accent 3" w:uiPriority="65"/>
+    <w:lsdException w:name="Medium List 2 Accent 3" w:uiPriority="66"/>
+    <w:lsdException w:name="Medium Grid 1 Accent 3" w:uiPriority="67"/>
+    <w:lsdException w:name="Medium Grid 2 Accent 3" w:uiPriority="68"/>
+    <w:lsdException w:name="Medium Grid 3 Accent 3" w:uiPriority="69"/>
+    <w:lsdException w:name="Dark List Accent 3" w:uiPriority="70"/>
+    <w:lsdException w:name="Colorful Shading Accent 3" w:uiPriority="71"/>
+    <w:lsdException w:name="Colorful List Accent 3" w:uiPriority="72"/>
+    <w:lsdException w:name="Colorful Grid Accent 3" w:uiPriority="73"/>
+    <w:lsdException w:name="Light Shading Accent 4" w:uiPriority="60"/>
+    <w:lsdException w:name="Light List Accent 4" w:uiPriority="61"/>
+    <w:lsdException w:name="Light Grid Accent 4" w:uiPriority="62"/>
+    <w:lsdException w:name="Medium Shading 1 Accent 4" w:uiPriority="63"/>
+    <w:lsdException w:name="Medium Shading 2 Accent 4" w:uiPriority="64"/>
+    <w:lsdException w:name="Medium List 1 Accent 4" w:uiPriority="65"/>
+    <w:lsdException w:name="Medium List 2 Accent 4" w:uiPriority="66"/>
+    <w:lsdException w:name="Medium Grid 1 Accent 4" w:uiPriority="67"/>
+    <w:lsdException w:name="Medium Grid 2 Accent 4" w:uiPriority="68"/>
+    <w:lsdException w:name="Medium Grid 3 Accent 4" w:uiPriority="69"/>
+    <w:lsdException w:name="Dark List Accent 4" w:uiPriority="70"/>
+    <w:lsdException w:name="Colorful Shading Accent 4" w:uiPriority="71"/>
+    <w:lsdException w:name="Colorful List Accent 4" w:uiPriority="72"/>
+    <w:lsdException w:name="Colorful Grid Accent 4" w:uiPriority="73"/>
+    <w:lsdException w:name="Light Shading Accent 5" w:uiPriority="60"/>
+    <w:lsdException w:name="Light List Accent 5" w:uiPriority="61"/>
+    <w:lsdException w:name="Light Grid Accent 5" w:uiPriority="62"/>
+    <w:lsdException w:name="Medium Shading 1 Accent 5" w:uiPriority="63"/>
+    <w:lsdException w:name="Medium Shading 2 Accent 5" w:uiPriority="64"/>
+    <w:lsdException w:name="Medium List 1 Accent 5" w:uiPriority="65"/>
+    <w:lsdException w:name="Medium List 2 Accent 5" w:uiPriority="66"/>
+    <w:lsdException w:name="Medium Grid 1 Accent 5" w:uiPriority="67"/>
+    <w:lsdException w:name="Medium Grid 2 Accent 5" w:uiPriority="68"/>
+    <w:lsdException w:name="Medium Grid 3 Accent 5" w:uiPriority="69"/>
+    <w:lsdException w:name="Dark List Accent 5" w:uiPriority="70"/>
+    <w:lsdException w:name="Colorful Shading Accent 5" w:uiPriority="71"/>
+    <w:lsdException w:name="Colorful List Accent 5" w:uiPriority="72"/>
+    <w:lsdException w:name="Colorful Grid Accent 5" w:uiPriority="73"/>
+    <w:lsdException w:name="Light Shading Accent 6" w:uiPriority="60"/>
+    <w:lsdException w:name="Light List Accent 6" w:uiPriority="61"/>
+    <w:lsdException w:name="Light Grid Accent 6" w:uiPriority="62"/>
+    <w:lsdException w:name="Medium Shading 1 Accent 6" w:uiPriority="63"/>
+    <w:lsdException w:name="Medium Shading 2 Accent 6" w:uiPriority="64"/>
+    <w:lsdException w:name="Medium List 1 Accent 6" w:uiPriority="65"/>
+    <w:lsdException w:name="Medium List 2 Accent 6" w:uiPriority="66"/>
+    <w:lsdException w:name="Medium Grid 1 Accent 6" w:uiPriority="67"/>
+    <w:lsdException w:name="Medium Grid 2 Accent 6" w:uiPriority="68"/>
+    <w:lsdException w:name="Medium Grid 3 Accent 6" w:uiPriority="69"/>
+    <w:lsdException w:name="Dark List Accent 6" w:uiPriority="70"/>
+    <w:lsdException w:name="Colorful Shading Accent 6" w:uiPriority="71"/>
+    <w:lsdException w:name="Colorful List Accent 6" w:uiPriority="72"/>
+    <w:lsdException w:name="Colorful Grid Accent 6" w:uiPriority="73"/>
+    <w:lsdException w:name="Subtle Emphasis" w:uiPriority="19"/>
+    <w:lsdException w:name="Intense Emphasis" w:uiPriority="21"/>
+    <w:lsdException w:name="Subtle Reference" w:uiPriority="31"/>
+    <w:lsdException w:name="Intense Reference" w:uiPriority="32"/>
+    <w:lsdException w:name="Book Title" w:uiPriority="33"/>
+    <w:lsdException w:name="Bibliography" w:semiHidden="1" w:uiPriority="37" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="TOC Heading" w:semiHidden="1" w:uiPriority="39" w:unhideWhenUsed="1" w:qFormat="1"/>
+    <w:lsdException w:name="Plain Table 1" w:uiPriority="41"/>
+    <w:lsdException w:name="Plain Table 2" w:uiPriority="42"/>
+    <w:lsdException w:name="Plain Table 3" w:uiPriority="43"/>
+    <w:lsdException w:name="Plain Table 4" w:uiPriority="44"/>
+    <w:lsdException w:name="Plain Table 5" w:uiPriority="45"/>
+    <w:lsdException w:name="Grid Table Light" w:uiPriority="40"/>
+    <w:lsdException w:name="Grid Table 1 Light" w:uiPriority="46"/>
+    <w:lsdException w:name="Grid Table 2" w:uiPriority="47"/>
+    <w:lsdException w:name="Grid Table 3" w:uiPriority="48"/>
+    <w:lsdException w:name="Grid Table 4" w:uiPriority="49"/>
+    <w:lsdException w:name="Grid Table 5 Dark" w:uiPriority="50"/>
+    <w:lsdException w:name="Grid Table 6 Colorful" w:uiPriority="51"/>
+    <w:lsdException w:name="Grid Table 7 Colorful" w:uiPriority="52"/>
+    <w:lsdException w:name="Grid Table 1 Light Accent 1" w:uiPriority="46"/>
+    <w:lsdException w:name="Grid Table 2 Accent 1" w:uiPriority="47"/>
+    <w:lsdException w:name="Grid Table 3 Accent 1" w:uiPriority="48"/>
+    <w:lsdException w:name="Grid Table 4 Accent 1" w:uiPriority="49"/>
+    <w:lsdException w:name="Grid Table 5 Dark Accent 1" w:uiPriority="50"/>
+    <w:lsdException w:name="Grid Table 6 Colorful Accent 1" w:uiPriority="51"/>
+    <w:lsdException w:name="Grid Table 7 Colorful Accent 1" w:uiPriority="52"/>
+    <w:lsdException w:name="Grid Table 1 Light Accent 2" w:uiPriority="46"/>
+    <w:lsdException w:name="Grid Table 2 Accent 2" w:uiPriority="47"/>
+    <w:lsdException w:name="Grid Table 3 Accent 2" w:uiPriority="48"/>
+    <w:lsdException w:name="Grid Table 4 Accent 2" w:uiPriority="49"/>
+    <w:lsdException w:name="Grid Table 5 Dark Accent 2" w:uiPriority="50"/>
+    <w:lsdException w:name="Grid Table 6 Colorful Accent 2" w:uiPriority="51"/>
+    <w:lsdException w:name="Grid Table 7 Colorful Accent 2" w:uiPriority="52"/>
+    <w:lsdException w:name="Grid Table 1 Light Accent 3" w:uiPriority="46"/>
+    <w:lsdException w:name="Grid Table 2 Accent 3" w:uiPriority="47"/>
+    <w:lsdException w:name="Grid Table 3 Accent 3" w:uiPriority="48"/>
+    <w:lsdException w:name="Grid Table 4 Accent 3" w:uiPriority="49"/>
+    <w:lsdException w:name="Grid Table 5 Dark Accent 3" w:uiPriority="50"/>
+    <w:lsdException w:name="Grid Table 6 Colorful Accent 3" w:uiPriority="51"/>
+    <w:lsdException w:name="Grid Table 7 Colorful Accent 3" w:uiPriority="52"/>
+    <w:lsdException w:name="Grid Table 1 Light Accent 4" w:uiPriority="46"/>
+    <w:lsdException w:name="Grid Table 2 Accent 4" w:uiPriority="47"/>
+    <w:lsdException w:name="Grid Table 3 Accent 4" w:uiPriority="48"/>
+    <w:lsdException w:name="Grid Table 4 Accent 4" w:uiPriority="49"/>
+    <w:lsdException w:name="Grid Table 5 Dark Accent 4" w:uiPriority="50"/>
+    <w:lsdException w:name="Grid Table 6 Colorful Accent 4" w:uiPriority="51"/>
+    <w:lsdException w:name="Grid Table 7 Colorful Accent 4" w:uiPriority="52"/>
+    <w:lsdException w:name="Grid Table 1 Light Accent 5" w:uiPriority="46"/>
+    <w:lsdException w:name="Grid Table 2 Accent 5" w:uiPriority="47"/>
+    <w:lsdException w:name="Grid Table 3 Accent 5" w:uiPriority="48"/>
+    <w:lsdException w:name="Grid Table 4 Accent 5" w:uiPriority="49"/>
+    <w:lsdException w:name="Grid Table 5 Dark Accent 5" w:uiPriority="50"/>
+    <w:lsdException w:name="Grid Table 6 Colorful Accent 5" w:uiPriority="51"/>
+    <w:lsdException w:name="Grid Table 7 Colorful Accent 5" w:uiPriority="52"/>
+    <w:lsdException w:name="Grid Table 1 Light Accent 6" w:uiPriority="46"/>
+    <w:lsdException w:name="Grid Table 2 Accent 6" w:uiPriority="47"/>
+    <w:lsdException w:name="Grid Table 3 Accent 6" w:uiPriority="48"/>
+    <w:lsdException w:name="Grid Table 4 Accent 6" w:uiPriority="49"/>
+    <w:lsdException w:name="Grid Table 5 Dark Accent 6" w:uiPriority="50"/>
+    <w:lsdException w:name="Grid Table 6 Colorful Accent 6" w:uiPriority="51"/>
+    <w:lsdException w:name="Grid Table 7 Colorful Accent 6" w:uiPriority="52"/>
+    <w:lsdException w:name="List Table 1 Light" w:uiPriority="46"/>
+    <w:lsdException w:name="List Table 2" w:uiPriority="47"/>
+    <w:lsdException w:name="List Table 3" w:uiPriority="48"/>
+    <w:lsdException w:name="List Table 4" w:uiPriority="49"/>
+    <w:lsdException w:name="List Table 5 Dark" w:uiPriority="50"/>
+    <w:lsdException w:name="List Table 6 Colorful" w:uiPriority="51"/>
+    <w:lsdException w:name="List Table 7 Colorful" w:uiPriority="52"/>
+    <w:lsdException w:name="List Table 1 Light Accent 1" w:uiPriority="46"/>
+    <w:lsdException w:name="List Table 2 Accent 1" w:uiPriority="47"/>
+    <w:lsdException w:name="List Table 3 Accent 1" w:uiPriority="48"/>
+    <w:lsdException w:name="List Table 4 Accent 1" w:uiPriority="49"/>
+    <w:lsdException w:name="List Table 5 Dark Accent 1" w:uiPriority="50"/>
+    <w:lsdException w:name="List Table 6 Colorful Accent 1" w:uiPriority="51"/>
+    <w:lsdException w:name="List Table 7 Colorful Accent 1" w:uiPriority="52"/>
+    <w:lsdException w:name="List Table 1 Light Accent 2" w:uiPriority="46"/>
+    <w:lsdException w:name="List Table 2 Accent 2" w:uiPriority="47"/>
+    <w:lsdException w:name="List Table 3 Accent 2" w:uiPriority="48"/>
+    <w:lsdException w:name="List Table 4 Accent 2" w:uiPriority="49"/>
+    <w:lsdException w:name="List Table 5 Dark Accent 2" w:uiPriority="50"/>
+    <w:lsdException w:name="List Table 6 Colorful Accent 2" w:uiPriority="51"/>
+    <w:lsdException w:name="List Table 7 Colorful Accent 2" w:uiPriority="52"/>
+    <w:lsdException w:name="List Table 1 Light Accent 3" w:uiPriority="46"/>
+    <w:lsdException w:name="List Table 2 Accent 3" w:uiPriority="47"/>
+    <w:lsdException w:name="List Table 3 Accent 3" w:uiPriority="48"/>
+    <w:lsdException w:name="List Table 4 Accent 3" w:uiPriority="49"/>
+    <w:lsdException w:name="List Table 5 Dark Accent 3" w:uiPriority="50"/>
+    <w:lsdException w:name="List Table 6 Colorful Accent 3" w:uiPriority="51"/>
+    <w:lsdException w:name="List Table 7 Colorful Accent 3" w:uiPriority="52"/>
+    <w:lsdException w:name="List Table 1 Light Accent 4" w:uiPriority="46"/>
+    <w:lsdException w:name="List Table 2 Accent 4" w:uiPriority="47"/>
+    <w:lsdException w:name="List Table 3 Accent 4" w:uiPriority="48"/>
+    <w:lsdException w:name="List Table 4 Accent 4" w:uiPriority="49"/>
+    <w:lsdException w:name="List Table 5 Dark Accent 4" w:uiPriority="50"/>
+    <w:lsdException w:name="List Table 6 Colorful Accent 4" w:uiPriority="51"/>
+    <w:lsdException w:name="List Table 7 Colorful Accent 4" w:uiPriority="52"/>
+    <w:lsdException w:name="List Table 1 Light Accent 5" w:uiPriority="46"/>
+    <w:lsdException w:name="List Table 2 Accent 5" w:uiPriority="47"/>
+    <w:lsdException w:name="List Table 3 Accent 5" w:uiPriority="48"/>
+    <w:lsdException w:name="List Table 4 Accent 5" w:uiPriority="49"/>
+    <w:lsdException w:name="List Table 5 Dark Accent 5" w:uiPriority="50"/>
+    <w:lsdException w:name="List Table 6 Colorful Accent 5" w:uiPriority="51"/>
+    <w:lsdException w:name="List Table 7 Colorful Accent 5" w:uiPriority="52"/>
+    <w:lsdException w:name="List Table 1 Light Accent 6" w:uiPriority="46"/>
+    <w:lsdException w:name="List Table 2 Accent 6" w:uiPriority="47"/>
+    <w:lsdException w:name="List Table 3 Accent 6" w:uiPriority="48"/>
+    <w:lsdException w:name="List Table 4 Accent 6" w:uiPriority="49"/>
+    <w:lsdException w:name="List Table 5 Dark Accent 6" w:uiPriority="50"/>
+    <w:lsdException w:name="List Table 6 Colorful Accent 6" w:uiPriority="51"/>
+    <w:lsdException w:name="List Table 7 Colorful Accent 6" w:uiPriority="52"/>
+    <w:lsdException w:name="Mention" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Smart Hyperlink" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Hashtag" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Unresolved Mention" w:semiHidden="1" w:unhideWhenUsed="1"/>
+    <w:lsdException w:name="Smart Link" w:semiHidden="1" w:unhideWhenUsed="1"/>
+  </w:latentStyles>
+  <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
+    <w:name w:val="Normal"/>
+    <w:rsid w:val="008E36CA"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="280" w:lineRule="atLeast"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre1">
+    <w:name w:val="heading 1"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre1Car"/>
+    <w:qFormat/>
+    <w:rsid w:val="00BA42D1"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:after="120" w:line="360" w:lineRule="atLeast"/>
+      <w:outlineLvl w:val="0"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+      <w:sz w:val="36"/>
+      <w:szCs w:val="36"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre2">
+    <w:name w:val="heading 2"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre2Car"/>
+    <w:qFormat/>
+    <w:rsid w:val="00031A0A"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="1"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="220" w:after="120" w:line="360" w:lineRule="atLeast"/>
+      <w:outlineLvl w:val="1"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:sz w:val="27"/>
+      <w:szCs w:val="27"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre3">
+    <w:name w:val="heading 3"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre3Car"/>
+    <w:qFormat/>
+    <w:rsid w:val="00031A0A"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="2"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="200" w:after="60"/>
+      <w:outlineLvl w:val="2"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:sz w:val="22"/>
+      <w:lang w:val="en-GB"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre4">
+    <w:name w:val="heading 4"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre4Car"/>
+    <w:qFormat/>
+    <w:rsid w:val="00031A0A"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="3"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="120" w:after="60"/>
+      <w:outlineLvl w:val="3"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:iCs/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre5">
+    <w:name w:val="heading 5"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre5Car"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:qFormat/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="4"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="200"/>
+      <w:outlineLvl w:val="4"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:color w:val="00477F" w:themeColor="accent1" w:themeShade="7F"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre6">
+    <w:name w:val="heading 6"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre6Car"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:qFormat/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="5"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="200"/>
+      <w:outlineLvl w:val="5"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:i/>
+      <w:iCs/>
+      <w:color w:val="00477F" w:themeColor="accent1" w:themeShade="7F"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre7">
+    <w:name w:val="heading 7"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre7Car"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:qFormat/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="6"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="200"/>
+      <w:outlineLvl w:val="6"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:i/>
+      <w:iCs/>
+      <w:color w:val="7F7D85" w:themeColor="text1" w:themeTint="BF"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre8">
+    <w:name w:val="heading 8"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre8Car"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:qFormat/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="7"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="200"/>
+      <w:outlineLvl w:val="7"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:color w:val="7F7D85" w:themeColor="text1" w:themeTint="BF"/>
+      <w:sz w:val="20"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre9">
+    <w:name w:val="heading 9"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="Titre9Car"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:qFormat/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:pPr>
+      <w:keepNext/>
+      <w:keepLines/>
+      <w:numPr>
+        <w:ilvl w:val="8"/>
+        <w:numId w:val="3"/>
+      </w:numPr>
+      <w:spacing w:before="200"/>
+      <w:outlineLvl w:val="8"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:i/>
+      <w:iCs/>
+      <w:color w:val="7F7D85" w:themeColor="text1" w:themeTint="BF"/>
+      <w:sz w:val="20"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:default="1" w:styleId="Policepardfaut">
+    <w:name w:val="Default Paragraph Font"/>
+    <w:uiPriority w:val="1"/>
+    <w:semiHidden/>
+    <w:unhideWhenUsed/>
+  </w:style>
+  <w:style w:type="table" w:default="1" w:styleId="TableauNormal">
+    <w:name w:val="Normal Table"/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:unhideWhenUsed/>
+    <w:tblPr>
+      <w:tblInd w:w="0" w:type="dxa"/>
+      <w:tblCellMar>
+        <w:top w:w="0" w:type="dxa"/>
+        <w:left w:w="108" w:type="dxa"/>
+        <w:bottom w:w="0" w:type="dxa"/>
+        <w:right w:w="108" w:type="dxa"/>
+      </w:tblCellMar>
+    </w:tblPr>
+  </w:style>
+  <w:style w:type="numbering" w:default="1" w:styleId="Aucuneliste">
+    <w:name w:val="No List"/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:unhideWhenUsed/>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="En-tte">
+    <w:name w:val="header"/>
+    <w:aliases w:val="normal3,Header_En tete,En-tête1,E.e,En-tête Portrait,Aston En-tête,head,En-tête tbo,Formations,Cover Page,h"/>
+    <w:link w:val="En-tteCar"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="008747E0"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="240" w:lineRule="exact"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="20"/>
+      <w:lang w:val="en-US"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="En-tteCar">
+    <w:name w:val="En-tête Car"/>
+    <w:aliases w:val="normal3 Car,Header_En tete Car,En-tête1 Car,E.e Car,En-tête Portrait Car,Aston En-tête Car,head Car,En-tête tbo Car,Formations Car,Cover Page Car,h Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="En-tte"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="008747E0"/>
+    <w:rPr>
+      <w:sz w:val="20"/>
+      <w:lang w:val="en-US"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Pieddepage">
+    <w:name w:val="footer"/>
+    <w:link w:val="PieddepageCar"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="008747E0"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="240" w:lineRule="exact"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="20"/>
+      <w:lang w:val="en-US"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="PieddepageCar">
+    <w:name w:val="Pied de page Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Pieddepage"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="008747E0"/>
+    <w:rPr>
+      <w:sz w:val="20"/>
+      <w:lang w:val="en-US"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Textedebulles">
+    <w:name w:val="Balloon Text"/>
+    <w:basedOn w:val="Normal"/>
+    <w:link w:val="TextedebullesCar"/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00CD4C5A"/>
+    <w:pPr>
+      <w:spacing w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Tahoma" w:hAnsi="Tahoma" w:cs="Tahoma"/>
+      <w:sz w:val="16"/>
+      <w:szCs w:val="16"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="TextedebullesCar">
+    <w:name w:val="Texte de bulles Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Textedebulles"/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00CD4C5A"/>
+    <w:rPr>
+      <w:rFonts w:ascii="Tahoma" w:hAnsi="Tahoma" w:cs="Tahoma"/>
+      <w:sz w:val="16"/>
+      <w:szCs w:val="16"/>
+      <w:lang w:val="en-US"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="table" w:styleId="Grilledutableau">
+    <w:name w:val="Table Grid"/>
+    <w:basedOn w:val="TableauNormal"/>
+    <w:rsid w:val="00325034"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:tblPr>
+      <w:tblStyleRowBandSize w:val="1"/>
+      <w:tblStyleColBandSize w:val="1"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:insideH w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+      </w:tblBorders>
+      <w:tblCellMar>
+        <w:top w:w="57" w:type="dxa"/>
+        <w:bottom w:w="85" w:type="dxa"/>
+      </w:tblCellMar>
+    </w:tblPr>
+    <w:tcPr>
+      <w:shd w:val="clear" w:color="auto" w:fill="F3F5D7"/>
+    </w:tcPr>
+    <w:tblStylePr w:type="firstRow">
+      <w:rPr>
+        <w:b/>
+        <w:i w:val="0"/>
+        <w:color w:val="FFFFFF" w:themeColor="background1"/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="nil"/>
+          <w:left w:val="nil"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="nil"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="315B6D" w:themeFill="accent5"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="firstCol">
+      <w:rPr>
+        <w:b/>
+        <w:i w:val="0"/>
+        <w:color w:val="FFFFFF" w:themeColor="background1"/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="315B6D" w:themeFill="accent5"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Vert">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="F3F5D7"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band2Vert">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="D6EBE7" w:themeFill="accent6"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="nil"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="nil"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="D6EBE7" w:themeFill="accent6"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band2Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="nil"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="nil"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="F3F5D7"/>
+      </w:tcPr>
+    </w:tblStylePr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Date">
+    <w:name w:val="Date"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="DateCar"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="00F762F9"/>
+    <w:rPr>
+      <w:noProof/>
+      <w:sz w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="DateCar">
+    <w:name w:val="Date Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Date"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="00F762F9"/>
+    <w:rPr>
+      <w:noProof/>
+      <w:color w:val="56555A" w:themeColor="text1"/>
+      <w:sz w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Titleofdocument">
+    <w:name w:val="Title of document"/>
+    <w:basedOn w:val="Normal"/>
+    <w:qFormat/>
+    <w:rsid w:val="00DF7989"/>
+    <w:pPr>
+      <w:spacing w:after="40" w:line="680" w:lineRule="atLeast"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:hAnsiTheme="majorHAnsi"/>
+      <w:b/>
+      <w:sz w:val="56"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Subtitleofdocument">
+    <w:name w:val="Subtitle of document"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="1"/>
+    <w:qFormat/>
+    <w:rsid w:val="009E5EE8"/>
+    <w:pPr>
+      <w:spacing w:after="720" w:line="420" w:lineRule="exact"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="34"/>
+      <w:szCs w:val="34"/>
+      <w:lang w:val="en-GB"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Pages">
+    <w:name w:val="Pages"/>
+    <w:basedOn w:val="Pieddepage"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00FA2F17"/>
+    <w:pPr>
+      <w:tabs>
+        <w:tab w:val="center" w:pos="4820"/>
+        <w:tab w:val="right" w:pos="10206"/>
+      </w:tabs>
+      <w:ind w:left="-567" w:right="-1"/>
+      <w:jc w:val="right"/>
+    </w:pPr>
+    <w:rPr>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+      <w:sz w:val="16"/>
+      <w:szCs w:val="16"/>
+      <w:lang w:val="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Datefooter">
+    <w:name w:val="Date footer"/>
+    <w:basedOn w:val="Date"/>
+    <w:semiHidden/>
+    <w:rsid w:val="000C6C17"/>
+    <w:pPr>
+      <w:framePr w:wrap="around" w:vAnchor="page" w:hAnchor="page" w:xAlign="center" w:yAlign="bottom"/>
+      <w:spacing w:line="240" w:lineRule="exact"/>
+      <w:suppressOverlap/>
+      <w:jc w:val="center"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="16"/>
+      <w:szCs w:val="16"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Titleheader">
+    <w:name w:val="Title header"/>
+    <w:basedOn w:val="En-tte"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00886E7A"/>
+    <w:pPr>
+      <w:framePr w:wrap="around" w:vAnchor="page" w:hAnchor="page" w:xAlign="right" w:yAlign="top"/>
+      <w:spacing w:line="160" w:lineRule="exact"/>
+      <w:ind w:left="2268"/>
+      <w:jc w:val="right"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:noProof/>
+      <w:sz w:val="15"/>
+      <w:szCs w:val="15"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Visuals">
+    <w:name w:val="Visuals"/>
+    <w:basedOn w:val="En-tte"/>
+    <w:rsid w:val="00F603FE"/>
+    <w:pPr>
+      <w:framePr w:wrap="around" w:vAnchor="page" w:hAnchor="margin" w:y="15423"/>
+      <w:spacing w:line="240" w:lineRule="atLeast"/>
+      <w:ind w:left="-28"/>
+      <w:suppressOverlap/>
+      <w:jc w:val="center"/>
+    </w:pPr>
+    <w:rPr>
+      <w:noProof/>
+      <w:lang w:val="fr-FR" w:eastAsia="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Clientheader">
+    <w:name w:val="Client header"/>
+    <w:basedOn w:val="Titleheader"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00892E00"/>
+    <w:pPr>
+      <w:framePr w:wrap="around"/>
+      <w:spacing w:line="150" w:lineRule="exact"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b w:val="0"/>
+      <w:sz w:val="13"/>
+      <w:szCs w:val="13"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Referenceheader">
+    <w:name w:val="Reference header"/>
+    <w:basedOn w:val="Titleheader"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00892E00"/>
+    <w:pPr>
+      <w:framePr w:wrap="around"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b w:val="0"/>
+      <w:sz w:val="13"/>
+      <w:szCs w:val="13"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Copyrightfooter">
+    <w:name w:val="Copyright footer"/>
+    <w:basedOn w:val="Datefooter"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00892E00"/>
+    <w:pPr>
+      <w:framePr w:wrap="around"/>
+      <w:jc w:val="left"/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre1Car">
+    <w:name w:val="Titre 1 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre1"/>
+    <w:rsid w:val="00E07C1E"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+      <w:sz w:val="36"/>
+      <w:szCs w:val="36"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre2Car">
+    <w:name w:val="Titre 2 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre2"/>
+    <w:rsid w:val="00E07C1E"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:sz w:val="27"/>
+      <w:szCs w:val="27"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre3Car">
+    <w:name w:val="Titre 3 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre3"/>
+    <w:rsid w:val="00E07C1E"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:lang w:val="en-GB"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Paragraphedeliste">
+    <w:name w:val="List Paragraph"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="34"/>
+    <w:qFormat/>
+    <w:rsid w:val="00C4162B"/>
+    <w:pPr>
+      <w:ind w:left="720"/>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Bullet1">
+    <w:name w:val="Bullet 1"/>
+    <w:uiPriority w:val="1"/>
+    <w:qFormat/>
+    <w:rsid w:val="00DB3077"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="2"/>
+      </w:numPr>
+      <w:spacing w:after="0" w:line="280" w:lineRule="atLeast"/>
+      <w:ind w:left="567" w:hanging="283"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="18"/>
+      <w:lang w:val="en-GB"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Bullet2">
+    <w:name w:val="Bullet 2"/>
+    <w:basedOn w:val="Bullet1"/>
+    <w:uiPriority w:val="1"/>
+    <w:qFormat/>
+    <w:rsid w:val="00DB3077"/>
+    <w:pPr>
+      <w:numPr>
+        <w:ilvl w:val="1"/>
+      </w:numPr>
+      <w:ind w:left="851" w:hanging="284"/>
+    </w:pPr>
+    <w:rPr>
+      <w:lang w:val="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Listepuces">
+    <w:name w:val="List Bullet"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="008618C8"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="1"/>
+      </w:numPr>
+      <w:contextualSpacing/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Bullet3">
+    <w:name w:val="Bullet 3"/>
+    <w:basedOn w:val="Bullet1"/>
+    <w:uiPriority w:val="1"/>
+    <w:qFormat/>
+    <w:rsid w:val="00DB3077"/>
+    <w:pPr>
+      <w:numPr>
+        <w:ilvl w:val="2"/>
+      </w:numPr>
+      <w:ind w:left="1134" w:hanging="283"/>
+    </w:pPr>
+    <w:rPr>
+      <w:lang w:val="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Textitalic">
+    <w:name w:val="Text italic"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="0064417E"/>
+    <w:rPr>
+      <w:i/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Textbolditalic">
+    <w:name w:val="Text bold italic"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="0064417E"/>
+    <w:rPr>
+      <w:b/>
+      <w:i/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Textbold">
+    <w:name w:val="Text bold"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="0064417E"/>
+    <w:rPr>
+      <w:b/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Textemphasis">
+    <w:name w:val="Text emphasis"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="00FD13C7"/>
+    <w:rPr>
+      <w:b/>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+      <w:lang w:val="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Textemphasisintense1">
+    <w:name w:val="Text emphasis intense 1"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="00A95034"/>
+    <w:rPr>
+      <w:u w:val="single"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Textemphasisintense2">
+    <w:name w:val="Text emphasis intense 2"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="00A95034"/>
+    <w:rPr>
+      <w:u w:val="single" w:color="F8485E" w:themeColor="text2"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Reference">
+    <w:name w:val="Reference"/>
+    <w:basedOn w:val="Date"/>
+    <w:uiPriority w:val="2"/>
+    <w:rsid w:val="00F762F9"/>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Version">
+    <w:name w:val="Version"/>
+    <w:basedOn w:val="Date"/>
+    <w:uiPriority w:val="2"/>
+    <w:rsid w:val="00F762F9"/>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Lgende">
+    <w:name w:val="caption"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:uiPriority w:val="2"/>
+    <w:rsid w:val="00D82EE3"/>
+    <w:pPr>
+      <w:spacing w:before="120" w:after="200" w:line="240" w:lineRule="atLeast"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:bCs/>
+      <w:i/>
+      <w:color w:val="000000" w:themeColor="background2"/>
+      <w:sz w:val="15"/>
+      <w:szCs w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre4Car">
+    <w:name w:val="Titre 4 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre4"/>
+    <w:rsid w:val="00E07C1E"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:iCs/>
+      <w:sz w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:styleId="Lienhypertexte">
+    <w:name w:val="Hyperlink"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="005871E9"/>
+    <w:rPr>
+      <w:color w:val="56555A" w:themeColor="hyperlink"/>
+      <w:u w:val="single"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Notedebasdepage">
+    <w:name w:val="footnote text"/>
+    <w:basedOn w:val="Normal"/>
+    <w:link w:val="NotedebasdepageCar"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="003F6DD7"/>
+    <w:pPr>
+      <w:framePr w:wrap="around" w:hAnchor="margin" w:yAlign="bottom"/>
+      <w:spacing w:line="180" w:lineRule="exact"/>
+    </w:pPr>
+    <w:rPr>
+      <w:i/>
+      <w:sz w:val="15"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="NotedebasdepageCar">
+    <w:name w:val="Note de bas de page Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Notedebasdepage"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="003F6DD7"/>
+    <w:rPr>
+      <w:i/>
+      <w:color w:val="56555A" w:themeColor="text1"/>
+      <w:sz w:val="15"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:styleId="Appelnotedebasdep">
+    <w:name w:val="footnote reference"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="005871E9"/>
+    <w:rPr>
+      <w:vertAlign w:val="superscript"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Text">
+    <w:name w:val="Text"/>
+    <w:basedOn w:val="Normal"/>
+    <w:link w:val="TextCar"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="003F7931"/>
+    <w:pPr>
+      <w:jc w:val="both"/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Titlecontent">
+    <w:name w:val="Title content"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="3"/>
+    <w:rsid w:val="0073523A"/>
+    <w:pPr>
+      <w:framePr w:wrap="around" w:vAnchor="page" w:hAnchor="page" w:xAlign="center" w:y="1759"/>
+      <w:spacing w:line="264" w:lineRule="atLeast"/>
+      <w:ind w:left="1134" w:right="1134"/>
+    </w:pPr>
+    <w:rPr>
+      <w:color w:val="FFFFFF" w:themeColor="background1"/>
+      <w:sz w:val="22"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Titlesuivi">
+    <w:name w:val="Title suivi"/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:pPr>
+      <w:spacing w:line="360" w:lineRule="atLeast"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+      <w:sz w:val="36"/>
+      <w:szCs w:val="36"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Subtitlesuivi">
+    <w:name w:val="Subtitle suivi"/>
+    <w:uiPriority w:val="3"/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:pPr>
+      <w:spacing w:before="220" w:after="120" w:line="360" w:lineRule="atLeast"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:b/>
+      <w:bCs/>
+      <w:sz w:val="27"/>
+      <w:szCs w:val="27"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre5Car">
+    <w:name w:val="Titre 5 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre5"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:color w:val="00477F" w:themeColor="accent1" w:themeShade="7F"/>
+      <w:sz w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre6Car">
+    <w:name w:val="Titre 6 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre6"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:i/>
+      <w:iCs/>
+      <w:color w:val="00477F" w:themeColor="accent1" w:themeShade="7F"/>
+      <w:sz w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre7Car">
+    <w:name w:val="Titre 7 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre7"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:i/>
+      <w:iCs/>
+      <w:color w:val="7F7D85" w:themeColor="text1" w:themeTint="BF"/>
+      <w:sz w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre8Car">
+    <w:name w:val="Titre 8 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre8"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:color w:val="7F7D85" w:themeColor="text1" w:themeTint="BF"/>
+      <w:sz w:val="20"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Titre9Car">
+    <w:name w:val="Titre 9 Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre9"/>
+    <w:uiPriority w:val="9"/>
+    <w:semiHidden/>
+    <w:rsid w:val="00AD7C68"/>
+    <w:rPr>
+      <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+      <w:i/>
+      <w:iCs/>
+      <w:color w:val="7F7D85" w:themeColor="text1" w:themeTint="BF"/>
+      <w:sz w:val="20"/>
+      <w:szCs w:val="20"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="TM1">
+    <w:name w:val="toc 1"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:autoRedefine/>
+    <w:uiPriority w:val="39"/>
+    <w:rsid w:val="002244B7"/>
+    <w:pPr>
+      <w:tabs>
+        <w:tab w:val="right" w:pos="9639"/>
+      </w:tabs>
+      <w:spacing w:before="120" w:line="320" w:lineRule="exact"/>
+      <w:ind w:right="282"/>
+    </w:pPr>
+    <w:rPr>
+      <w:noProof/>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+      <w:sz w:val="27"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="TM2">
+    <w:name w:val="toc 2"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:autoRedefine/>
+    <w:uiPriority w:val="39"/>
+    <w:rsid w:val="002244B7"/>
+    <w:pPr>
+      <w:tabs>
+        <w:tab w:val="right" w:pos="9639"/>
+      </w:tabs>
+      <w:spacing w:line="320" w:lineRule="exact"/>
+      <w:ind w:left="295" w:right="282"/>
+    </w:pPr>
+    <w:rPr>
+      <w:noProof/>
+      <w:sz w:val="22"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="TM3">
+    <w:name w:val="toc 3"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:autoRedefine/>
+    <w:uiPriority w:val="39"/>
+    <w:rsid w:val="002244B7"/>
+    <w:pPr>
+      <w:tabs>
+        <w:tab w:val="right" w:pos="9639"/>
+      </w:tabs>
+      <w:spacing w:line="260" w:lineRule="exact"/>
+      <w:ind w:left="488" w:right="282"/>
+    </w:pPr>
+    <w:rPr>
+      <w:noProof/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="Texthighlighton">
+    <w:name w:val="Text highlight on"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="2"/>
+    <w:qFormat/>
+    <w:rsid w:val="00CD4964"/>
+    <w:rPr>
+      <w:bdr w:val="single" w:sz="8" w:space="0" w:color="F8485E" w:themeColor="text2"/>
+      <w:shd w:val="clear" w:color="auto" w:fill="FDDADE" w:themeFill="text2" w:themeFillTint="33"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="TextCar">
+    <w:name w:val="Text Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Text"/>
+    <w:uiPriority w:val="2"/>
+    <w:rsid w:val="003F7931"/>
+    <w:rPr>
+      <w:sz w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Textcontact">
+    <w:name w:val="Text contact"/>
+    <w:basedOn w:val="Text"/>
+    <w:uiPriority w:val="2"/>
+    <w:rsid w:val="0027586E"/>
+    <w:pPr>
+      <w:spacing w:line="216" w:lineRule="atLeast"/>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Titlecontact">
+    <w:name w:val="Title contact"/>
+    <w:basedOn w:val="Text"/>
+    <w:uiPriority w:val="3"/>
+    <w:rsid w:val="00B0217E"/>
+    <w:pPr>
+      <w:framePr w:wrap="around" w:hAnchor="margin" w:yAlign="bottom"/>
+      <w:spacing w:after="240"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b/>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+      <w:sz w:val="27"/>
+      <w:szCs w:val="27"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Boxtext">
+    <w:name w:val="Box text"/>
+    <w:basedOn w:val="Text"/>
+    <w:rsid w:val="00146959"/>
+    <w:pPr>
+      <w:pBdr>
+        <w:top w:val="single" w:sz="8" w:space="1" w:color="D6EBE7" w:themeColor="accent6"/>
+        <w:left w:val="single" w:sz="24" w:space="4" w:color="D6EBE7" w:themeColor="accent6"/>
+        <w:bottom w:val="single" w:sz="48" w:space="1" w:color="D6EBE7" w:themeColor="accent6"/>
+        <w:right w:val="single" w:sz="24" w:space="4" w:color="D6EBE7" w:themeColor="accent6"/>
+      </w:pBdr>
+      <w:shd w:val="clear" w:color="auto" w:fill="D6EBE7" w:themeFill="accent6"/>
+      <w:spacing w:line="320" w:lineRule="atLeast"/>
+      <w:ind w:left="170" w:right="170"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="22"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Boxtitle">
+    <w:name w:val="Box title"/>
+    <w:basedOn w:val="Boxtext"/>
+    <w:rsid w:val="008E36CA"/>
+    <w:rPr>
+      <w:b/>
+      <w:color w:val="F8485E" w:themeColor="text2"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="table" w:customStyle="1" w:styleId="Grilleclaire-Accent11">
+    <w:name w:val="Grille claire - Accent 11"/>
+    <w:basedOn w:val="TableauNormal"/>
+    <w:uiPriority w:val="62"/>
+    <w:rsid w:val="00367467"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Times New Roman" w:eastAsia="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+      <w:color w:val="auto"/>
+      <w:sz w:val="20"/>
+      <w:szCs w:val="20"/>
+      <w:lang w:eastAsia="fr-FR"/>
+    </w:rPr>
+    <w:tblPr>
+      <w:tblStyleRowBandSize w:val="1"/>
+      <w:tblStyleColBandSize w:val="1"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        <w:left w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        <w:bottom w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        <w:right w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        <w:insideH w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        <w:insideV w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+      </w:tblBorders>
+    </w:tblPr>
+    <w:tblStylePr w:type="firstRow">
+      <w:pPr>
+        <w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>
+      </w:pPr>
+      <w:rPr>
+        <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+        <w:b/>
+        <w:bCs/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:bottom w:val="single" w:sz="18" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        </w:tcBorders>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="lastRow">
+      <w:pPr>
+        <w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>
+      </w:pPr>
+      <w:rPr>
+        <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+        <w:b/>
+        <w:bCs/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="double" w:sz="6" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        </w:tcBorders>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="firstCol">
+      <w:rPr>
+        <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+        <w:b/>
+        <w:bCs/>
+      </w:rPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="lastCol">
+      <w:rPr>
+        <w:rFonts w:asciiTheme="majorHAnsi" w:eastAsiaTheme="majorEastAsia" w:hAnsiTheme="majorHAnsi" w:cstheme="majorBidi"/>
+        <w:b/>
+        <w:bCs/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        </w:tcBorders>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Vert">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="C0E3FF" w:themeFill="accent1" w:themeFillTint="3F"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="C0E3FF" w:themeFill="accent1" w:themeFillTint="3F"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band2Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="0090FF" w:themeColor="accent1"/>
+        </w:tcBorders>
+      </w:tcPr>
+    </w:tblStylePr>
+  </w:style>
+  <w:style w:type="paragraph" w:customStyle="1" w:styleId="Body">
+    <w:name w:val="Body"/>
+    <w:basedOn w:val="Normal"/>
+    <w:link w:val="BodyCar"/>
+    <w:qFormat/>
+    <w:rsid w:val="003F7931"/>
+    <w:pPr>
+      <w:keepLines/>
+      <w:adjustRightInd w:val="0"/>
+      <w:spacing w:after="120" w:line="240" w:lineRule="auto"/>
+      <w:jc w:val="both"/>
+      <w:textAlignment w:val="baseline"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Arial" w:eastAsia="MS Mincho" w:hAnsi="Arial" w:cs="Times New Roman"/>
+      <w:color w:val="auto"/>
+      <w:sz w:val="22"/>
+      <w:lang w:val="en-GB" w:eastAsia="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="numbering" w:customStyle="1" w:styleId="Bullets">
+    <w:name w:val="Bullets"/>
+    <w:uiPriority w:val="99"/>
+    <w:rsid w:val="00720E3F"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="6"/>
+      </w:numPr>
+    </w:pPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="BodyCar">
+    <w:name w:val="Body Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Body"/>
+    <w:rsid w:val="003F7931"/>
+    <w:rPr>
+      <w:rFonts w:ascii="Arial" w:eastAsia="MS Mincho" w:hAnsi="Arial" w:cs="Times New Roman"/>
+      <w:color w:val="auto"/>
+      <w:lang w:val="en-GB" w:eastAsia="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="NormalWeb">
+    <w:name w:val="Normal (Web)"/>
+    <w:basedOn w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="00CA00A3"/>
+    <w:pPr>
+      <w:spacing w:before="100" w:beforeAutospacing="1" w:after="100" w:afterAutospacing="1" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Times New Roman" w:eastAsia="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+      <w:color w:val="auto"/>
+      <w:sz w:val="24"/>
+      <w:szCs w:val="24"/>
+      <w:lang w:eastAsia="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="table" w:styleId="Tramemoyenne1-Accent2">
+    <w:name w:val="Medium Shading 1 Accent 2"/>
+    <w:basedOn w:val="TableauNormal"/>
+    <w:uiPriority w:val="63"/>
+    <w:rsid w:val="001D0102"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Times New Roman" w:eastAsia="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+      <w:color w:val="auto"/>
+      <w:sz w:val="20"/>
+      <w:szCs w:val="20"/>
+      <w:lang w:eastAsia="fr-FR"/>
+    </w:rPr>
+    <w:tblPr>
+      <w:tblStyleRowBandSize w:val="1"/>
+      <w:tblStyleColBandSize w:val="1"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+        <w:left w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+        <w:bottom w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+        <w:right w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+        <w:insideH w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+      </w:tblBorders>
+    </w:tblPr>
+    <w:tblStylePr w:type="firstRow">
+      <w:pPr>
+        <w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>
+      </w:pPr>
+      <w:rPr>
+        <w:b/>
+        <w:bCs/>
+        <w:color w:val="FFFFFF" w:themeColor="background1"/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="22D69B" w:themeFill="accent2"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="lastRow">
+      <w:pPr>
+        <w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>
+      </w:pPr>
+      <w:rPr>
+        <w:b/>
+        <w:bCs/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="double" w:sz="6" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="55E4B5" w:themeColor="accent2" w:themeTint="BF"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+        </w:tcBorders>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="firstCol">
+      <w:rPr>
+        <w:b/>
+        <w:bCs/>
+      </w:rPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="lastCol">
+      <w:rPr>
+        <w:b/>
+        <w:bCs/>
+      </w:rPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Vert">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:shd w:val="clear" w:color="auto" w:fill="C6F6E6" w:themeFill="accent2" w:themeFillTint="3F"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="C6F6E6" w:themeFill="accent2" w:themeFillTint="3F"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band2Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+        </w:tcBorders>
+      </w:tcPr>
+    </w:tblStylePr>
+  </w:style>
+  <w:style w:type="table" w:customStyle="1" w:styleId="Grilledutableau1">
+    <w:name w:val="Grille du tableau1"/>
+    <w:basedOn w:val="TableauNormal"/>
+    <w:next w:val="Grilledutableau"/>
+    <w:uiPriority w:val="39"/>
+    <w:rsid w:val="00545DB8"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:tblPr>
+      <w:tblStyleRowBandSize w:val="1"/>
+      <w:tblStyleColBandSize w:val="1"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:insideH w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+        <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+      </w:tblBorders>
+      <w:tblCellMar>
+        <w:top w:w="57" w:type="dxa"/>
+        <w:bottom w:w="85" w:type="dxa"/>
+      </w:tblCellMar>
+    </w:tblPr>
+    <w:tcPr>
+      <w:shd w:val="clear" w:color="auto" w:fill="F3F5D7"/>
+    </w:tcPr>
+    <w:tblStylePr w:type="firstRow">
+      <w:rPr>
+        <w:b/>
+        <w:i w:val="0"/>
+        <w:color w:val="FFFFFF" w:themeColor="background1"/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="nil"/>
+          <w:left w:val="nil"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="nil"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="315B6D" w:themeFill="accent5"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="firstCol">
+      <w:rPr>
+        <w:b/>
+        <w:i w:val="0"/>
+        <w:color w:val="FFFFFF" w:themeColor="background1"/>
+      </w:rPr>
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="315B6D" w:themeFill="accent5"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Vert">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="F3F5D7"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band2Vert">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="nil"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="D6EBE7" w:themeFill="accent6"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band1Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="nil"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="nil"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="D6EBE7" w:themeFill="accent6"/>
+      </w:tcPr>
+    </w:tblStylePr>
+    <w:tblStylePr w:type="band2Horz">
+      <w:tblPr/>
+      <w:tcPr>
+        <w:tcBorders>
+          <w:top w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:left w:val="nil"/>
+          <w:bottom w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:right w:val="nil"/>
+          <w:insideH w:val="nil"/>
+          <w:insideV w:val="single" w:sz="8" w:space="0" w:color="FFFFFF" w:themeColor="background1"/>
+          <w:tl2br w:val="nil"/>
+          <w:tr2bl w:val="nil"/>
+        </w:tcBorders>
+        <w:shd w:val="clear" w:color="auto" w:fill="F3F5D7"/>
+      </w:tcPr>
+    </w:tblStylePr>
+  </w:style>
+  <w:style w:type="character" w:styleId="Mentionnonrsolue">
+    <w:name w:val="Unresolved Mention"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="003F7931"/>
+    <w:rPr>
+      <w:color w:val="605E5C"/>
+      <w:shd w:val="clear" w:color="auto" w:fill="E1DFDD"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Tabledesillustrations">
+    <w:name w:val="table of figures"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:uiPriority w:val="99"/>
+    <w:unhideWhenUsed/>
+    <w:rsid w:val="005A68F3"/>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Rvision">
+    <w:name w:val="Revision"/>
+    <w:hidden/>
+    <w:uiPriority w:val="99"/>
+    <w:semiHidden/>
+    <w:rsid w:val="003E3939"/>
+    <w:pPr>
+      <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:sz w:val="18"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="En-ttedetabledesmatires">
+    <w:name w:val="TOC Heading"/>
+    <w:basedOn w:val="Titre1"/>
+    <w:next w:val="Normal"/>
+    <w:uiPriority w:val="39"/>
+    <w:unhideWhenUsed/>
+    <w:qFormat/>
+    <w:rsid w:val="00FF40F6"/>
+    <w:pPr>
+      <w:numPr>
+        <w:numId w:val="0"/>
+      </w:numPr>
+      <w:spacing w:before="240" w:after="0" w:line="259" w:lineRule="auto"/>
+      <w:outlineLvl w:val="9"/>
+    </w:pPr>
+    <w:rPr>
+      <w:b w:val="0"/>
+      <w:bCs w:val="0"/>
+      <w:color w:val="006BBF" w:themeColor="accent1" w:themeShade="BF"/>
+      <w:sz w:val="32"/>
+      <w:szCs w:val="32"/>
+      <w:lang w:val="en-US"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="paragraph" w:styleId="Titre">
+    <w:name w:val="Title"/>
+    <w:basedOn w:val="Normal"/>
+    <w:next w:val="Normal"/>
+    <w:link w:val="TitreCar"/>
+    <w:uiPriority w:val="10"/>
+    <w:qFormat/>
+    <w:rsid w:val="0060375A"/>
+    <w:pPr>
+      <w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/>
+      <w:spacing w:before="400" w:after="1200" w:line="240" w:lineRule="auto"/>
+    </w:pPr>
+    <w:rPr>
+      <w:rFonts w:ascii="Calibri" w:eastAsia="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+      <w:b/>
+      <w:bCs/>
+      <w:color w:val="3C3C3A"/>
+      <w:sz w:val="100"/>
+      <w:szCs w:val="100"/>
+      <w:lang w:val="fr" w:eastAsia="fr-FR"/>
+    </w:rPr>
+  </w:style>
+  <w:style w:type="character" w:customStyle="1" w:styleId="TitreCar">
+    <w:name w:val="Titre Car"/>
+    <w:basedOn w:val="Policepardfaut"/>
+    <w:link w:val="Titre"/>
+    <w:uiPriority w:val="10"/>
+    <w:rsid w:val="0060375A"/>
+    <w:rPr>
+      <w:rFonts w:ascii="Calibri" w:eastAsia="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+      <w:b/>
+      <w:bCs/>
+      <w:color w:val="3C3C3A"/>
+      <w:sz w:val="100"/>
+      <w:szCs w:val="100"/>
+      <w:shd w:val="clear" w:color="auto" w:fill="FFFFFF"/>
+      <w:lang w:val="fr" w:eastAsia="fr-FR"/>
+    </w:rPr>
+  </w:style>
+</w:styles>

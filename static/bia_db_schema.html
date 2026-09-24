@@ -1,0 +1,359 @@
+<title>BIA Automatique — Schéma de base de données</title>
+<style>
+  :root{
+    --bg:#FAF8F5; --bg-card:#FFFFFF; --ink:#2B2A28; --ink-dim:#6B6862;
+    --border:#E7E3DC; --accent:#F8485E; --accent-soft:#FDE7EA;
+    --mono-bg:#F4F1EA; --grey:#5A5852; --grey-soft:#EEECE7;
+    --warn:#2F5D7C; --warn-soft:#E8F0F6; --warn-border:#BDD4E4;
+    --new:#2F6B4F; --new-soft:#E6F1EA;
+    --er-entity-bg:#FFFFFF; --er-entity-border:#3c3c3a; --er-attr-bg:#FBFAF8;
+  }
+  :root[data-theme="dark"]{
+    --bg:#1B1A18; --bg-card:#242220; --ink:#EDEAE4; --ink-dim:#A8A39A;
+    --border:#3A3733; --accent:#FF6B7E; --accent-soft:#3A2226;
+    --mono-bg:#2A2724; --grey:#B7B2A8; --grey-soft:#2E2B27;
+    --warn:#8FBEDD; --warn-soft:#16242E; --warn-border:#274050;
+    --new:#7FC49E; --new-soft:#1C2A22;
+    --er-entity-bg:#242220; --er-entity-border:#B7B2A8; --er-attr-bg:#1F1D1B;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1B1A18; --bg-card:#242220; --ink:#EDEAE4; --ink-dim:#A8A39A;
+      --border:#3A3733; --accent:#FF6B7E; --accent-soft:#3A2226;
+      --mono-bg:#2A2724; --grey:#B7B2A8; --grey-soft:#2E2B27;
+      --warn:#8FBEDD; --warn-soft:#16242E; --warn-border:#274050;
+      --new:#7FC49E; --new-soft:#1C2A22;
+      --er-entity-bg:#242220; --er-entity-border:#B7B2A8; --er-attr-bg:#1F1D1B;
+    }
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:2.5rem 1.5rem 4rem; max-width:1160px; margin:0 auto;
+  }
+  .eyebrow{
+    font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:.5rem;
+  }
+  h1{
+    font-size:1.7rem; font-weight:800; letter-spacing:-.01em; margin:0 0 .35rem;
+    text-wrap:balance;
+  }
+  .sub{color:var(--ink-dim); font-size:.92rem; line-height:1.5; max-width:64ch; margin:0 0 1.6rem;}
+  .badge-row{display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:2.1rem;}
+  .badge{
+    display:inline-flex; align-items:center; gap:.4em;
+    font-family:ui-monospace,"SF Mono",Consolas,monospace;
+    font-size:.72rem; padding:.32em .7em; border-radius:100px;
+    background:var(--grey-soft); color:var(--grey); border:1px solid var(--border);
+  }
+  .badge b{color:var(--ink); font-weight:600;}
+
+  .card{
+    background:var(--bg-card); border:1px solid var(--border); border-radius:14px;
+    padding:1.4rem 1.4rem 1.1rem; margin-bottom:1.4rem;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  .card h2{
+    font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--ink-dim); margin:0 0 1rem;
+    display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap;
+  }
+  .card h2 .h2-note{
+    font-size:.72rem; font-weight:400; letter-spacing:0; text-transform:none;
+    color:var(--ink-dim); opacity:.8;
+  }
+  .pill-new{
+    font-family:ui-monospace,"SF Mono",Consolas,monospace;
+    font-size:.62rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--new); background:var(--new-soft); border:1px solid var(--new);
+    padding:.15em .5em; border-radius:100px;
+  }
+
+  .diagram-scroll{overflow-x:auto; padding-bottom:.3rem;}
+  .diagram-scroll pre.mermaid{min-width:860px;}
+
+  .grid2{display:grid; grid-template-columns:1.3fr 1fr; gap:1.4rem;}
+  @media (max-width:820px){.grid2{grid-template-columns:1fr;}}
+
+  .callout{
+    border:1px solid var(--warn-border); background:var(--warn-soft);
+    border-radius:14px; padding:1.3rem 1.4rem; margin-bottom:1.4rem;
+  }
+  .callout h2{
+    font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--warn); margin:0 0 .8rem;
+  }
+  .callout p{margin:0 0 .7rem; font-size:.85rem; line-height:1.65; color:var(--ink);}
+  .callout p:last-child{margin-bottom:0;}
+  .callout code, .callout pre{
+    font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:.78rem;
+  }
+  .callout pre{
+    background:var(--bg-card); border:1px solid var(--warn-border); border-radius:8px;
+    padding:.7rem .9rem; margin:.7rem 0; overflow-x:auto; color:var(--ink);
+  }
+
+  .chain{
+    display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+    font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:.74rem;
+    margin:.2rem 0 1rem;
+  }
+  .chain span{
+    background:var(--mono-bg); border:1px solid var(--border);
+    padding:.3em .6em; border-radius:6px; color:var(--ink);
+  }
+  .chain i{color:var(--accent); font-style:normal; font-weight:700;}
+
+  .soft-link{
+    display:flex; gap:.85rem; padding:.9rem 1rem; border:1px dashed var(--border);
+    border-radius:10px; background:var(--mono-bg); margin-bottom:.7rem;
+  }
+  .soft-link:last-child{margin-bottom:0;}
+  .soft-link .tag{
+    font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:.74rem; font-weight:700;
+    color:var(--accent); flex-shrink:0; padding-top:.1rem;
+  }
+  .soft-link p{margin:0; font-size:.82rem; line-height:1.5; color:var(--ink-dim);}
+  .soft-link code{
+    font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:.78rem;
+    background:var(--grey-soft); padding:.1em .35em; border-radius:4px; color:var(--ink);
+  }
+
+  table.idx{width:100%; border-collapse:collapse; font-size:.8rem;}
+  table.idx th{
+    text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-dim); font-weight:700; padding:.3rem .4rem; border-bottom:1px solid var(--border);
+  }
+  table.idx td{
+    padding:.42rem .4rem; border-bottom:1px solid var(--border);
+    font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:.76rem;
+  }
+  table.idx tr:last-child td{border-bottom:none;}
+  table.idx td.tbl{color:var(--grey); font-family:inherit; font-weight:600;}
+
+  .migrations{font-size:.8rem; color:var(--ink-dim); line-height:1.7;}
+  .migrations code{
+    font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:.76rem;
+    background:var(--grey-soft); padding:.1em .35em; border-radius:4px; color:var(--ink);
+  }
+
+  footer{margin-top:2rem; font-size:.72rem; color:var(--ink-dim); text-align:center;}
+</style>
+
+<div class="eyebrow">BIA Automatique · SQLite</div>
+<h1>Schéma de base de données</h1>
+<p class="sub">Un seul fichier SQLite (<code style="font-family:ui-monospace,monospace">projects.db</code>) partagé par trois modules Python — <code style="font-family:ui-monospace,monospace">projects_db.py</code>, <code style="font-family:ui-monospace,monospace">questionnaires_db.py</code> et <code style="font-family:ui-monospace,monospace">risk_analysis.py</code> — extrait en direct de la base réelle.</p>
+
+<div class="badge-row">
+  <span class="badge">📄 <b>12</b> tables</span>
+  <span class="badge">🔗 <b>9</b> clés étrangères (CASCADE actif)</span>
+  <span class="badge">📇 <b>13</b> index</span>
+  <span class="badge">🗄️ 1 fichier — projects.db</span>
+</div>
+
+<div class="card">
+  <h2>Fichiers BIA <span class="h2-note">projects est le point d'ancrage : une ligne = un fichier déposé</span></h2>
+  <div class="diagram-scroll">
+<pre class="mermaid">
+erDiagram
+    PROJECTS ||--o{ ACTIVITY_DMIA : "project_id"
+    PROJECTS ||--o{ FICHE_EQUIPMENT : "project_id"
+    PROJECTS ||--o{ SYNTHESE_FICHE_LINKS : "synthese_project_id"
+    PROJECTS ||--o{ SYNTHESE_FICHE_LINKS : "fiche_project_id"
+
+    PROJECTS {
+        integer id PK
+        text sector
+        text client
+        text project_name
+        text file_type "fiche ou synthese"
+        text created_at
+        text form_data_path "migration differee"
+    }
+    ACTIVITY_DMIA {
+        integer id PK
+        integer project_id FK
+        text activity_name
+        text departement
+        text dmia_exprimee
+        integer dmia_minutes "defaut -1"
+    }
+    FICHE_EQUIPMENT {
+        integer id PK
+        integer project_id FK
+        text entity
+        text designation
+        text horizons "JSON"
+    }
+    SYNTHESE_FICHE_LINKS {
+        integer id PK
+        integer synthese_project_id FK
+        integer fiche_project_id FK
+    }
+</pre>
+  </div>
+  <p class="sub" style="margin:.9rem 0 0;"><code style="font-family:ui-monospace,monospace">synthese_fiche_links</code> est une table de jonction : une synthèse s'appuie sur plusieurs fiches, et une fiche peut alimenter plusieurs synthèses. Ses deux clés étrangères pointent vers la <em>même</em> table, car une synthèse et une fiche sont toutes deux des lignes de <code style="font-family:ui-monospace,monospace">projects</code>, distinguées par <code style="font-family:ui-monospace,monospace">file_type</code>.</p>
+</div>
+
+<div class="card">
+  <h2>Analyse des risques — relevé de visite <span class="pill-new">ajouté</span> <span class="h2-note">chaîne d'appartenance : chaque photo garde son contexte</span></h2>
+  <div class="chain">
+    <span>risk_assessments</span><i>→</i>
+    <span>assessment_floors</span><i>→</i>
+    <span>assessment_notes</span><i>→</i>
+    <span>assessment_photos</span><i>→</i>
+    <span>photo_tags</span>
+  </div>
+  <div class="diagram-scroll">
+<pre class="mermaid">
+erDiagram
+    PROJECTS ||--o{ RISK_ASSESSMENTS : "project_id (nullable)"
+    RISK_ASSESSMENTS ||--o{ ASSESSMENT_FLOORS : "assessment_id"
+    ASSESSMENT_FLOORS ||--o{ ASSESSMENT_NOTES : "floor_id"
+    ASSESSMENT_NOTES ||--o{ ASSESSMENT_PHOTOS : "note_id"
+    ASSESSMENT_PHOTOS ||--|| PHOTO_TAGS : "photo_id"
+
+    RISK_ASSESSMENTS {
+        integer id PK
+        integer project_id FK "nullable"
+        text sector
+        text client
+        text building_type
+        integer num_floors
+        text assessment_date
+        text status
+    }
+    ASSESSMENT_FLOORS {
+        integer id PK
+        integer assessment_id FK
+        integer floor_number
+        text floor_label
+        integer notes_count "denormalise"
+        text status
+    }
+    ASSESSMENT_NOTES {
+        integer id PK
+        integer floor_id FK
+        text component
+        text note_text
+        text created_at
+        text updated_at
+        text status
+    }
+    ASSESSMENT_PHOTOS {
+        integer id PK
+        integer note_id FK
+        text filename
+        integer filesize
+        text mime_type
+        integer width
+        integer height
+        integer orientation
+        text exif_timestamp
+        text upload_timestamp
+        boolean is_compressed
+        text original_path "chemin sur disque"
+        text thumbnail_path "chemin sur disque"
+    }
+    PHOTO_TAGS {
+        integer id PK
+        integer photo_id FK
+        integer assessment_id "copie"
+        integer floor_number "copie"
+        text component_type "copie"
+        text condition
+        text risk_level
+        text equipment_status
+        text created_at
+    }
+    ASSESSMENT_BUILDING_TYPES {
+        integer id PK
+        text label UK
+        text icon
+        text created_at
+    }
+</pre>
+  </div>
+  <p class="sub" style="margin:.9rem 0 0;">Une photo ne peut pas exister sans note, ni une note sans niveau : le contexte d'une observation est porté par la structure, pas par la mémoire du consultant. <code style="font-family:ui-monospace,monospace">photo_tags</code> recopie volontairement l'étage et le composant à côté de l'état et du niveau de risque, pour que l'agent de synthèse lise une photo sans avoir à remonter toute la chaîne. <code style="font-family:ui-monospace,monospace">assessment_building_types</code> ne stocke que les types ajoutés par l'utilisateur ; les sept types standard vivent dans <code style="font-family:ui-monospace,monospace">risk_components.py</code>.</p>
+</div>
+
+<div class="callout">
+  <h2>Pourquoi la cascade fonctionne réellement</h2>
+  <p>SQLite désactive la vérification des clés étrangères par défaut : <code>ON DELETE CASCADE</code> n'est qu'une déclaration inerte tant que le contrôle n'est pas réactivé, <em>et il doit l'être sur chaque connexion</em>. C'est ce que fait <code>_conn()</code> dans <code>projects_db.py</code> :</p>
+  <pre>c.execute("PRAGMA foreign_keys = ON")</pre>
+  <p>Vérifié sur une copie de la base : supprimer une évaluation efface bien, d'un seul <code>DELETE</code>, ses niveaux, ses notes, ses photos et leurs étiquettes.</p>
+  <p><code>questionnaires_db.py</code> et <code>risk_analysis.py</code> ouvrent leurs connexions sans ce <code>PRAGMA</code>, sans conséquence : leurs deux tables ne portent aucune clé étrangère.</p>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>Liens implicites (sans clé étrangère)</h2>
+    <div class="soft-link">
+      <div class="tag">QUESTIONNAIRES</div>
+      <p>Rattaché à un client via les colonnes texte <code>sector</code> / <code>client</code> — pas de <code>project_id</code>, donc aucune contrainte <code>REFERENCES</code> ni <code>CASCADE</code>. Un questionnaire peut ainsi être créé avant qu'un seul fichier du client n'ait été déposé. En contrepartie, rien ne garantit l'orthographe : <code>GAT Assurances</code> et <code>GAT assurances</code> comptent pour deux clients.</p>
+    </div>
+    <div class="soft-link">
+      <div class="tag">RISK_FILES</div>
+      <p>Même rattachement par <code>sector</code> / <code>client</code>. L'échelle de risque (<code>scale_json</code>) est dupliquée dans chaque ligne plutôt que centralisée : chaque client définit la sienne, et le fichier doit rester lisible même si le classeur source a disparu.</p>
+    </div>
+    <div class="soft-link">
+      <div class="tag">RISK_ASSESSMENTS</div>
+      <p>Cas intermédiaire : la table possède un <code>project_id</code> avec <code>REFERENCES projects(id)</code>, mais la colonne est <em>nullable</em> et reste vide pour une visite lancée depuis le terrain. Le rattachement effectif au client se fait alors par <code>sector</code> / <code>client</code>, comme au-dessus.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Index <span class="h2-note">13</span></h2>
+    <table class="idx">
+      <tr><th>Table</th><th>Index</th><th>Colonne(s)</th></tr>
+      <tr><td class="tbl">activity_dmia</td><td>idx_act_name</td><td>activity_name <span style="color:var(--ink-dim)">(NOCASE)</span></td></tr>
+      <tr><td class="tbl">activity_dmia</td><td>idx_act_dmia</td><td>dmia_minutes</td></tr>
+      <tr><td class="tbl">fiche_equipment</td><td>idx_fiche_eq_proj</td><td>project_id</td></tr>
+      <tr><td class="tbl">synthese_fiche_links</td><td>idx_sfl_syn</td><td>synthese_project_id</td></tr>
+      <tr><td class="tbl">synthese_fiche_links</td><td>idx_sfl_fic</td><td>fiche_project_id</td></tr>
+      <tr><td class="tbl">questionnaires</td><td>idx_q_type</td><td>qtype</td></tr>
+      <tr><td class="tbl">questionnaires</td><td>idx_q_client</td><td>sector, client</td></tr>
+      <tr><td class="tbl">risk_assessments</td><td>idx_risk_assessment_project</td><td>project_id</td></tr>
+      <tr><td class="tbl">assessment_floors</td><td>idx_assessment_floor</td><td>assessment_id</td></tr>
+      <tr><td class="tbl">assessment_notes</td><td>idx_assessment_notes</td><td>floor_id</td></tr>
+      <tr><td class="tbl">photo_tags</td><td>idx_photo_tags_floor</td><td>assessment_id, floor_number</td></tr>
+      <tr><td class="tbl">photo_tags</td><td>idx_photo_tags_component</td><td>component_type</td></tr>
+      <tr><td class="tbl">questionnaires</td><td colspan="2" style="color:var(--ink-dim);font-family:inherit;">créés à la première utilisation du module</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Fichiers sur disque</h2>
+  <p class="sub" style="margin:0 0 .8rem;">La base ne contient aucun document. Les <code style="font-family:ui-monospace,monospace">.docx</code>, <code style="font-family:ui-monospace,monospace">.xlsx</code> et photos restent dans <code style="font-family:ui-monospace,monospace">projects_data/&lt;secteur&gt;/&lt;client&gt;/&lt;type&gt;/</code>. Deux stratégies coexistent pour retrouver un fichier :</p>
+  <div class="soft-link">
+    <div class="tag">PAR CONVENTION</div>
+    <p><code>projects</code> ne stocke aucun chemin. <code>get_project_file_path()</code> reconstruit le dossier à partir de <code>sector</code>, <code>client</code> et <code>file_type</code>. Simple, mais renommer un client en base ne déplace pas le dossier : le fichier devient injoignable.</p>
+  </div>
+  <div class="soft-link">
+    <div class="tag">EXPLICITE</div>
+    <p><code>assessment_photos</code> stocke <code>original_path</code> et <code>thumbnail_path</code>, relatifs à <code>projects_data/</code>. Plus verbeux, mais résiste au renommage — c'est la stratégie retenue pour les photos de visite.</p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Migrations appliquées</h2>
+  <p class="migrations">
+    Deux colonnes ont été ajoutées après la création initiale des tables, via <code>ALTER TABLE</code> enveloppé dans un <code>try/except</code> qui ignore l'erreur « colonne déjà présente » :<br>
+    · <code>risk_files.scale_json</code> — exécuté dans <code>_init_db()</code> de <code>risk_analysis.py</code>, donc à la première utilisation du module.<br>
+    · <code>projects.form_data_path</code> — exécuté par <code>_ensure_form_col()</code> de <code>projects_db.py</code>, appelé uniquement lors du premier enregistrement depuis l'éditeur de fiche. Cette colonne est donc <em>absente</em> d'une base où l'éditeur n'a jamais servi.<br>
+    Rudimentaire, mais suffisant pour un fichier unique et local : aucun outil de migration n'est nécessaire.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Création des tables</h2>
+  <p class="migrations">
+    Les dix tables de <code>projects_db.py</code> sont créées au démarrage par <code>init_db()</code>. Les deux autres — <code>questionnaires</code> et <code>risk_files</code> — sont créées paresseusement : leur <code>_init_db()</code> est appelé en tête de chaque fonction publique du module. Elles n'apparaissent donc dans le fichier qu'après la première ouverture d'un questionnaire ou d'un fichier de risques.
+  </p>
+</div>
+
+<footer>Extrait de projects.db via <code style="font-family:ui-monospace,monospace">sqlite_master</code> et <code style="font-family:ui-monospace,monospace">PRAGMA</code> — reflète l'état réel de la base, pas seulement le code source.</footer>

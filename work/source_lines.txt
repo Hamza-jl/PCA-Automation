@@ -1,0 +1,327 @@
+﻿100: Déduire en fonction des contraintes de fonctionnement et des impacts d’arrêt le périmètre des processus critiques à seco
+101: Modéliser la chaîne d’activité de chacun des processus critiques.
+102: Pour ce faire, les responsables des activités métiers doivent être rencontrés afin de déterminer les impacts et les beso
+103: Fiche d’identité de l’entité
+104: Nom du (des) responsable(s)
+105: Naoufel JAOUADI
+106: Organisation et effectifs
+107: L’entité se compose de 5 personnes divisées comme suit :
+108: Un responsable de la division
+109: Un département pilotage et suivi de l’activité des points de vente composé d’un sous-directeur et 3 collaborateurs
+110: Les Régions commerciales sont composées de 6 chefs de régions
+111: Présentation générale de l’activité (produits, services, etc.)
+112: Les activités principales de l’entité sont les suivantes :
+113: Animation, suivi et pilotage du réseau commercial de la STAR (succursales et agences)
+114: Principales contraintes liées à l’activité (réglementaires, juridiques, contractuelles, etc.)
+115: Les contraintes de l’activité sont les suivantes :
+116: Retard des demandes de cotations
+117: Chaque mois : envoi les tableaux de bords de l’activité des points de vente
+118: Périodes critiques
+119: Les périodes critiques de l’activité sont les suivantes :
+120: Période estivale
+121: Le premier trimestre de l’année
+122: Historique des interruptions majeures
+123: Arrêt du système (pendant une heure)
+124: Tableau  SEQ Tableau \* ARABIC 3 : Fiche identité de l’entité
+125: Description et criticité des activités métiers
+126: Pour chaque processus :
+127: Indiquer les ressources IT ou autres utilisées ;
+128: Préciser les périodes critiques ;
+129: Déterminer la criticité correspondante, à savoir :
+130: Faible : L’activité correspondante peut être reportée pour une période relativement flexible ;
+131: Moyenne : L’activité correspondante peut être reportée pour une période limitée ;
+132: Forte : L’activité correspondante ne peut pas être reportée, elle doit être opérationnelle même de façon dégradée.
+133: Activité
+134: Ressources utilisées (Outils informatique, téléphone, Fax, documents, …)
+135: Période critique
+136: Criticité
+137: Animation, suivi et pilotage du réseau commercial de la STAR (succursales et agences)
+138: Espace commun reporting
+139: Office 365
+140: PC
+141: Le premier trimestre de l’année (Décembre  Mars)
+142: Forte
+143: Tableau  SEQ Tableau \* ARABIC 4 : Description et criticité des activités métiers
+144: Métrique d’impact pour les processus métier
+145: Matrice d’impact
+146: Le tableau suivant présente la matrice d’impact qui va être utilisée durant toute la phase d’analyse des impacts métiers
+147: Impacts / Sévérité
+148: Poids
+149: Description
+150: Niveau 1
+151: Faible
+152: Niveau 2
+153: Significatif
+154: Niveau 3
+155: Majeur
+156: Niveau 4
+157: Catastrophique
+158: Image de marque
+159: 4
+160: Perte de confiance
+161: Perte de clientèle
+162: Faible nuisance nécessitant quelques jours pour être résorbées
+163: Nuisance significative sur le Front Office et dégradation de l’image en interne
+164: Nuisance grave sur la société
+165: Dégradation auprès des tiers (fournisseur, régulateur, …)
+166: Couverture médiatique négative limitée dans le temps
+167: Vaste couverture médiatique négative
+168: Perte de confiance dans la société
+169: Désorganisation interne
+170: 1
+171: Désorganisation liée au fonctionnement dégradé
+172: Surcharge pour rattraper le retard
+173: Faible nuisance interne à l’entité
+174: Désorganisation significative limitée à un service
+175: Désorganisation durable
+176: Détérioration du climat social
+177: Chômage technique d’une importante proportion du personnel
+178: Incapacité à résorber le travail en retard
+179: Réglementaire
+180: 2
+181: Non-respect des obligations contractuelle, réglementaires
+182: Faible
+183: Non-respect de la réglementation comptable, fiscale…
+184: Infraction majeure à la législation
+185: Sanction judiciaire
+186: Financier
+187: 3
+188: Manque à gagner
+189: Pénalité de retard
+190: Perte inférieure à 10.000 DT
+191: Perte entre 10.000 et 50.000 DT
+192: Perte entre 50.000 et 100.000 DT
+193: Perte supérieure à 100.000 DT
+194: Tableau  SEQ Tableau \* ARABIC 5 : Matrice d’impact
+195: Évaluation des impacts
+196: Selon la matrice d’impact présentée ci-dessus (cf.5.1), il faut préciser le niveau d’évaluation de l’impact d’arrêt des 
+197: Pour cela, il faut prendre en considération la période la plus critique (début ou fin de mois, journalier, autre).
+198: Animation, suivi et pilotage du réseau commercial de la STAR
+199: A
+200: Interruption &lt; 1 jour
+201: B
+202: Interruption ≥ 5 jours
+203: Image de marque
+204: 1
+205: 1
+206: Désorganisation interne
+207: 1
+208: 2
+209: Juridique et réglementaire
+210: 1
+211: 1
+212: Financier
+213: 4
+214: 4
+215: Tableau 6 : Animation, suivi et pilotage du réseau commercial de la STAR
+216: Durée maximale d’interruption d’activités
+217: Dans le tableau présenté ci-dessous, il faut indiquer la Durée Maximale d’Interruption Admissible (DMIA) dans le cas d’u
+218: Processus
+219: DMIA Exprimée
+220: Premières actions à mener en cas de survenance d’un sinistre
+221: Animation, suivi et pilotage du réseau commercial de la STAR
+222: 1J
+223: -
+224: Tableau 7 : Durée maximale d’interruption d’activité
+225: Analyse des échanges d’information
+226: Dans le tableau présenté ci-dessous, il faut :
+227: Lister les groupes fonctionnels (internes / externes) avec lesquels vous interagissez ;
+228: Préciser si ce groupe fonctionnel est interne ou externe ;
+229: Décrire le type d’informations échangées (fichier, fax, etc.) et le sens de transfert (Transmis et/ou Reçu) ;
+230: Lister les outils, applications et ressources SI utilisées.
+231: Groupes fonctionnels / Correspondants
+232: (I/E)
+233: Interne / Externe
+234: Type d’information
+235: (T/R)
+236: Transmis/ Reçu
+237: Ressources SI utilisées
+238: Tous les départements métiers et transverses
+239: I
+240: Demandes de cotations
+241: Propositions d’offres
+242: Réclamations réseau
+243: T / R
+244: Mail
+245: Téléphone
+246: Agents de la STAR
+247: I
+248: Réclamations
+249: Demandes de cotations
+250: T / R
+251: Mail
+252: Téléphone
+253: Les chefs des régions
+254: I
+255: Statistiques
+256: Rapports d’activité hebdomadaire
+257: Réclamations
+258: T / R
+259: Mail
+260: Téléphone
+261: Les clients
+262: E
+263: Informations sur l’activité pour une éventuelle offre d’assurance
+264: T / R
+265: Mail
+266: Téléphone
+267: Les prestataires, Hôtels, boites de communications, etc.
+268: E
+269: Bons de commandes
+270: Statistiques
+271: Devis
+272: Validations
+273: Contrats
+274: T / R
+275: Mail
+276: Tableau 8 : Analyse des échanges d’information
+277: Besoins de redémarrage des activités
+278: Effectifs et positions de travail
+279: Cette table décrit les besoins de continuité de l’entité en termes d’effectifs et de positions de travail. Il s’agit de 
+280: Préciser l’effectif nominal ;
+281: Évaluer les besoins en termes d’effectif et de position de travail pour la continuité d’activité, en fonction de la DMIA
+282: Spécifier le besoin en termes de positions spécifiques ou spéciales ainsi que les équipements et/ou logiciels spécifique
+283: Montée en charge souhaitée
+284: Nominal
+285: H+2
+286: H+4
+287: J+1
+288: J+2
+289: J+3
+290: J+5
+291: J+10
+292: J+15
+293: Commentaires
+294: Effectif
+295: 5
+296: Animation, suivi et pilotage du réseau commercial de la STAR
+297: Positions
+298: Télétravail
+299: +2
+300: Effectif cumulé
+301: Positions cumulées
+302: Télétravail cumulés
+303: +2
+304: % Effectif cumulé
+305: Tableau 9 : Effectif et positions de travail
+306: Collaborateurs clés
+307: Par collaborateur clé on entend :
+308: Tout collaborateur qui dispose d’une expertise rare/pointue ;
+309: Tout collaborateur assurant une tâche tout seul ;
+310: Tout collaborateur dont le potentiel d’encadrement est affirmé au sein de l’équipe.
+311: Fonction
+312: Nom
+313: Prénom
+314: Ancienneté
+315: Suppléants possibles
+316: Responsable de la division animation commerciale
+317: JAOUADI
+318: Naoufel
+319: 24 ans
+320: Anis BERREJEB
+321: Manager du département
+322: BERREJEB
+323: Anis
+324: 20 ans
+325: Naoufel JAOUADI
+326: Latifa CHAARANA
+327: Refka EL AYEB
+328: Samar JANDOUBI
+329: Fondé pouvoirs
+330: CHAARANA
+331: Latifa
+332: +20 ans
+333: Refka
+334: Chef service adjoint
+335: EL AYEB
+336: Refka
+337: 18 ans
+338: Latifa
+339: Chef section
+340: JANDOUBI
+341: Samar
+342: 8 ans
+343: Anis BERREJEB
+344: Tableau 10 : Les collaborateurs de repli
+345: Applications informatiques
+346: Le tableau suivant représente les applications informatiques utilisées par l’entité ainsi que :
+347: La criticité :
+348: Vitale (V) : si le processus métier est arrêté en cas d’indisponibilité de l’application ;
+349: Critique (C) : si le processus nécessite un travail manuel pour contourner l’application ;
+350: Moyennement critique (MC) : si le processus métier nécessite un contournement de l’application indisponible par une autr
+351: Peu critique (PC) : si le processus métier est opérationnel et peu impacté ;
+352: La DMIA - Durée Maximale d’Interruption Admissible : durée au-delà de laquelle une interruption de l’activité peut être 
+353: La PMDT– Perte Maximale de Données tolérée : durée maximale d’enregistrement des données qu’il est acceptable de perdre 
+354: Application
+355: Criticité
+356: DMIA
+357: PMDT
+358: Commentaires
+359: Commun reporting
+360: V
+361: 3J
+362: 5J
+363: -
+364: PI
+365: V
+366: 3J
+367: 3J
+368: (La DMIA / PMDT dépend parfois du client)
+369: Pro ASSUR
+370: V
+371: 3J
+372: 5J
+373: -
+374: Application IRDS
+375: PC
+376: 10J
+377: 15J
+378: -
+379: UNICOM
+380: C
+381: 3J
+382: 3J
+383: (La DMIA / PMDT dépend parfois du client)
+384: Refection
+385: PC
+386: 10J
+387: 15J
+388: -
+389: Office 365
+390: -
+391: -
+392: -
+393: -
+394: Application réseau STAR
+395: PC
+396: 10J
+397: 15J
+398: -
+399: Tableau 11 : Les applications informatiques
+400: Autres équipements et outils de communication
+401: Le tableau suivant présente les équipements et outils de communication qui doivent être disponibles au niveau du site de
+402: Désignation
+403: H+2
+404: H+4
+405: J+1
+406: J+2
+407: J+3
+408: J+5
+409: J+10
+410: J+15
+411: PC
+412: +2
+413: Casques
+414: +2
+415: Internet / VPN
+416: Tableau 12 : Autres équipements et outils de communication
+417: Documents et fichiers critiques
+418: Dans le tableau suivant, il faut détailler les documents et fichiers critiques utilisés au niveau de l’entité.
+419: Documents / Fichiers
+420: Type de stockage
+421: (Electronique/Papier)
+422: Duplication (O/N)
+423: Si oui, où ?
+424: RAS
+425: Tableau 13 SEQ Tableau \* ARABIC  : Documents et fichiers critiques
+426: Observations

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Éditeur Fiche BIA — Sélection — Devoteam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAF8F4;--surface:#F0EDE6;--panel:#ECEAE4;
+  --border:rgba(26,24,20,.12);--text:#1A1814;--muted:#6B6860;
+  --accent:#F2485E;--accent-d:#d63448;--accent-bg:rgba(242,72,94,.08);
+  --bank:#1565C0;--bank-bg:rgba(21,101,192,.07);--bank-border:rgba(21,101,192,.2);
+  --ins:#2E7D32;--ins-bg:rgba(46,125,50,.07);--ins-border:rgba(46,125,50,.2);
+  --r:12px;--sh:0 4px 16px rgba(0,0,0,.08);
+}
+body{font-family:'Montserrat',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── topbar ── */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:300;height:52px;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;padding:0 20px}
+#topbar a{text-decoration:none;color:var(--muted);font-size:12px;display:flex;align-items:center;gap:5px;transition:color .14s}
+#topbar a:hover{color:var(--accent)}
+.tb-title{flex:1;font-weight:700;font-size:14px;letter-spacing:.02em}
+.tb-title span{color:var(--accent)}
+.tb-dev{font-size:11px;color:var(--muted)}
+
+/* ── page wrapper ── */
+#page{margin-top:52px;min-height:calc(100vh - 52px);
+  display:flex;flex-direction:column;align-items:center;padding:48px 20px 80px}
+
+/* ── step header ── */
+.step-label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;text-align:center}
+
+/* ── sector cards ── */
+.sector-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:640px;margin-bottom:8px}
+.sec-card{background:#fff;border:2px solid var(--border);border-radius:var(--r);
+  padding:28px 24px;cursor:pointer;text-align:center;
+  transition:border-color .18s,transform .14s,box-shadow .18s}
+.sec-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.1)}
+.sec-card.bank{border-color:var(--bank-border);background:var(--bank-bg)}
+.sec-card.ins{border-color:var(--ins-border);background:var(--ins-bg)}
+.sec-card.selected.bank{border-color:var(--bank);box-shadow:0 0 0 4px rgba(21,101,192,.12),var(--sh)}
+.sec-card.selected.ins{border-color:var(--ins);box-shadow:0 0 0 4px rgba(46,125,50,.12),var(--sh)}
+.sec-icon{font-size:32px;margin-bottom:12px;display:block}
+.sec-card.bank .sec-icon{color:var(--bank)}
+.sec-card.ins  .sec-icon{color:var(--ins)}
+.sec-name{font-size:16px;font-weight:800;margin-bottom:4px}
+.sec-card.bank .sec-name{color:var(--bank)}
+.sec-card.ins  .sec-name{color:var(--ins)}
+.sec-desc{font-size:11.5px;color:var(--muted);line-height:1.5}
+
+/* ── step divider ── */
+.step-div{display:flex;align-items:center;gap:14px;width:100%;max-width:640px;
+  margin:28px 0 20px}
+.step-div::before,.step-div::after{content:'';flex:1;height:1px;background:var(--border)}
+.step-div span{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+
+/* ── step block ── */
+.step-block{width:100%;max-width:640px;
+  opacity:0;transform:translateY(18px);pointer-events:none;
+  transition:opacity .28s ease,transform .28s ease;
+  position:relative}
+.step-block.visible{opacity:1;transform:none;pointer-events:auto}
+
+/* ── mode cards ── */
+.mode-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mode-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);
+  padding:22px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;
+  transition:border-color .15s,box-shadow .15s,transform .12s}
+.mode-card:hover{border-color:var(--accent);box-shadow:0 4px 18px rgba(242,72,94,.1);transform:translateY(-2px)}
+.mode-ic{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:18px}
+.mode-new .mode-ic{background:rgba(242,72,94,.1);color:var(--accent)}
+.mode-edit .mode-ic{background:rgba(21,101,192,.1);color:#1565C0}
+.mode-body .mode-title{font-size:13.5px;font-weight:700;margin-bottom:4px}
+.mode-body .mode-desc{font-size:11.5px;color:var(--muted);line-height:1.5}
+
+/* ── sector badge (shown once selected) ── */
+.sel-badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;
+  padding:4px 12px;border-radius:99px;margin-bottom:16px}
+.sel-badge.bank{background:var(--bank-bg);color:var(--bank);border:1px solid var(--bank-border)}
+.sel-badge.ins{background:var(--ins-bg);color:var(--ins);border:1px solid var(--ins-border)}
+
+/* ── file browser ── */
+#browser{display:none;background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  box-shadow:var(--sh);overflow:hidden}
+.br-hd{padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700}
+.br-hd i{color:var(--muted)}
+.br-search{display:flex;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--panel)}
+.br-search input{width:100%;padding:7px 11px;border:1px solid var(--border);border-radius:7px;
+  background:#fff;font-family:inherit;font-size:12.5px;outline:none;
+  transition:border-color .12s}
+.br-search input:focus{border-color:#1565C0;box-shadow:0 0 0 2px rgba(21,101,192,.1)}
+.br-body{max-height:400px;overflow-y:auto;padding:8px}
+.br-empty{text-align:center;padding:32px;color:var(--muted);font-size:12.5px}
+.br-empty i{font-size:26px;display:block;margin-bottom:8px}
+
+/* ── client accordion ── */
+.cl-node{margin-bottom:6px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.cl-hd{display:flex;align-items:center;gap:8px;padding:9px 12px;
+  background:var(--surface);cursor:pointer;user-select:none;
+  transition:background .12s}
+.cl-hd:hover{background:var(--panel)}
+.cl-hd i.fa-chevron-down{margin-left:auto;color:var(--muted);font-size:10px;
+  transition:transform .2s}
+.cl-hd.open i.fa-chevron-down{transform:rotate(180deg)}
+.cl-name{font-size:12.5px;font-weight:700;flex:1}
+.cl-cnt{font-size:10px;background:var(--accent-bg);color:var(--accent);
+  padding:1px 6px;border-radius:99px;font-weight:700}
+.cl-files{display:none;padding:6px 6px 6px 12px;background:#fff}
+.cl-hd.open+.cl-files{display:block}
+.file-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;
+  cursor:pointer;transition:background .12s}
+.file-row:hover{background:var(--accent-bg)}
+.file-info{flex:1;min-width:0}
+.file-name{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-date{font-size:10.5px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:2px}
+
+/* file-type badges */
+.ft-badge{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:99px;white-space:nowrap;flex-shrink:0}
+.ft-editor{background:rgba(21,101,192,.1);color:#1565C0;border:1px solid rgba(21,101,192,.2)}
+.ft-docx  {background:rgba(33,150,243,.08);color:#0277BD;border:1px solid rgba(33,150,243,.2)}
+
+/* file type icon colour */
+.icon-editor{color:#1565C0}
+.icon-docx  {color:#0277BD}
+
+.btn-open{background:var(--accent);color:#fff;border:none;border-radius:6px;
+  padding:5px 12px;font-family:inherit;font-size:11px;font-weight:700;
+  cursor:pointer;transition:background .12s;white-space:nowrap;flex-shrink:0}
+.btn-open:hover{background:var(--accent-d)}
+
+/* ── loading spinner ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.15);
+  border-top-color:var(--muted);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{display:flex;align-items:center;gap:8px;padding:14px;color:var(--muted);font-size:12.5px}
+
+@media(max-width:560px){
+  .sector-row,.mode-row{grid-template-columns:1fr}
+  #page{padding:28px 14px 60px}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="/"><i class="fa-solid fa-arrow-left"></i> Accueil</a>
+  <div class="tb-title">Éditeur Fiche <span>BIA</span></div>
+  <span class="tb-dev">Devoteam</span>
+</div>
+
+<div id="page">
+
+  <!-- ══ STEP 1 — Secteur ══ -->
+  <div style="width:100%;max-width:640px">
+    <div class="step-label">Étape 1 — Choisissez votre secteur</div>
+    <div class="sector-row">
+      <div class="sec-card bank" onclick="selectSector('banques',this)">
+        <span class="sec-icon"><i class="fa-solid fa-landmark"></i></span>
+        <div class="sec-name">Secteur Bancaire</div>
+        <div class="sec-desc">Banques commerciales, banques islamiques, établissements de crédit</div>
+      </div>
+      <div class="sec-card ins" onclick="selectSector('assurances',this)">
+        <span class="sec-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <div class="sec-name">Secteur Assurances</div>
+        <div class="sec-desc">Compagnies d'assurance, réassurance, mutuelles</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2 — Mode ══ -->
+  <div id="step2" class="step-block">
+    <div id="sel-badge-wrap" style="text-align:center"></div>
+    <div class="step-label">Étape 2 — Que souhaitez-vous faire ?</div>
+    <div class="mode-row">
+      <div class="mode-card mode-new" onclick="goNew()">
+        <div class="mode-ic"><i class="fa-solid fa-plus"></i></div>
+        <div class="mode-body">
+          <div class="mode-title">Nouvelle fiche BIA</div>
+          <div class="mode-desc">Créer une fiche vierge pour un nouveau client ou département</div>
+        </div>
+      </div>
+      <div class="mode-card mode-edit" onclick="goEdit()">
+        <div class="mode-ic"><i class="fa-regular fa-folder-open"></i></div>
+        <div class="mode-body">
+          <div class="mode-title">Charger une fiche existante</div>
+          <div class="mode-desc">Reprendre et modifier une fiche déjà sauvegardée dans la base</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3 — Navigateur de fiches ══ -->
+  <div id="step3" class="step-block" style="margin-top:0">
+    <div class="step-div"><span>Sélectionnez un fichier</span></div>
+    <div id="browser">
+      <div class="br-hd">
+        <i class="fa-solid fa-folder-tree"></i>
+        <span id="br-title">Fiches sauvegardées</span>
+      </div>
+      <div class="br-search">
+        <input id="br-q" placeholder="Rechercher un client ou une fiche…" oninput="filterTree()">
+      </div>
+      <div class="br-body" id="br-body">
+        <div class="loading-row"><span class="spin"></span> Chargement…</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #page -->
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────────
+// State
+// ──────────────────────────────────────────────────────────────────────────────
+let SECTOR   = '';
+let projects = [];   // [{client, projects:[{id, project_name, file_type, has_json, created_at}]}]
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Step 1 — sector selection
+// ──────────────────────────────────────────────────────────────────────────────
+function selectSector(sector, card) {
+  SECTOR = sector;
+
+  document.querySelectorAll('.sec-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+
+  const isCls = sector === 'banques' ? 'bank' : 'ins';
+  const label  = sector === 'banques'
+    ? '<i class="fa-solid fa-landmark"></i> Secteur Bancaire sélectionné'
+    : '<i class="fa-solid fa-shield-halved"></i> Secteur Assurances sélectionné';
+  document.getElementById('sel-badge-wrap').innerHTML =
+    `<span class="sel-badge ${isCls}">${label}</span>`;
+
+  const s2 = document.getElementById('step2');
+  s2.style.display = 'block';
+  requestAnimationFrame(() => requestAnimationFrame(() => s2.classList.add('visible')));
+
+  // Reset step 3 when sector changes
+  const s3 = document.getElementById('step3');
+  s3.classList.remove('visible');
+  setTimeout(() => { s3.style.display='none'; document.getElementById('browser').style.display='none'; }, 300);
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Step 2 — mode
+// ──────────────────────────────────────────────────────────────────────────────
+function goNew() {
+  window.location.href = `/fiche-editor?sector=${encodeURIComponent(SECTOR)}`;
+}
+
+async function goEdit() {
+  const s3 = document.getElementById('step3');
+  s3.style.display = 'block';
+  requestAnimationFrame(() => requestAnimationFrame(() => s3.classList.add('visible')));
+  document.getElementById('browser').style.display = 'block';
+
+  const label = SECTOR === 'banques' ? 'Banques' : 'Assurances';
+  document.getElementById('br-title').textContent = `Fiches disponibles — ${label}`;
+
+  document.getElementById('br-body').innerHTML =
+    '<div class="loading-row"><span class="spin"></span> Chargement…</div>';
+
+  try {
+    const r = await fetch(`/api/fiche-projects?sector=${encodeURIComponent(SECTOR)}`);
+    projects = await r.json();
+    renderTree(projects);
+  } catch(e) {
+    document.getElementById('br-body').innerHTML =
+      '<div class="loading-row" style="color:#c0392b"><i class="fa-solid fa-circle-exclamation"></i> Erreur de chargement</div>';
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Tree rendering — handles both 'fiche_editor' and 'fiche' (.docx) entries
+// ──────────────────────────────────────────────────────────────────────────────
+function renderTree(data, q = '') {
+  const container = document.getElementById('br-body');
+  const ql = q.trim().toLowerCase();
+
+  const filtered = data
+    .map(cl => ({
+      ...cl,
+      projects: cl.projects.filter(p =>
+        !ql ||
+        cl.client.toLowerCase().includes(ql) ||
+        (p.project_name||'').toLowerCase().includes(ql)
+      )
+    }))
+    .filter(cl => cl.projects.length);
+
+  if (!filtered.length) {
+    const msg = ql
+      ? `Aucun résultat pour «&nbsp;<strong>${esc(q)}</strong>&nbsp;»<br><br>
+         <span style="font-size:11px">Essayez avec une partie du nom du client ou de la fiche.</span>`
+      : `Aucune fiche dans ce secteur.<br><br>Créez votre première fiche en cliquant <strong>Nouvelle fiche BIA</strong>.`;
+    container.innerHTML = `<div class="br-empty"><i class="fa-regular fa-folder-open"></i>${msg}</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(cl => `
+    <div class="cl-node">
+      <div class="cl-hd open" onclick="toggleClient(this)">
+        <i class="fa-solid fa-building" style="color:var(--muted);font-size:12px"></i>
+        <span class="cl-name">${esc(cl.client)}</span>
+        <span class="cl-cnt">${cl.projects.length}</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </div>
+      <div class="cl-files">
+        ${cl.projects.map(p => fileRowHtml(p)).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function fileRowHtml(p) {
+  const isEditor = p.file_type === 'fiche_editor';
+  const iconCls  = isEditor ? 'icon-editor' : 'icon-docx';
+  const iconTag  = `<i class="fa-regular fa-file-word ${iconCls}"></i>`;
+  const badge = isEditor
+    ? `<span class="ft-badge ft-editor"><i class="fa-solid fa-pen-to-square" style="font-size:8px"></i> Éditeur</span>`
+    : `<span class="ft-badge ft-docx"><i class="fa-regular fa-file-word" style="font-size:8px"></i> .docx importé</span>`;
+  const name = p.project_name || 'Fiche BIA';
+
+  return `
+    <div class="file-row" onclick="openProject(${p.id}, '${esc(p.file_type)}')">
+      ${iconTag}
+      <div class="file-info">
+        <div class="file-name" title="${esc(name)}">${esc(name)}</div>
+        <div class="file-date">${badge} ${fmtDate(p.created_at)}</div>
+      </div>
+      <button class="btn-open" onclick="event.stopPropagation();openProject(${p.id},'${esc(p.file_type)}')">
+        <i class="fa-solid fa-arrow-up-right-from-square fa-xs"></i> Ouvrir
+      </button>
+    </div>`;
+}
+
+function toggleClient(hd) { hd.classList.toggle('open'); }
+
+function filterTree() { renderTree(projects, document.getElementById('br-q').value); }
+
+function openProject(pid, fileType) {
+  // Both types navigate to the fiche editor with project_id.
+  // The editor's /api/project-form/{id} endpoint handles both:
+  //   - fiche_editor → loads full JSON form data
+  //   - fiche (.docx) → extracts activities from the .docx as a skeleton
+  window.location.href = `/fiche-editor?sector=${encodeURIComponent(SECTOR)}&project_id=${pid}`;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ──────────────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso.replace(' ','T'));
+    return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+  } catch { return iso; }
+}
+
+// Init
+document.getElementById('step2').style.display = 'none';
+document.getElementById('step3').style.display = 'none';
+</script>
+</body>
+</html>

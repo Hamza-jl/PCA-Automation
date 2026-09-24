@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Éditeur Fiche BIA — Devoteam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FAF8F4;--surface:#F0EDE6;--panel:#ECEAE4;
+  --border:rgba(26,24,20,.12);--text:#1A1814;--muted:#6B6860;
+  --accent:#F2485E;--accent-d:#d63448;--accent-bg:rgba(242,72,94,.08);
+  --info-bg:#EFF6FF;--info-border:#BFDBFE;--info-text:#1E40AF;
+  --sb-w:258px;--r:9px;--sh:0 2px 10px rgba(0,0,0,.07);
+}
+body{font-family:'Montserrat',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* topbar */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:300;height:52px;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;padding:0 18px}
+#topbar a{text-decoration:none;color:var(--muted);font-size:12px;display:flex;align-items:center;gap:5px;transition:color .14s}
+#topbar a:hover{color:var(--accent)}
+#topbar .title{flex:1;font-weight:700;font-size:14px;letter-spacing:.02em}
+#topbar .title span{color:var(--accent)}
+
+/* sidebar */
+#sb{position:fixed;top:52px;left:0;bottom:0;width:var(--sb-w);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;z-index:200}
+.sb-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);padding:14px 14px 4px}
+.sb-a{display:flex;align-items:center;gap:9px;padding:8px 12px;
+  border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;
+  color:var(--muted);text-decoration:none;margin:0 6px;
+  transition:background .12s,color .12s}
+.sb-a:hover{background:var(--panel);color:var(--text)}
+.sb-a.on{background:var(--accent-bg);color:var(--accent)}
+.sb-a .bdg{margin-left:auto;background:var(--accent);color:#fff;
+  font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px;min-width:18px;text-align:center}
+.sb-bot{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+.btn-gen{width:100%;padding:11px;background:var(--accent);color:#fff;
+  border:none;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background .14s,transform .1s}
+.btn-gen:hover{background:var(--accent-d);transform:translateY(-1px)}
+.btn-gen:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.sb-hint{font-size:10px;color:var(--muted);margin-top:6px;text-align:center}
+
+/* main */
+#main{margin-left:var(--sb-w);margin-top:52px;padding:28px 36px;max-width:1080px}
+
+/* doc title */
+.doc-title{font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+.doc-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+
+/* section headings */
+.sec-h1{font-size:16px;font-weight:800;letter-spacing:.01em;
+  padding:12px 0 6px;border-bottom:2px solid var(--accent);margin:32px 0 16px;
+  display:flex;align-items:center;gap:10px}
+.sec-h1 .num{background:var(--accent);color:#fff;font-size:11px;font-weight:800;
+  border-radius:5px;padding:2px 8px;letter-spacing:.06em}
+.sec-h2{font-size:13.5px;font-weight:700;margin:22px 0 10px;
+  display:flex;align-items:center;gap:8px;color:var(--text)}
+.sec-h2::before{content:'';display:block;width:4px;height:18px;
+  background:var(--accent);border-radius:2px;flex-shrink:0}
+
+/* instruction box */
+.instr{background:var(--info-bg);border:1px solid var(--info-border);
+  border-left:4px solid var(--info-border);border-radius:var(--r);
+  padding:12px 16px;margin-bottom:14px;font-size:12.5px;color:#374151;line-height:1.7}
+.instr strong{color:var(--info-text)}
+.instr ul{margin:4px 0 0 18px}
+.instr ul li{margin:2px 0}
+.instr ul ul{margin-left:16px}
+.instr-sub{color:#6B7280;font-size:12px;font-style:italic}
+
+/* caption */
+.tbl-cap{font-size:11px;color:var(--muted);font-style:italic;margin-bottom:4px;font-weight:600}
+
+/* cards */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  margin-bottom:20px;overflow:hidden;box-shadow:var(--sh)}
+.card-hd{display:flex;align-items:center;gap:12px;padding:14px 20px;
+  background:var(--surface);border-bottom:1px solid var(--border);cursor:pointer;
+  user-select:none}
+.card-hd .caret{margin-left:auto;color:var(--muted);transition:transform .2s}
+.card-hd.open .caret{transform:rotate(180deg)}
+.card-num{width:28px;height:28px;border-radius:50%;background:var(--accent);
+  color:#fff;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-title{font-size:13.5px;font-weight:700}
+.card-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.card-bd{padding:20px}
+.card-bd.collapsed{display:none}
+
+/* upload zone */
+.upzone{border:2px dashed var(--border);border-radius:var(--r);
+  padding:24px 20px;text-align:center;cursor:pointer;
+  transition:border-color .14s,background .14s}
+.upzone:hover,.upzone.drag{border-color:var(--accent);background:var(--accent-bg)}
+.upzone.ok{border-color:#2E7D32;background:rgba(46,125,50,.06)}
+.upzone i{font-size:26px;color:var(--muted);margin-bottom:8px}
+.upzone.ok i{color:#2E7D32}
+.upzone p{font-size:13px;color:var(--muted)}
+.upzone .fname{font-size:12px;font-weight:600;color:#2E7D32;margin-top:6px}
+
+/* form controls */
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase}
+input[type=text],input[type=date],select,textarea{
+  width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:7px;
+  background:#fff;color:var(--text);font-family:inherit;font-size:13px;
+  transition:border-color .13s,box-shadow .13s;outline:none}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px rgba(242,72,94,.1)}
+textarea{resize:vertical;min-height:60px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+
+/* buttons */
+.btn-add{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;
+  border-radius:7px;background:var(--surface);border:1px solid var(--border);
+  color:var(--text);font-family:inherit;font-size:12px;font-weight:600;
+  cursor:pointer;transition:background .12s,border-color .12s,color .12s}
+.btn-add:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+.btn-rm{background:none;border:none;cursor:pointer;padding:4px 6px;
+  border-radius:5px;color:var(--muted);font-size:12px;
+  transition:background .1s,color .1s}
+.btn-rm:hover{background:#fde8eb;color:var(--accent)}
+
+/* identity table */
+.id-tbl{width:100%;border-collapse:collapse}
+.id-tbl td{border:1px solid var(--border);vertical-align:top;padding:10px 12px}
+.id-tbl td.id-label{font-size:12px;font-weight:700;background:var(--surface);
+  white-space:nowrap;width:220px;color:var(--text)}
+.id-tbl td.id-val{background:#fff}
+
+/* activity cards (in Présentation row) */
+.act-card{border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.act-hd{display:flex;align-items:center;gap:8px;padding:8px 12px;
+  border-bottom:1px solid var(--border)}
+.act-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.act-name-disp{font-size:12.5px;font-weight:700;flex:1}
+.act-flds{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px}
+
+/* BIA tables */
+.bia-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.bia-tbl th{background:var(--surface);padding:8px 10px;border:1px solid var(--border);
+  font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--muted);white-space:nowrap}
+.bia-tbl td{padding:5px 8px;border:1px solid var(--border);vertical-align:middle}
+.bia-tbl tr:nth-child(even) td{background:rgba(0,0,0,.015)}
+.bia-tbl td input,.bia-tbl td textarea,.bia-tbl td select{
+  margin:0;padding:4px 7px;font-size:12px}
+.bia-tbl td textarea{min-height:44px}
+.bia-tbl td.act-lbl{font-weight:600;font-size:12px;background:var(--surface);white-space:nowrap}
+.tbl-scroll{overflow-x:auto}
+
+/* static read-only table */
+.static-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.static-tbl th{background:#E8EAF6;padding:7px 9px;border:1px solid #C5CAE9;
+  font-size:10.5px;font-weight:700;color:#3949AB}
+.static-tbl td{padding:6px 9px;border:1px solid #C5CAE9;vertical-align:top;line-height:1.5}
+.static-tbl tr:nth-child(even) td{background:#F8F9FE}
+
+/* §5.2 impact cards */
+.imp-card{border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.imp-hd{padding:10px 15px;font-size:13px;font-weight:700;border-bottom:1px solid var(--border)}
+.imp-body{padding:14px}
+.imp-grid{width:100%;border-collapse:collapse;font-size:12px}
+.imp-grid th{background:var(--surface);padding:7px 10px;border:1px solid var(--border);
+  font-size:11px;font-weight:700;color:var(--muted)}
+.imp-grid td{padding:6px 10px;border:1px solid var(--border)}
+.imp-grid td.lbl{font-weight:600;background:var(--surface);font-size:12px;white-space:nowrap}
+.imp-grid select{width:100%;min-width:70px}
+
+/* §5.3 DMIA */
+.dmia-card{border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px}
+.dmia-hd{display:flex;align-items:center;gap:9px;padding:9px 14px;
+  border-bottom:1px solid var(--border);background:var(--surface)}
+.dmia-body{display:grid;grid-template-columns:160px 1fr;gap:14px;padding:14px}
+
+/* §7.1 montée en charge */
+.act-sel-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;
+  padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+.act-sel-bar label{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted);white-space:nowrap}
+.act-sel-bar select{flex:1;max-width:260px}
+#montee-tbl{width:100%;border-collapse:collapse;font-size:11.5px;min-width:820px}
+#montee-tbl th{background:var(--surface);padding:7px 6px;border:1px solid var(--border);
+  text-align:center;font-weight:700;font-size:11px;white-space:nowrap}
+#montee-tbl th.mh-metric{text-align:left;min-width:130px;padding-left:11px}
+#montee-tbl td{padding:3px 5px;border:1px solid var(--border);vertical-align:middle;text-align:center}
+#montee-tbl td.tc-metric{font-weight:600;font-size:12px;text-align:left;
+  padding-left:11px;background:var(--surface);white-space:nowrap}
+#montee-tbl td.tc-comm{padding:5px 8px;font-size:11px;vertical-align:top}
+.cell-inp{width:100%;min-width:44px;padding:3px;text-align:center;
+  border:1px solid transparent;border-radius:4px;background:transparent;
+  font-family:inherit;font-size:11.5px;outline:none;
+  transition:border-color .12s,background .12s}
+.cell-inp:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px rgba(242,72,94,.1)}
+.cell-inp:hover:not(:focus):not(:disabled){border-color:var(--border);background:rgba(255,255,255,.7)}
+.blocked{background:#efefef!important;position:relative;cursor:not-allowed}
+.blocked .cell-inp{pointer-events:none;color:transparent;background:transparent!important}
+.blocked::after{content:'\f023';font-family:'Font Awesome 6 Free';font-weight:900;
+  font-size:10px;color:#bbb;display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%;position:absolute;inset:0}
+.act-chip{display:inline-flex;flex-direction:column;padding:3px 7px;border-radius:6px;
+  font-size:10.5px;font-weight:600;margin:2px 0;white-space:nowrap}
+.act-chip .dmia-hint{font-size:9.5px;font-weight:400;opacity:.8}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+
+/* collapsible */
+.coll-hd{display:flex;align-items:center;gap:9px;padding:10px 14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+  cursor:pointer;user-select:none;margin-bottom:10px;font-size:12.5px;font-weight:700}
+.coll-hd .cc{margin-left:auto;color:var(--muted);font-size:11px;transition:transform .2s}
+.coll-hd.open .cc{transform:rotate(180deg)}
+.coll-body{display:none;margin-bottom:12px}
+.coll-body.open{display:block}
+
+
+/* ── DMIA suggestion popover ── */
+.dmia-wrap{position:relative;display:flex;align-items:center;gap:5px}
+.dmia-wrap select{flex:1}
+.btn-suggest{background:none;border:1px solid var(--border);border-radius:5px;
+  padding:3px 7px;cursor:pointer;font-size:11px;color:#1565C0;
+  transition:background .12s,border-color .12s;white-space:nowrap}
+.btn-suggest:hover{background:#EFF6FF;border-color:#1565C0}
+.btn-suggest.loading{color:var(--muted);pointer-events:none}
+.btn-suggest.has-sug{border-color:#1565C0;background:#EFF6FF;font-weight:700}
+.sug-pop{position:absolute;top:calc(100% + 6px);left:0;z-index:400;
+  background:#fff;border:1px solid #BFDBFE;border-radius:var(--r);
+  box-shadow:0 8px 24px rgba(0,0,0,.13);min-width:340px;max-width:480px;
+  animation:fadeUp .14s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.sug-pop-hd{padding:8px 12px;background:#EFF6FF;border-bottom:1px solid #BFDBFE;
+  font-size:11px;font-weight:700;color:#1E40AF;border-radius:var(--r) var(--r) 0 0;
+  display:flex;align-items:center;justify-content:space-between}
+.sug-pop-hd button{background:none;border:none;cursor:pointer;color:#1E40AF;font-size:13px}
+.sug-item{display:flex;align-items:center;gap:8px;padding:7px 12px;
+  cursor:pointer;transition:background .1s;border-bottom:1px solid #F0F4FF}
+.sug-item:last-child{border-bottom:none}
+.sug-item:hover{background:#F0F7FF}
+.sug-dmia{font-weight:800;font-size:13px;color:#1565C0;min-width:50px}
+.sug-detail{flex:1;font-size:11px;color:var(--muted);line-height:1.5}
+.sug-detail strong{color:var(--text)}
+.sug-freq{font-size:10px;background:#E3F2FD;color:#1565C0;padding:1px 5px;border-radius:99px;white-space:nowrap}
+.sug-empty{padding:12px;font-size:12px;color:var(--muted);text-align:center}
+
+/* ── sync hint banner ── */
+#sync-hint-banner{display:none;position:fixed;top:52px;left:var(--sb-w);right:0;z-index:250;
+  background:linear-gradient(90deg,#1E3A8A 0%,#1D4ED8 100%);
+  color:#fff;padding:11px 20px;
+  align-items:center;gap:12px;
+  box-shadow:0 3px 12px rgba(29,78,216,.35)}
+#sync-hint-banner.visible{display:flex}
+/* push main content down when banner is showing */
+#main.sync-hint-active{margin-top:calc(52px + 49px)}
+.shb-icon{font-size:18px;flex-shrink:0;animation:shbPulse 2s ease-in-out infinite}
+@keyframes shbPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.shb-body{flex:1}
+.shb-title{font-size:12.5px;font-weight:800;letter-spacing:.02em;margin-bottom:2px}
+.shb-detail{font-size:11.5px;opacity:.88;line-height:1.5}
+.shb-target{font-weight:800;background:rgba(255,255,255,.18);
+  padding:1px 7px;border-radius:4px;font-size:12px;letter-spacing:.03em}
+.shb-close{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  border-radius:6px;color:#fff;cursor:pointer;font-size:13px;
+  padding:4px 9px;transition:background .13s;flex-shrink:0}
+.shb-close:hover{background:rgba(255,255,255,.28)}
+
+/* ── alert panel ── */
+#alert-panel{position:fixed;bottom:24px;right:24px;z-index:500;
+  background:#fff;border:1px solid #FED7AA;border-radius:var(--r);
+  box-shadow:0 8px 28px rgba(0,0,0,.15);width:320px;
+  animation:slideIn .2s ease;display:none}
+#alert-panel.visible{display:block}
+@keyframes slideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.alert-hd{display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:#FFF7ED;border-bottom:1px solid #FED7AA;border-radius:var(--r) var(--r) 0 0}
+.alert-hd i{color:#EA580C;font-size:16px}
+.alert-hd span{font-size:12.5px;font-weight:700;color:#9A3412;flex:1}
+.alert-hd button{background:none;border:none;cursor:pointer;color:#9A3412;font-size:14px}
+.alert-list{max-height:240px;overflow-y:auto;padding:8px}
+.alert-item{padding:8px 10px;border-radius:7px;background:#FFF7ED;
+  border-left:3px solid #EA580C;margin-bottom:6px;font-size:11.5px}
+.alert-item:last-child{margin-bottom:0}
+.alert-item .ai-act{font-weight:700;color:var(--text);margin-bottom:2px}
+.alert-item .ai-detail{color:#9A3412;font-size:11px}
+.alert-item .ai-lower{font-weight:800;color:#EA580C}
+
+/* tooltip */
+#tip{position:fixed;z-index:9999;background:#1A1814;color:#fff;
+  padding:7px 12px;border-radius:7px;font-size:11.5px;max-width:250px;
+  pointer-events:none;opacity:0;transition:opacity .12s;
+  box-shadow:0 4px 14px rgba(0,0,0,.22);line-height:1.4}
+#tip.on{opacity:1}
+
+/* toast */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);
+  background:#1A1814;color:#fff;padding:10px 20px;border-radius:99px;
+  font-size:12.5px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.22);
+  opacity:0;transition:opacity .2s;pointer-events:none;z-index:8000;white-space:nowrap}
+#toast.on{opacity:1}
+#toast.ok{background:#2E7D32}
+#toast.err{background:var(--accent)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.empty{text-align:center;padding:24px 16px;color:var(--muted);font-size:12.5px}
+.empty i{font-size:28px;display:block;margin-bottom:8px}
+
+/* presentation preview */
+.pres-preview{padding:9px 12px;border:1px solid var(--border);border-radius:7px;
+  background:var(--surface);font-size:12.5px;color:var(--muted);min-height:44px;
+  line-height:1.6;margin-top:8px}
+.pres-preview.has-data{color:var(--text);background:#fff}
+
+/* save button */
+.btn-save{width:100%;margin-top:8px;padding:9px;background:#fff;color:#1565C0;
+  border:1.5px solid rgba(21,101,192,.3);border-radius:var(--r);font-family:inherit;
+  font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:7px;transition:background .14s,border-color .14s}
+.btn-save:hover{background:rgba(21,101,192,.06);border-color:#1565C0}
+
+/* sync DMIA button */
+/* ── save modal ── */
+#save-modal-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.45);
+  display:none;align-items:center;justify-content:center}
+#save-modal-overlay.open{display:flex}
+#save-modal{background:#fff;border-radius:var(--r);box-shadow:0 16px 48px rgba(0,0,0,.18);
+  width:440px;max-width:calc(100vw - 40px);overflow:hidden;
+  animation:fadeUp .18s ease}
+.sm-hd{display:flex;align-items:center;gap:10px;padding:16px 20px;
+  background:var(--surface);border-bottom:1px solid var(--border)}
+.sm-hd i{color:#1565C0;font-size:16px}
+.sm-hd .sm-title{font-size:14px;font-weight:700;flex:1}
+.sm-hd button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:2px}
+.sm-hd button:hover{color:var(--text)}
+.sm-bd{padding:20px}
+.sm-fg{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.sm-fg label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sm-fg select,.sm-fg input{width:100%;padding:8px 11px;border:1px solid var(--border);
+  border-radius:7px;font-family:inherit;font-size:13px;outline:none;
+  transition:border-color .12s,box-shadow .12s}
+.sm-fg select:focus,.sm-fg input:focus{border-color:#1565C0;box-shadow:0 0 0 3px rgba(21,101,192,.1)}
+.sm-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sm-ft{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border)}
+.sm-ft button{flex:1;padding:10px;border-radius:var(--r);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:background .14s}
+.btn-sm-cancel{background:var(--surface);color:var(--muted)}
+.btn-sm-cancel:hover{background:var(--panel)}
+.btn-sm-ok{background:#1565C0;color:#fff}
+.btn-sm-ok:hover{background:#1251a0}
+.btn-sm-ok:disabled{opacity:.5;cursor:not-allowed}
+
+/* load indicator (topbar pill) */
+.tb-load-pill{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:99px;
+  background:rgba(21,101,192,.09);color:#1565C0;border:1px solid rgba(21,101,192,.2)}
+
+@media(max-width:768px){
+  #sb{display:none}
+  #main{margin-left:0;padding:14px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .full{grid-column:1}
+}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="#" id="tb-back" onclick="handleNavBack(event)"><i class="fa-solid fa-arrow-left"></i> Sélection</a>
+  <div class="title">Éditeur Fiche <span>BIA</span></div>
+  <span id="tb-sector-badge" style="display:none;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:99px;"></span>
+  <span style="font-size:11px;color:var(--muted)">Devoteam</span>
+</div>
+
+<!-- ══ SYNC HINT BANNER ══ -->
+<div id="sync-hint-banner">
+  <i class="fa-solid fa-arrows-rotate shb-icon"></i>
+  <div class="shb-body">
+    <div class="shb-title">⚡ Synchronisation — Correction requise</div>
+    <div class="shb-detail" id="shb-detail">Chargement…</div>
+  </div>
+  <button class="shb-close" onclick="dismissSyncHint()"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<aside id="sb">
+  <div style="padding:6px">
+    <div class="sb-lbl">Navigation</div>
+    <a class="sb-a" href="/projects" target="_blank"><i class="fa-solid fa-database fa-fw"></i>Base de projets <i class="fa-solid fa-arrow-up-right-from-square fa-xs" style="margin-left:auto;opacity:.6"></i></a>
+    <a class="sb-a on" href="#s-template"><i class="fa-solid fa-file-word fa-fw"></i>Template</a>
+    <a class="sb-a" href="#s-toc"><i class="fa-solid fa-list fa-fw"></i>Tables des matières</a>
+    <a class="sb-a" href="#s-suivi"><i class="fa-solid fa-users fa-fw"></i>Fiche de suivi</a>
+    <a class="sb-a" href="#s-termi"><i class="fa-solid fa-book fa-fw"></i>§1 Terminologie</a>
+    <a class="sb-a" href="#s-objectif"><i class="fa-solid fa-bullseye fa-fw"></i>Objectif</a>
+    <a class="sb-a" href="#s-identite"><i class="fa-solid fa-building fa-fw"></i>Fiche d'identité <span class="bdg" id="sb-cnt">0</span></a>
+    <div class="sb-lbl" style="margin-top:4px">Analyse des impacts</div>
+    <a class="sb-a" href="#s-sec4"><i class="fa-solid fa-table fa-fw"></i>§4 Description &amp; criticité</a>
+    <a class="sb-a" href="#s-sec5"><i class="fa-solid fa-chart-bar fa-fw"></i>§5 Métriques d'impact</a>
+    <div class="sb-lbl" style="margin-top:4px">Ressources</div>
+    <a class="sb-a" href="#s-sec6"><i class="fa-solid fa-arrows-left-right fa-fw"></i>§6 Échanges d'information</a>
+    <a class="sb-a" href="#s-sec7"><i class="fa-solid fa-chart-line fa-fw"></i>§7 Besoins de redémarrage</a>
+    <a class="sb-a" href="#s-obs"><i class="fa-solid fa-comment fa-fw"></i>Observations</a>
+  </div>
+  <div class="sb-bot">
+    <button class="btn-gen" id="btn-gen" disabled onclick="generate()">
+      <i class="fa-solid fa-download"></i> Générer le .docx
+    </button>
+    <button class="btn-save" id="btn-save" onclick="openProjSelect()">
+      <i class="fa-solid fa-floppy-disk"></i> Sauvegarder dans la base
+    </button>
+    <div class="sb-hint" id="sb-hint">Uploadez un template pour commencer</div>
+  </div>
+</aside>
+
+<main id="main">
+
+<div class="doc-title">Fiche BIA — Expression des Besoins Métiers</div>
+<div class="doc-sub">Business Impact Analysis · Maintien en Condition Opérationnelle</div>
+
+<!-- ══ 0. TEMPLATE ══ -->
+<section id="s-template">
+<div class="card">
+  <div class="card-hd open" onclick="toggleCard(this)">
+    <div class="card-num">T</div>
+    <div><div class="card-title">Template BIA (.docx)</div>
+    <div class="card-sub">Fichier modèle Word à remplir</div></div>
+    <i class="fa-solid fa-chevron-down caret"></i>
+  </div>
+  <div class="card-bd">
+    <div class="upzone" id="upzone"
+         onclick="document.getElementById('tmpl-inp').click()"
+         ondragover="event.preventDefault();this.classList.add('drag')"
+         ondragleave="this.classList.remove('drag')"
+         ondrop="dropTmpl(event)">
+      <i class="fa-solid fa-file-word"></i>
+      <p>Cliquez ou glissez votre <strong>.docx</strong> ici</p>
+      <div class="fname" id="tmpl-fname" style="display:none"></div>
+    </div>
+    <input type="file" id="tmpl-inp" accept=".docx" style="display:none" onchange="setTmpl(this.files[0])">
+  </div>
+</div>
+</section>
+
+<!-- ══ TABLE DES MATIÈRES ══ -->
+<section id="s-toc">
+<div id="coll-toc-hd" class="coll-hd" onclick="toggleColl('toc')">
+  <i class="fa-solid fa-list" style="color:#607D8B"></i>
+  <span>Table des matières &amp; Table des tableaux</span>
+  <span style="margin-left:8px;font-size:10.5px;color:var(--muted);font-weight:400">(référence — lecture seule)</span>
+  <i class="fa-solid fa-chevron-down cc"></i>
+</div>
+<div id="coll-toc-body" class="coll-body">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--muted)">TABLE DES MATIÈRES</div>
+      <table class="static-tbl" style="font-size:12px">
+        <tbody>
+          <tr><td>Fiche de suivi</td></tr>
+          <tr><td>1. Terminologie et abréviations</td></tr>
+          <tr><td>2. Objectif</td></tr>
+          <tr><td>3. Fiche d'identité de l'entité</td></tr>
+          <tr><td>4. Description et criticité des activités métiers</td></tr>
+          <tr><td>5. Métrique d'impact pour les processus métier</td></tr>
+          <tr><td style="padding-left:20px">5.1. Matrice d'impact</td></tr>
+          <tr><td style="padding-left:20px">5.2. Évaluation des impacts</td></tr>
+          <tr><td style="padding-left:20px">5.3. Durée maximale d'interruption d'activités</td></tr>
+          <tr><td>6. Analyse des échanges d'information</td></tr>
+          <tr><td>7. Besoins de redémarrage des activités</td></tr>
+          <tr><td style="padding-left:20px">7.1. Effectifs et positions de travail</td></tr>
+          <tr><td style="padding-left:20px">7.2. Collaborateurs clés</td></tr>
+          <tr><td style="padding-left:20px">7.3. Applications informatiques</td></tr>
+          <tr><td style="padding-left:20px">7.4. Documents et fichiers critiques</td></tr>
+          <tr><td>Observations</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--muted)">TABLE DES TABLEAUX</div>
+      <table class="static-tbl" style="font-size:12px">
+        <tbody id="tot-body">
+          <!-- rendered by renderTOT() -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ FICHE DE SUIVI ══ -->
+<section id="s-suivi">
+<div class="sec-h1"><span class="num">FS</span> Fiche de suivi</div>
+<table class="id-tbl" style="margin-bottom:16px">
+  <tbody>
+    <tr>
+      <td class="id-label">Entité</td>
+      <td class="id-val"><input type="text" id="suivi-entite" placeholder="Nom de l'entité / département…" oninput="st.suivi.entite=this.value"></td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">Participants</div>
+<div class="tbl-scroll" style="margin-bottom:10px">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="width:100px">Présence</th><th>Nom</th><th>Fonction</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="suivi-body"></tbody>
+  </table>
+</div>
+<div class="empty" id="suivi-empty" style="padding:10px 0;text-align:left;display:none">
+  <i class="fa-solid fa-users" style="display:inline;margin-right:6px"></i>Aucun participant ajouté.
+</div>
+<button class="btn-add" onclick="addParticipant()"><i class="fa-solid fa-plus"></i> Ajouter un participant</button>
+
+<table class="id-tbl" style="margin-top:16px">
+  <tbody>
+    <tr>
+      <td class="id-label">Rédacteur</td>
+      <td class="id-val"><input type="text" id="suivi-redacteur" placeholder="Devoteam" oninput="st.suivi.redacteur=this.value"></td>
+    </tr>
+    <tr>
+      <td class="id-label">Version</td>
+      <td class="id-val"><input type="text" id="suivi-version" placeholder="2.0" oninput="st.suivi.version=this.value" style="max-width:120px"></td>
+    </tr>
+    <tr>
+      <td class="id-label">Dernière mise à jour</td>
+      <td class="id-val"><input type="date" id="suivi-date" oninput="st.suivi.date_maj=this.value" style="max-width:180px"></td>
+    </tr>
+    <tr>
+      <td class="id-label">Référence du document</td>
+      <td class="id-val"><input type="text" id="suivi-ref" placeholder="ex. MCO-BIA-RH-V2.0" oninput="st.suivi.reference=this.value"></td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══ §1 TERMINOLOGIE ET ABRÉVIATIONS ══ -->
+<section id="s-termi">
+<div class="sec-h1"><span class="num">§1</span> Terminologie et abréviations</div>
+
+<div class="sec-h2">Terminologies</div>
+<div class="tbl-cap">Tableau 1 : Terminologies</div>
+<div class="tbl-scroll" style="margin-bottom:20px">
+  <table class="static-tbl">
+    <thead><tr><th style="min-width:220px">Terme</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Plan de Continuité d'Activité (PCA)</strong></td><td>Ensemble du dispositif de continuité d'activité</td></tr>
+      <tr><td><strong>Plan de secours informatique (PSI)</strong></td><td>Plan déclenché pour la reprise du système d'information</td></tr>
+      <tr><td><strong>Analyse d'impact</strong></td><td>Analyse d'impacts d'un sinistre sur les activités</td></tr>
+      <tr><td><strong>Expression de Besoins en Continuité des Activités</strong></td><td>Estimation des locaux, matériels, personnels et services pour assurer la continuité des activités</td></tr>
+      <tr><td><strong>DMIA</strong></td><td>Durée au-delà de laquelle une interruption de l'activité peut être préjudiciable pour la pérennité de l'entité et de l'entreprise</td></tr>
+      <tr><td><strong>PMDT</strong></td><td>Durée maximale d'enregistrement des données qu'il est acceptable de perdre entre la dernière sauvegarde et le sinistre provoquant une perte de données</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="sec-h2">Abréviations</div>
+<div class="tbl-cap">Tableau 2 : Abréviations</div>
+<div class="tbl-scroll">
+  <table class="static-tbl" style="max-width:480px">
+    <thead><tr><th style="width:100px">Abréviation</th><th>Définition</th></tr></thead>
+    <tbody>
+      <tr><td><strong>PCA</strong></td><td>Plan de Continuité d'activité</td></tr>
+      <tr><td><strong>DMIA</strong></td><td>Durée Maximale d'Interruption Admissible</td></tr>
+      <tr><td><strong>PMDT</strong></td><td>Perte Maximale de Données Tolérée</td></tr>
+      <tr><td><strong>V</strong></td><td>Vitale</td></tr>
+      <tr><td><strong>C</strong></td><td>Critique</td></tr>
+      <tr><td><strong>PC</strong></td><td>Peu critique</td></tr>
+      <tr><td><strong>MC</strong></td><td>Moyennement critique</td></tr>
+      <tr><td><strong>NA</strong></td><td>Non applicable</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- ══ OBJECTIF ══ -->
+<section id="s-objectif">
+<div class="sec-h1"><span class="num">OBJ</span> Objectif</div>
+<div class="instr">
+  <strong>L'objectif de ce document</strong> est de recueillir les besoins métiers en termes de continuité d'activité dans le cadre du projet du maintien en condition opérationnelle.
+  <br><br>
+  La phase d'identification des besoins métiers a pour objectifs de :
+  <ul>
+    <li>Inventorier les processus métiers et supports ;</li>
+    <li>Évaluer les contraintes de fonctionnement normal de chacun des processus (réglementaires, contractuels, confidentialité, déontologie, etc.) ;</li>
+    <li>Analyser les impacts d'arrêt de chacun des processus (image de marque, financiers, désorganisation interne, juridiques) ;</li>
+    <li>Déduire en fonction des contraintes de fonctionnement et des impacts d'arrêt le périmètre des processus critiques à secourir ;</li>
+    <li>Modéliser la chaîne d'activité de chacun des processus critiques.</li>
+  </ul>
+  <br>
+  Pour ce faire, les responsables des activités métiers doivent être rencontrés afin de déterminer les impacts et les besoins suite à un sinistre majeur.
+</div>
+</section>
+
+<!-- ══ FICHE D'IDENTITÉ ══ -->
+<section id="s-identite">
+<div class="sec-h1"><span class="num">FI</span> Fiche d'identité de l'entité</div>
+<div class="tbl-cap">Tableau 3 : Fiche identité de l'entité</div>
+<table class="id-tbl">
+  <tbody>
+    <tr>
+      <td class="id-label">Nom du (des) responsable(s)</td>
+      <td class="id-val">
+        <input type="text" id="ei-resp" placeholder="Mme / M. …" oninput="st.entity.nom_responsable=this.value">
+      </td>
+    </tr>
+    <tr>
+      <td class="id-label">Organisation et effectifs</td>
+      <td class="id-val">
+        <textarea id="ei-org" rows="3" placeholder="Le département se compose de …" oninput="st.entity.organisation=this.value"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td class="id-label" style="vertical-align:top;padding-top:14px">
+        Présentation générale de l'activité<br>
+        <span style="font-size:10.5px;font-weight:400;color:var(--muted)">(produits, services, etc.)</span>
+      </td>
+      <td class="id-val" id="pres-cell">
+        <!-- Activities editor lives here -->
+        <div id="acts-container"></div>
+        <div class="empty" id="acts-empty" style="padding:10px 0;text-align:left">
+          <i class="fa-regular fa-rectangle-list" style="font-size:18px;display:inline;margin-right:6px"></i>Aucune activité. Ajoutez-en une ci-dessous.
+        </div>
+        <button class="btn-add" onclick="addAct()" style="margin-top:4px">
+          <i class="fa-solid fa-plus"></i> Ajouter une activité
+        </button>
+        <!-- Preview text (what will be written in the Word doc) -->
+        <div id="pres-preview" class="pres-preview" style="margin-top:12px;display:none">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px">
+            <i class="fa-solid fa-eye fa-xs"></i> Aperçu dans le Word
+          </div>
+          <div id="pres-preview-text"></div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="id-label">Principales contraintes liées à l'activité<br>
+        <span style="font-size:10.5px;font-weight:400;color:var(--muted)">(réglementaires, contractuelles…)</span>
+      </td>
+      <td class="id-val">
+        <textarea id="ei-contr" rows="3" placeholder="Les contraintes de l'activité sont les suivantes : …" oninput="st.entity.contraintes=this.value"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td class="id-label">Périodes critiques</td>
+      <td class="id-val">
+        <textarea id="ei-per" rows="2" placeholder="Les périodes critiques de l'activité sont les suivantes : …" oninput="st.entity.periodes_critiques=this.value"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td class="id-label">Historique des interruptions majeures</td>
+      <td class="id-val">
+        <textarea id="ei-hist" rows="2" placeholder="NA" oninput="st.entity.historique_interruptions=this.value"></textarea>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ══ §4 DESCRIPTION ET CRITICITÉ ══ -->
+<section id="s-sec4">
+<div class="sec-h1"><span class="num">§4</span> Description et criticité des activités métiers</div>
+<div class="instr">
+  <strong>Pour chaque processus :</strong>
+  <ul>
+    <li>Indiquer les ressources IT ou autres utilisées ;</li>
+    <li>Préciser les périodes critiques ;</li>
+    <li>Déterminer la criticité correspondante, à savoir :
+      <ul>
+        <li><strong>Faible :</strong> L'activité correspondante peut être reportée pour une période relativement flexible ;</li>
+        <li><strong>Moyenne :</strong> L'activité correspondante peut être reportée pour une période limitée ;</li>
+        <li><strong>Forte :</strong> L'activité correspondante ne peut pas être reportée, elle doit être opérationnelle même de façon dégradée.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+<div class="tbl-cap">Tableau 4 : Description et criticité des activités métier</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl" id="sec4-tbl">
+    <thead><tr>
+      <th style="min-width:150px">Activité</th>
+      <th style="min-width:200px">Ressources utilisées</th>
+      <th style="min-width:130px">Période critique</th>
+      <th style="min-width:130px">Criticité</th>
+    </tr></thead>
+    <tbody id="sec4-body"></tbody>
+  </table>
+</div>
+<div class="empty" id="sec4-empty"><i class="fa-solid fa-table"></i>Ajoutez des activités dans la Fiche d'identité.</div>
+</section>
+
+<!-- ══ §5 MÉTRIQUES D'IMPACT ══ -->
+<section id="s-sec5">
+<div class="sec-h1"><span class="num">§5</span> Métrique d'impact pour les processus métier</div>
+
+<!-- §5.1 Matrice d'impact (static / read-only) -->
+<div class="sec-h2">§5.1 — Matrice d'impact</div>
+<div class="instr">
+  Le tableau suivant présente la matrice d'impact qui va être utilisée durant toute la phase d'analyse des impacts métiers.
+</div>
+
+<div id="coll-matrix-hd" class="coll-hd" onclick="toggleColl('matrix')">
+  <i class="fa-solid fa-table-cells" style="color:#3949AB"></i>
+  <span>Tableau 5 : Matrice d'impact</span>
+  <span style="margin-left:8px;font-size:10.5px;color:var(--muted);font-weight:400">(référence — lecture seule)</span>
+  <i class="fa-solid fa-chevron-down cc"></i>
+</div>
+<div id="coll-matrix-body" class="coll-body">
+<div class="tbl-scroll">
+<table class="static-tbl">
+  <thead><tr>
+    <th>Impacts / Sévérité</th><th>Poids</th><th>Description</th>
+    <th>Niveau 1 — Faible</th><th>Niveau 2 — Significatif</th>
+    <th>Niveau 3 — Majeur</th><th>Niveau 4 — Catastrophique</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Image de marque</strong></td><td>4</td>
+      <td>Perte de confiance / Perte de clientèle</td>
+      <td>Faible nuisance nécessitant quelques jours pour être résorbée</td>
+      <td>Nuisance significative sur le Front Office et dégradation de l'image</td>
+      <td>Nuisance grave / Dégradation auprès des tiers</td>
+      <td>Vaste couverture médiatique négative / Perte de confiance</td>
+    </tr>
+    <tr>
+      <td><strong>Désorganisation interne</strong></td><td>1</td>
+      <td>Désorganisation liée au fonctionnement dégradé</td>
+      <td>Faible nuisance interne à l'entité</td>
+      <td>Désorganisation significative limitée à un service</td>
+      <td>Désorganisation durable / Détérioration du climat social</td>
+      <td>Chômage technique d'une importante proportion du personnel</td>
+    </tr>
+    <tr>
+      <td><strong>Réglementaire</strong></td><td>2</td>
+      <td>Non-respect des obligations contractuelles / réglementaires</td>
+      <td>Faible</td>
+      <td>Non-respect de la réglementation comptable, fiscale…</td>
+      <td>Infraction majeure à la législation</td>
+      <td>Sanction judiciaire</td>
+    </tr>
+    <tr>
+      <td><strong>Financier</strong></td><td>3</td>
+      <td>Manque à gagner / Pénalité de retard</td>
+      <td>Perte inférieure à 10 000 DT</td>
+      <td>Perte entre 10 000 et 50 000 DT</td>
+      <td>Perte entre 50 000 et 100 000 DT</td>
+      <td>Perte supérieure à 100 000 DT</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+<!-- §5.2 Évaluation des impacts -->
+<div class="sec-h2">§5.2 — Évaluation des impacts</div>
+<div class="instr">
+  Selon la matrice d'impact présentée ci-dessus (§5.1), il faut préciser le niveau d'évaluation de l'impact d'arrêt des activités de l'entité
+  (<em>faible, significatif, majeur ou catastrophique</em>) pour chacun des critères d'impact mentionnés dans la première colonne à gauche.
+  <br><br>
+  Pour cela, il faut prendre en considération la période la plus critique (début ou fin de mois, journalier, autre).
+  <br><br>
+  <strong>A</strong> = interruption &lt; 1 jour &nbsp;·&nbsp; <strong>B</strong> = interruption ≥ 5 jours
+</div>
+<div id="sec52-body">
+  <div class="empty"><i class="fa-solid fa-chart-bar"></i>Ajoutez des activités dans la Fiche d'identité.</div>
+</div>
+
+<!-- §5.3 DMIA -->
+<div class="sec-h2">§5.3 — Durée maximale d'interruption d'activités (DMIA)</div>
+<div class="instr">
+  Dans le tableau présenté ci-dessous, il faut indiquer la <strong>Durée Maximale d'Interruption Admissible (DMIA)</strong> dans le cas d'un sinistre majeur.
+</div>
+<div class="tbl-cap">Tableau 8 : Durée maximale d'interruption d'activité</div>
+<div id="sec53-body">
+  <div class="empty"><i class="fa-solid fa-stopwatch"></i>Ajoutez des activités dans la Fiche d'identité.</div>
+</div>
+</section>
+
+<!-- ══ §6 ÉCHANGES D'INFORMATION ══ -->
+<section id="s-sec6">
+<div class="sec-h1"><span class="num">§6</span> Analyse des échanges d'information</div>
+<div class="instr">
+  Dans le tableau présenté ci-dessous, il faut :
+  <ul>
+    <li>Lister les groupes fonctionnels (internes / externes) avec lesquels vous interagissez ;</li>
+    <li>Préciser si ce groupe fonctionnel est interne ou externe ;</li>
+    <li>Décrire le type d'informations échangées (fichier, fax, etc.) et le sens de transfert (Transmis et/ou Reçu) ;</li>
+    <li>Lister les outils, applications et ressources SI utilisées.</li>
+  </ul>
+</div>
+<div class="tbl-cap">Tableau 9 : Analyse des échanges d'information</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="min-width:200px">Groupes fonctionnels / Correspondants</th>
+      <th style="width:60px">(I/E)</th>
+      <th style="min-width:180px">Type d'information</th>
+      <th style="width:60px">(T/R)</th>
+      <th style="min-width:180px">Ressources SI utilisées</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="sec6-body"></tbody>
+  </table>
+</div>
+<div class="empty" id="sec6-empty" style="padding:12px 0;text-align:left;display:none">
+  <i class="fa-solid fa-arrows-left-right" style="display:inline;margin-right:6px"></i>Aucun échange.
+</div>
+<br>
+<button class="btn-add" onclick="addEchange()"><i class="fa-solid fa-plus"></i> Ajouter une ligne</button>
+</section>
+
+<!-- ══ §7 BESOINS DE REDÉMARRAGE ══ -->
+<section id="s-sec7">
+<div class="sec-h1"><span class="num">§7</span> Besoins de redémarrage des activités</div>
+
+<!-- §7.1 Effectifs et positions -->
+<div class="sec-h2">§7.1 — Effectifs et positions de travail</div>
+<div class="instr">
+  Cette table décrit les besoins de continuité de l'entité en termes d'effectifs et de positions de travail. Il s'agit de :
+  <ul>
+    <li>Préciser l'effectif nominal ;</li>
+    <li>Évaluer les besoins en termes d'effectif et de position de travail pour la continuité d'activité, en fonction de la DMIA ;</li>
+    <li>Spécifier le besoin en termes de positions spécifiques ou spéciales ainsi que les équipements et/ou logiciels spécifiques associés.</li>
+  </ul>
+  <br>
+  <em class="instr-sub">Les cellules grisées sont inférieures à la DMIA de l'activité sélectionnée — elles ne nécessitent pas de saisie.</em>
+</div>
+<div class="tbl-cap">Tableau 10 : Effectif et positions de travail</div>
+<div class="legend" id="montee-legend"></div>
+<div class="act-sel-bar">
+  <label><i class="fa-solid fa-shield-halved" style="margin-right:5px;color:var(--accent)"></i>Blocage DMIA pour :</label>
+  <select id="montee-act-sel" onchange="setMonteeAct(this.value)">
+    <option value="">— Aucune (tout éditable) —</option>
+  </select>
+  <span id="montee-dmia-badge" style="font-size:11px;color:var(--muted)"></span>
+</div>
+<div class="tbl-scroll">
+  <table id="montee-tbl">
+    <thead>
+      <tr>
+        <th class="mh-metric">Montée en charge souhaitée</th>
+        <th>Nominal</th><th>H0</th><th>H+2</th><th>H+4</th>
+        <th>J+1</th><th>J+2</th><th>J+3</th><th>J+5</th><th>J+10</th><th>J+15</th>
+        <th style="min-width:120px">Commentaires</th>
+      </tr>
+    </thead>
+    <tbody id="montee-tbody"></tbody>
+  </table>
+</div>
+
+<!-- §7.2 Collaborateurs clés -->
+<div class="sec-h2" style="margin-top:28px">§7.2 — Collaborateurs clés</div>
+<div class="instr">
+  Par collaborateur clé on entend :
+  <ul>
+    <li>Tout collaborateur qui dispose d'une expertise rare/pointue ;</li>
+    <li>Tout collaborateur assurant une tâche tout seul ;</li>
+    <li>Tout collaborateur dont le potentiel d'encadrement est affirmé au sein de l'équipe.</li>
+  </ul>
+</div>
+<div class="tbl-cap">Tableau 11 : Les collaborateurs de repli</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th>Fonction</th><th>Nom</th><th>Prénom</th><th>Suppléants possibles</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="sec72-body"></tbody>
+  </table>
+</div>
+<br>
+<button class="btn-add" onclick="addCollab()"><i class="fa-solid fa-plus"></i> Ajouter un collaborateur</button>
+
+<!-- §7.3 Applications informatiques -->
+<div class="sec-h2" style="margin-top:28px">§7.3 — Applications informatiques</div>
+<div class="instr">
+  Le tableau suivant représente les applications informatiques utilisées par l'entité ainsi que :
+  <ul>
+    <li><strong>La criticité :</strong>
+      <ul>
+        <li><strong>Vitale (V) :</strong> si le processus métier est arrêté en cas d'indisponibilité de l'application ;</li>
+        <li><strong>Critique (C) :</strong> si le processus nécessite un travail manuel pour contourner l'application ;</li>
+        <li><strong>Moyennement critique (MC) :</strong> si le processus métier nécessite un contournement de l'application indisponible par une autre application ;</li>
+        <li><strong>Peu critique (PC) :</strong> si le processus métier est opérationnel et peu impacté ;</li>
+      </ul>
+    </li>
+    <li><strong>La DMIA</strong> — Durée Maximale d'Interruption Admissible : durée au-delà de laquelle une interruption de l'activité peut être préjudiciable pour la pérennité de l'entité et de l'entreprise ;</li>
+    <li><strong>La PMDT</strong> — Perte Maximale de Données tolérée : durée maximale d'enregistrement des données qu'il est acceptable de perdre entre la dernière sauvegarde et le sinistre.</li>
+  </ul>
+</div>
+<div class="tbl-cap">Tableau 12 : Les applications informatiques</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="min-width:160px">Application</th>
+      <th style="width:90px">Criticité</th>
+      <th style="width:90px">DMIA</th>
+      <th style="width:90px">PMDT</th>
+      <th>Commentaires</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="sec73-body"></tbody>
+  </table>
+</div>
+<br>
+<button class="btn-add" onclick="addApp()"><i class="fa-solid fa-plus"></i> Ajouter une application</button>
+
+<!-- §7.3b Autres équipements -->
+<div class="sec-h2" style="margin-top:28px">§7.3b — Autres équipements et outils de communication</div>
+<div class="instr">
+  Le tableau suivant présente les équipements et outils de communication qui doivent être disponibles au niveau du site de secours.
+</div>
+<div class="tbl-cap">Tableau 13 : Autres équipements et outils de communication</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="min-width:160px">Désignation</th>
+      <th>H+2</th><th>H+4</th><th>J+1</th><th>J+2</th><th>J+3</th><th>J+5</th><th>J+10</th><th>J+15</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="sec73b-body"></tbody>
+  </table>
+</div>
+<br>
+<button class="btn-add" onclick="addAppAvail()"><i class="fa-solid fa-plus"></i> Ajouter un équipement</button>
+
+<!-- §7.4 Documents -->
+<div class="sec-h2" style="margin-top:28px">§7.4 — Documents et fichiers critiques</div>
+<div class="instr">
+  Dans le tableau suivant, il faut détailler les documents et fichiers critiques utilisés au niveau de l'entité.
+</div>
+<div class="tbl-cap">Tableau 14 : Documents et fichiers critiques</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="min-width:180px">Documents / Fichiers</th>
+      <th style="width:180px">Type de stockage (E/P/E+P)</th>
+      <th>Duplication (O/N) — Si oui, où ?</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="sec74-body"></tbody>
+  </table>
+</div>
+<br>
+<button class="btn-add" onclick="addDoc()"><i class="fa-solid fa-plus"></i> Ajouter un document</button>
+
+</section>
+
+<!-- ══ OBSERVATIONS ══ -->
+<section id="s-obs">
+<div class="sec-h1"><span class="num">OBS</span> Observations</div>
+<div class="fg">
+  <label>Observations générales</label>
+  <textarea id="obs-txt" rows="5" placeholder="Observations libres…" oninput="st.observations=this.value"></textarea>
+</div>
+<br><br>
+</section>
+
+</main>
+
+<!-- ══ Leave-confirmation modal ══ -->
+<div id="leave-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1100;
+  display:none;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;width:min(94vw,440px);box-shadow:0 8px 40px rgba(0,0,0,0.18);overflow:hidden;">
+    <div style="padding:22px 24px 16px;display:flex;align-items:flex-start;gap:14px;">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,0.12);
+           display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid fa-floppy-disk" style="color:#D97706;font-size:16px;"></i>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#1a1814;margin-bottom:6px;">Modifications non sauvegardées</div>
+        <div style="font-size:13px;color:rgba(26,24,20,0.6);line-height:1.5;">
+          Voulez-vous sauvegarder vos derniers changements avant de continuer ?
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;padding:14px 24px 20px;">
+      <button onclick="leaveModalNo()" style="flex:1;padding:10px;border-radius:8px;border:1px solid rgba(26,24,20,0.14);
+        background:#f9f9f7;color:rgba(26,24,20,0.65);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">
+        Non, quitter
+      </button>
+      <button onclick="leaveModalYes()" style="flex:1.4;padding:10px;border-radius:8px;border:none;
+        background:#1565C0;color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">
+        <i class="fa-solid fa-floppy-disk fa-xs"></i> Oui, sauvegarder
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Project-selection modal (for new fiches / no project_id) ══ -->
+<div id="proj-select-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1200;
+  align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;width:min(94vw,480px);box-shadow:0 8px 40px rgba(0,0,0,0.18);overflow:hidden;">
+    <div style="padding:20px 24px 14px;border-bottom:1px solid rgba(26,24,20,0.08);
+         display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#1a1814;">Ajouter à un projet client</div>
+        <div style="font-size:11.5px;color:rgba(26,24,20,0.5);margin-top:2px;">Choisissez un projet existant ou créez-en un nouveau</div>
+      </div>
+      <button onclick="closeProjSelect()" style="background:none;border:none;cursor:pointer;color:rgba(26,24,20,0.4);font-size:16px;padding:4px;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;border-bottom:1px solid rgba(26,24,20,0.08);">
+      <button id="ps-tab-existing" onclick="switchProjTab('existing')"
+        style="flex:1;padding:11px;background:none;border:none;font-family:inherit;font-size:13px;font-weight:700;
+               cursor:pointer;border-bottom:2.5px solid #1565C0;color:#1565C0;">
+        <i class="fa-solid fa-database fa-xs"></i> Projet existant
+      </button>
+      <button id="ps-tab-new" onclick="switchProjTab('new')"
+        style="flex:1;padding:11px;background:none;border:none;font-family:inherit;font-size:13px;font-weight:600;
+               cursor:pointer;border-bottom:2.5px solid transparent;color:rgba(26,24,20,0.45);">
+        <i class="fa-solid fa-plus fa-xs"></i> Nouveau client
+      </button>
+    </div>
+    <div style="padding:20px 24px;">
+      <!-- Existing project panel -->
+      <div id="ps-panel-existing">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+                   color:rgba(26,24,20,0.45);display:block;margin-bottom:4px;">Secteur</label>
+            <select id="ps-sector" onchange="psLoadClients()"
+              style="width:100%;padding:8px 11px;border:1px solid rgba(26,24,20,0.15);border-radius:7px;
+                     font-family:inherit;font-size:13px;outline:none;">
+              <option value="">Tous les secteurs</option>
+              <option value="banques">🏦 Banques</option>
+              <option value="assurances">🛡 Assurances</option>
+              <option value="autres">Autres</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+                   color:rgba(26,24,20,0.45);display:block;margin-bottom:4px;">Client</label>
+            <select id="ps-client"
+              style="width:100%;padding:8px 11px;border:1px solid rgba(26,24,20,0.15);border-radius:7px;
+                     font-family:inherit;font-size:13px;outline:none;">
+              <option value="">Choisir un client…</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+                 color:rgba(26,24,20,0.45);display:block;margin-bottom:4px;">Nom de la fiche</label>
+          <input type="text" id="ps-projname" placeholder="Ex : Fiche BIA — Direction SI — v1.0"
+            style="width:100%;padding:8px 11px;border:1px solid rgba(26,24,20,0.15);border-radius:7px;
+                   font-family:inherit;font-size:13px;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+      <!-- New client panel -->
+      <div id="ps-panel-new" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+                   color:rgba(26,24,20,0.45);display:block;margin-bottom:4px;">Secteur</label>
+            <select id="ps-new-sector"
+              style="width:100%;padding:8px 11px;border:1px solid rgba(26,24,20,0.15);border-radius:7px;
+                     font-family:inherit;font-size:13px;outline:none;">
+              <option value="banques">🏦 Banques</option>
+              <option value="assurances">🛡 Assurances</option>
+              <option value="autres">Autres</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+                   color:rgba(26,24,20,0.45);display:block;margin-bottom:4px;">Nom du client</label>
+            <input type="text" id="ps-new-client" placeholder="Ex : BIAT, AMI…" autocomplete="off"
+              style="width:100%;padding:8px 11px;border:1px solid rgba(26,24,20,0.15);border-radius:7px;
+                     font-family:inherit;font-size:13px;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+                 color:rgba(26,24,20,0.45);display:block;margin-bottom:4px;">Nom de la fiche</label>
+          <input type="text" id="ps-new-projname" placeholder="Ex : Fiche BIA — Direction SI — v1.0"
+            style="width:100%;padding:8px 11px;border:1px solid rgba(26,24,20,0.15);border-radius:7px;
+                   font-family:inherit;font-size:13px;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;padding:0 24px 20px;">
+      <button onclick="closeProjSelect()" style="flex:1;padding:10px;border-radius:8px;
+        border:1px solid rgba(26,24,20,0.14);background:#f9f9f7;color:rgba(26,24,20,0.65);
+        font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Annuler</button>
+      <button id="ps-confirm-btn" onclick="confirmProjSelect()" style="flex:1.4;padding:10px;border-radius:8px;border:none;
+        background:#1565C0;color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">
+        <i class="fa-solid fa-floppy-disk fa-xs"></i> Sauvegarder
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Save modal ══ -->
+<div id="save-modal-overlay" onclick="if(event.target===this)closeSaveModal()">
+  <div id="save-modal">
+    <div class="sm-hd">
+      <i class="fa-solid fa-floppy-disk"></i>
+      <span class="sm-title">Sauvegarder la fiche dans la base</span>
+      <button onclick="closeSaveModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="sm-bd">
+      <div class="sm-row">
+        <div class="sm-fg">
+          <label>Secteur</label>
+          <select id="sm-sector">
+            <option value="banques">🏦 Secteur Bancaire</option>
+            <option value="assurances">🛡 Secteur Assurances</option>
+          </select>
+        </div>
+        <div class="sm-fg">
+          <label>Client / Entité</label>
+          <input type="text" id="sm-client" placeholder="Ex : BIAT, AMI…" autocomplete="off">
+        </div>
+      </div>
+      <div class="sm-fg">
+        <label>Nom du projet / fiche</label>
+        <input type="text" id="sm-projname" placeholder="Ex : Fiche BIA — Direction SI — v1.0">
+      </div>
+      <div id="sm-update-note" style="display:none;font-size:11.5px;color:#1565C0;
+        background:rgba(21,101,192,.06);border:1px solid rgba(21,101,192,.18);
+        border-radius:6px;padding:8px 12px;margin-top:4px">
+        <i class="fa-solid fa-arrows-rotate fa-xs"></i>
+        Cette fiche est déjà sauvegardée. La sauvegarder à nouveau mettra à jour le fichier existant.
+      </div>
+    </div>
+    <div class="sm-ft">
+      <button class="btn-sm-cancel" onclick="closeSaveModal()">Annuler</button>
+      <button class="btn-sm-ok" id="btn-sm-ok" onclick="doSave()">
+        <i class="fa-solid fa-floppy-disk"></i> Sauvegarder
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="tip"></div>
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════════════════════
+const TIME_COLS = ['Nominal','H0','H+2','H+4','J+1','J+2','J+3','J+5','J+10','J+15'];
+const TIME_MIN  = {Nominal:-1,'H0':0,'H+2':120,'H+4':240,'J+1':1440,'J+2':2880,'J+3':4320,'J+5':7200,'J+10':14400,'J+15':21600};
+const METRIC_ROWS = ['Effectif','Positions','Télétravail','Effectif cumulé','Positions cumulées','Télétravail cumulé','% Effectif cumulé'];
+const IMPACT_LABELS = ['Image de marque','Désorganisation interne','Juridique et réglementaire','Financier'];
+const SCORE_OPTS = ['','1','2','3','4','NA'];
+const DMIA_OPTS = ['','H0','H+2','H+4','J+1','J+2','J+3','J+5','J+7','J+10','J+15','1H','2H','4H','8H','12H','24H','1J','2J','3J','5J','7J','10J','15J'];
+const CRIT_OPTS = ['','V – Vital','C – Critique','MC – Moyennement critique','PC – Peu critique'];
+const AVAIL_COLS = ['H+2','H+4','J+1','J+2','J+3','J+5','J+10','J+15'];
+const ACT_CRITICITE_OPTS = ['','Faible','Moyenne','Forte','Critique'];
+
+const ACT_COLORS = [
+  {bg:'#E3F2FD',tx:'#1565C0',br:'#BBDEFB'},
+  {bg:'#F3E5F5',tx:'#6A1B9A',br:'#E1BEE7'},
+  {bg:'#E8F5E9',tx:'#2E7D32',br:'#C8E6C9'},
+  {bg:'#FFF3E0',tx:'#E65100',br:'#FFE0B2'},
+  {bg:'#FCE4EC',tx:'#C62828',br:'#F8BBD0'},
+  {bg:'#E0F7FA',tx:'#00838F',br:'#B2EBF2'},
+  {bg:'#F9FBE7',tx:'#558B2F',br:'#F0F4C3'},
+  {bg:'#EDE7F6',tx:'#4527A0',br:'#D1C4E9'},
+];
+
+// ══════════════════════════════════════════════════════════════
+// URL PARAMS — sector + project_id
+// ══════════════════════════════════════════════════════════════
+const _params    = new URLSearchParams(window.location.search);
+let   SECTOR     = (_params.get('sector') || '').toLowerCase();   // 'banques' | 'assurances' | ''
+let   PROJECT_ID = _params.get('project_id') ? parseInt(_params.get('project_id')) : null;
+
+// Show sector badge in topbar
+(function initSectorBadge(){
+  const badge = document.getElementById('tb-sector-badge');
+  if(!SECTOR){ badge.style.display = 'none'; return; }
+  const isBanque = SECTOR === 'banques';
+  badge.textContent = isBanque ? '🏦 Banques' : '🛡 Assurances';
+  badge.style.display = '';
+  badge.style.background = isBanque ? 'rgba(21,101,192,.1)' : 'rgba(46,125,50,.1)';
+  badge.style.color       = isBanque ? '#1565C0'             : '#2E7D32';
+  badge.style.border      = isBanque ? '1px solid rgba(21,101,192,.25)' : '1px solid rgba(46,125,50,.25)';
+})();
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let tmplFile = null;
+let nxtId = 1;
+
+const st = {
+  suivi: {entite:'',redacteur:'',version:'',date_maj:'',reference:''},
+  entity: {nom_responsable:'',organisation:'',contraintes:'',periodes_critiques:'',historique_interruptions:''},
+  participants: [],
+  activities: [],   // {id,name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts}
+  echanges: [],
+  monteeEnCharge: buildEmptyMontee(),
+  activeMonteeId: null,
+  collaborateurs: [],
+  applications: [],
+  appAvailability: [],
+  documents: [],
+  observations: ''
+};
+
+function buildEmptyMontee(){
+  const m={};
+  METRIC_ROWS.forEach(r=>{ m[r]={}; TIME_COLS.forEach(c=>m[r][c]=''); });
+  return m;
+}
+function emptyImpacts(){
+  const imp={};
+  IMPACT_LABELS.forEach(l=>imp[l]={A:'',B:''});
+  return imp;
+}
+function actC(idx){ return ACT_COLORS[idx%ACT_COLORS.length]; }
+
+// ══════════════════════════════════════════════════════════════
+// DMIA UTILS
+// ══════════════════════════════════════════════════════════════
+function parseDmiaMins(d){
+  if(!d) return -1;
+  const s=d.trim().toUpperCase().replace(/\s/g,'');
+  if(s==='H0') return 0;
+  let m=s.match(/^H\+?(\d+)$/); if(m) return+m[1]*60;
+  m=s.match(/^(\d+)H$/); if(m) return+m[1]*60;
+  m=s.match(/^J\+?(\d+)$/)||s.match(/^(\d+)J$/); if(m) return+m[1]*1440;
+  return 0;
+}
+function isBlocked(col,dmiaMin){
+  if(dmiaMin<=0) return false;
+  const c=TIME_MIN[col]; return c!==-1 && c<dmiaMin;
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function actById(id){ return st.activities.find(a=>a.id===id); }
+
+// ══════════════════════════════════════════════════════════════
+// CARD TOGGLE
+// ══════════════════════════════════════════════════════════════
+function toggleCard(hd){
+  const bd=hd.nextElementSibling;
+  const isOpen=!bd.classList.contains('collapsed');
+  if(isOpen){ bd.classList.add('collapsed'); hd.classList.remove('open'); }
+  else { bd.classList.remove('collapsed'); hd.classList.add('open'); }
+}
+function toggleColl(id){
+  const hd=document.getElementById('coll-'+id+'-hd');
+  const bd=document.getElementById('coll-'+id+'-body');
+  hd.classList.toggle('open');
+  bd.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════════════════════════
+// TEMPLATE UPLOAD
+// ══════════════════════════════════════════════════════════════
+function setTmpl(f){
+  if(!f||!f.name.toLowerCase().endsWith('.docx')){showToast('Sélectionnez un .docx','err');return;}
+  tmplFile=f;
+  const z=document.getElementById('upzone');
+  z.classList.add('ok');
+  z.querySelector('p').textContent='Template chargé :';
+  const fn=document.getElementById('tmpl-fname');
+  fn.textContent=f.name; fn.style.display='block';
+  updBtn();
+}
+function dropTmpl(e){
+  e.preventDefault();
+  document.getElementById('upzone').classList.remove('drag');
+  setTmpl(e.dataTransfer.files[0]);
+}
+
+// ══════════════════════════════════════════════════════════════
+// PARTICIPANTS (Fiche de suivi)
+// ══════════════════════════════════════════════════════════════
+function addParticipant(){
+  st.participants.push({id:nxtId++,nom:'',fonction:''});
+  renderParticipants();
+}
+function removeParticipant(id){
+  st.participants=st.participants.filter(p=>p.id!==id);
+  renderParticipants();
+}
+function renderParticipants(){
+  const tbody=document.getElementById('suivi-body');
+  const empty=document.getElementById('suivi-empty');
+  empty.style.display=st.participants.length?'none':'';
+  tbody.innerHTML=st.participants.map(p=>`
+    <tr>
+      <td><select style="width:90px" onchange="st.participants.find(x=>x.id===${p.id}).present=this.value">
+        <option value="Présents" selected>Présents</option>
+        <option value="Absents">Absents</option>
+        <option value="Excusés">Excusés</option>
+      </select></td>
+      <td><input type="text" value="${esc(p.nom)}" placeholder="Nom Prénom" oninput="st.participants.find(x=>x.id===${p.id}).nom=this.value"></td>
+      <td><input type="text" value="${esc(p.fonction)}" placeholder="Fonction" oninput="st.participants.find(x=>x.id===${p.id}).fonction=this.value"></td>
+      <td><button class="btn-rm" onclick="removeParticipant(${p.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// ACTIVITIES (in Présentation générale row)
+// ══════════════════════════════════════════════════════════════
+function addAct(){
+  st.activities.push({
+    id:nxtId++, name:'', description:'',
+    ressources_utilisees:'', periode_critique:'', criticite:'',
+    dmia_exprimee:'', premieres_actions:'', impacts:emptyImpacts()
+  });
+  renderActs();
+  updDerived();
+}
+function removeAct(id){
+  st.activities=st.activities.filter(a=>a.id!==id);
+  renderActs();
+  updDerived();
+}
+function updActF(id,field,val){
+  const act=actById(id); if(!act) return;
+  act[field]=val;
+  if(field==='name'){
+    const el=document.getElementById('an-'+id);
+    if(el) el.textContent=val||'Nouvelle activité';
+  }
+  updDerived();
+}
+
+function renderActs(){
+  const con=document.getElementById('acts-container');
+  const emp=document.getElementById('acts-empty');
+  const prev=document.getElementById('pres-preview');
+  emp.style.display=st.activities.length?'none':'';
+  prev.style.display=st.activities.length?'':'none';
+  document.getElementById('sb-cnt').textContent=st.activities.length;
+  con.innerHTML=st.activities.map((act,idx)=>{
+    const c=actC(idx);
+    return `<div class="act-card" id="ac-${act.id}">
+      <div class="act-hd" style="background:${c.bg};border-bottom-color:${c.br}">
+        <div class="act-dot" style="background:${c.tx}"></div>
+        <div class="act-name-disp" id="an-${act.id}" style="color:${c.tx}">${esc(act.name)||'Nouvelle activité'}</div>
+        <button class="btn-rm" onclick="removeAct(${act.id})" style="color:${c.tx}">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+      <div class="act-flds">
+        <div class="fg" style="grid-column:1/-1">
+          <label>Nom de l'activité *</label>
+          <input type="text" value="${esc(act.name)}" placeholder="ex. Gestion des comptes fournisseurs"
+            oninput="updActF(${act.id},'name',this.value)">
+        </div>
+        <div class="fg" style="grid-column:1/-1">
+          <label>Description</label>
+          <textarea rows="2" placeholder="Description succincte de l'activité…"
+            oninput="updActF(${act.id},'description',this.value)">${esc(act.description)}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updPresPreview();
+  updBtn();
+}
+
+function updPresPreview(){
+  const el=document.getElementById('pres-preview-text');
+  if(!el) return;
+  if(!st.activities.length){ el.textContent=''; return; }
+  el.innerHTML=`<em>Les activités principales de l'entité sont les suivantes :</em><br>`
+    +st.activities.map(a=>`<span style="display:block;margin-top:3px">• <strong>${esc(a.name)||'—'}</strong>${a.description?' : '+esc(a.description):''}</span>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// TABLE DES TABLEAUX (dynamic)
+// ══════════════════════════════════════════════════════════════
+function renderTOT(){
+  const tbody = document.getElementById('tot-body');
+  if(!tbody) return;
+
+  // Fixed entries before Tableau 6 (numbers never change)
+  const before = [
+    [1, 'Terminologies'],
+    [2, 'Abréviations'],
+    [3, "Fiche identité de l'entité"],
+    [4, 'Description et criticité des activités métier'],
+    [5, "Matrice d'impact"],
+  ];
+
+  // One Tableau 6, 7, 8… per activity (increment by 1 each)
+  const n = st.activities.length;
+  let rows = before.map(([n,t]) => `<tr><td>Tableau ${n} : ${t}</td></tr>`).join('');
+
+  if(n === 0){
+    rows += `<tr><td style="color:var(--muted);font-style:italic">Tableau 6 : (à compléter — ajoutez des activités)</td></tr>`;
+  } else {
+    rows += st.activities.map((a,i) => {
+      const num = 6 + i;
+      const name = a.name || `Activité ${i+1}`;
+      return `<tr><td>Tableau ${num} : <em>${esc(name)}</em></td></tr>`;
+    }).join('');
+  }
+
+  // Entries after the activity tables — numbered sequentially right after the last activity tableau
+  // If n=0 we still reserve slot 6 (placeholder), so next starts at 7
+  const nextNum = 6 + Math.max(n, 1);
+  const afterLabels = [
+    "Durée maximale d'interruption d'activité",
+    "Analyse des échanges d'information",
+    'Effectif et positions de travail',
+    'Les collaborateurs de repli',
+    'Les applications informatiques',
+    'Autres équipements et outils de communication',
+    'Documents et fichiers critiques',
+  ];
+  rows += afterLabels.map((label, i) =>
+    `<tr><td>Tableau ${nextNum + i} : ${label}</td></tr>`
+  ).join('');
+
+  tbody.innerHTML = rows;
+}
+
+// ══════════════════════════════════════════════════════════════
+// AUTO-DERIVED SECTIONS
+// ══════════════════════════════════════════════════════════════
+function updDerived(){
+  renderTOT();
+  renderSec4();
+  renderSec52();
+  renderSec53();
+  renderMontee();
+}
+
+// §4
+function renderSec4(){
+  const tbody=document.getElementById('sec4-body');
+  const empty=document.getElementById('sec4-empty');
+  if(!st.activities.length){ tbody.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display='none';
+  tbody.innerHTML=st.activities.map((act,idx)=>{
+    const c=actC(idx);
+    return `<tr>
+      <td class="act-lbl" style="border-left:3px solid ${c.tx}">${esc(act.name)||'—'}</td>
+      <td><textarea rows="2" style="min-width:190px"
+        oninput="updActF(${act.id},'ressources_utilisees',this.value)">${esc(act.ressources_utilisees)}</textarea></td>
+      <td><input type="text" value="${esc(act.periode_critique)}"
+        oninput="updActF(${act.id},'periode_critique',this.value)" style="min-width:110px"></td>
+      <td>
+        <select onchange="updActF(${act.id},'criticite',this.value)" style="min-width:120px">
+          ${ACT_CRITICITE_OPTS.map(v=>`<option value="${v}" ${v===act.criticite?'selected':''}>${v||'—'}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// §5.2
+function renderSec52(){
+  const body=document.getElementById('sec52-body');
+  if(!st.activities.length){
+    body.innerHTML=`<div class="empty"><i class="fa-solid fa-chart-bar"></i>Ajoutez des activités dans la Fiche d'identité.</div>`;
+    return;
+  }
+  body.innerHTML=st.activities.map((act,idx)=>{
+    const c=actC(idx);
+    return `<div class="imp-card">
+      <div class="imp-hd" style="background:${c.bg};color:${c.tx};border-bottom-color:${c.br}">
+        <i class="fa-solid fa-circle fa-xs" style="margin-right:6px"></i>${esc(act.name)||'Activité sans nom'}
+      </div>
+      <div class="tbl-cap" style="padding:8px 14px 0">Tableau 6 : ${esc(act.name)||'xx'}</div>
+      <div class="imp-body">
+        <table class="imp-grid">
+          <thead><tr>
+            <th style="text-align:left;min-width:200px">Impact</th>
+            <th>A — Interruption &lt; 1 jour</th>
+            <th>B — Interruption ≥ 5 jours</th>
+          </tr></thead>
+          <tbody>
+            ${IMPACT_LABELS.map(lbl=>`<tr>
+              <td class="lbl">${lbl}</td>
+              <td>${scoreSelect(act.id,lbl,'A',act.impacts[lbl]?.A||'')}</td>
+              <td>${scoreSelect(act.id,lbl,'B',act.impacts[lbl]?.B||'')}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function scoreSelect(actId,lbl,col,cur){
+  return `<select onchange="updImpact(${actId},'${lbl}','${col}',this.value)">
+    ${SCORE_OPTS.map(v=>`<option value="${v}" ${v===cur?'selected':''}>${v||'—'}</option>`).join('')}
+  </select>`;
+}
+function updImpact(actId,lbl,col,val){
+  const act=actById(actId); if(!act) return;
+  if(!act.impacts[lbl]) act.impacts[lbl]={A:'',B:''};
+  act.impacts[lbl][col]=val;
+}
+
+// §5.3
+function renderSec53(){
+  const body=document.getElementById('sec53-body');
+  if(!st.activities.length){
+    body.innerHTML=`<div class="empty"><i class="fa-solid fa-stopwatch"></i>Ajoutez des activités dans la Fiche d'identité.</div>`;
+    return;
+  }
+  body.innerHTML=`<div class="tbl-scroll"><table class="bia-tbl">
+    <thead><tr>
+      <th style="min-width:160px">Processus</th>
+      <th style="width:200px">DMIA Exprimée</th>
+      <th>Premières actions à mener en cas de survenance d'un sinistre</th>
+    </tr></thead>
+    <tbody>
+      ${st.activities.map((act,idx)=>{
+        const c=actC(idx);
+        const dOpts=DMIA_OPTS.map(v=>`<option value="${v}" ${v===act.dmia_exprimee?'selected':''}>${v||'—'}</option>`).join('');
+        return `<tr>
+          <td class="act-lbl" style="border-left:3px solid ${c.tx}">${esc(act.name)||'—'}</td>
+          <td>
+            <div class="dmia-wrap">
+              <select id="dmia-sel-${act.id}" onchange="updActDmia(${act.id},this.value)">${dOpts}</select>
+              <button class="btn-suggest" id="sug-btn-${act.id}"
+                onclick="openSugPop(${act.id},this)"
+                title="Suggestions depuis la base de projets">
+                <i class="fa-solid fa-lightbulb"></i> DB
+              </button>
+            </div>
+          </td>
+          <td><textarea rows="2" placeholder="Actions immédiates…"
+            oninput="updActF(${act.id},'premieres_actions',this.value)">${esc(act.premieres_actions)}</textarea></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table></div>`;
+  updMonteeActSel();
+}
+
+// ── DMIA suggestion popover ──────────────────────────────────
+let _sugActId = null;
+
+async function openSugPop(actId, btn){
+  // close any open popover first
+  closeSugPop();
+  const act = actById(actId);
+  if(!act || !act.name.trim()){
+    showToast('Nommez l\'activité d\'abord', '');
+    return;
+  }
+  _sugActId = actId;
+  btn.classList.add('loading');
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+  try{
+    const url = `/api/dmia-suggestions?activity=${encodeURIComponent(act.name)}${SECTOR ? '&sector='+encodeURIComponent(SECTOR) : ''}`;
+    const r   = await fetch(url);
+    const data = await r.json();
+
+    btn.classList.remove('loading');
+    btn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> DB';
+
+    if(!data.length){
+      showToast('Aucune suggestion dans la base', '');
+      return;
+    }
+    btn.classList.add('has-sug');
+
+    const pop = document.createElement('div');
+    pop.className = 'sug-pop';
+    pop.id = 'active-sug-pop';
+    pop.innerHTML = `
+      <div class="sug-pop-hd">
+        <span><i class="fa-solid fa-database fa-xs"></i> Suggestions — ${esc(act.name)}</span>
+        <button onclick="closeSugPop()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      ${data.map(s=>`
+        <div class="sug-item" onclick="applySug(${actId},'${esc(s.dmia_exprimee)}')">
+          <span class="sug-dmia">${esc(s.dmia_exprimee)}</span>
+          <div class="sug-detail">
+            <strong>${esc(s.activity_name)}</strong>
+            <div>${esc(s.client||'')}${s.sector?' · '+esc(s.sector):''}</div>
+          </div>
+          ${s.freq>1?`<span class="sug-freq">×${s.freq}</span>`:''}
+        </div>`).join('')}`;
+
+    btn.closest('.dmia-wrap').appendChild(pop);
+
+  } catch(e){
+    btn.classList.remove('loading');
+    btn.innerHTML = '<i class="fa-solid fa-lightbulb"></i> DB';
+    showToast('Erreur suggestions','err');
+  }
+}
+
+function closeSugPop(){
+  const p = document.getElementById('active-sug-pop');
+  if(p) p.remove();
+  _sugActId = null;
+}
+
+function applySug(actId, val){
+  updActDmia(actId, val);
+  const sel = document.getElementById(`dmia-sel-${actId}`);
+  if(sel) sel.value = val;
+  closeSugPop();
+  showToast(`DMIA appliquée : ${val}`, 'ok');
+}
+
+// close popover on outside click
+document.addEventListener('click', e=>{
+  if(document.getElementById('active-sug-pop') &&
+     !e.target.closest('.sug-pop') &&
+     !e.target.closest('.btn-suggest')){
+    closeSugPop();
+  }
+});
+
+function updActDmia(id,val){
+  updActF(id,'dmia_exprimee',val);
+  updMonteeActSel();
+  renderMontee();
+}
+
+// ══════════════════════════════════════════════════════════════
+// §6 ÉCHANGES
+// ══════════════════════════════════════════════════════════════
+function addEchange(){
+  st.echanges.push({id:nxtId++,groupes:'',ie:'I',type_info:'',tr:'T',ressources_si:''});
+  renderEchanges();
+}
+function removeEchange(id){ st.echanges=st.echanges.filter(e=>e.id!==id); renderEchanges(); }
+function renderEchanges(){
+  const tbody=document.getElementById('sec6-body');
+  tbody.innerHTML=st.echanges.map(e=>`
+    <tr>
+      <td><input type="text" value="${esc(e.groupes)}" placeholder="Correspondant…"
+        oninput="st.echanges.find(x=>x.id===${e.id}).groupes=this.value"></td>
+      <td><select onchange="st.echanges.find(x=>x.id===${e.id}).ie=this.value" style="width:60px">
+        <option value="I" ${e.ie==='I'?'selected':''}>I</option>
+        <option value="E" ${e.ie==='E'?'selected':''}>E</option>
+      </select></td>
+      <td><input type="text" value="${esc(e.type_info)}" placeholder="Type d'info…"
+        oninput="st.echanges.find(x=>x.id===${e.id}).type_info=this.value"></td>
+      <td><select onchange="st.echanges.find(x=>x.id===${e.id}).tr=this.value" style="width:60px">
+        <option value="T" ${e.tr==='T'?'selected':''}>T</option>
+        <option value="R" ${e.tr==='R'?'selected':''}>R</option>
+        <option value="T/R" ${e.tr==='T/R'?'selected':''}>T/R</option>
+      </select></td>
+      <td><input type="text" value="${esc(e.ressources_si)}" placeholder="Applications…"
+        oninput="st.echanges.find(x=>x.id===${e.id}).ressources_si=this.value"></td>
+      <td><button class="btn-rm" onclick="removeEchange(${e.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// §7.1 MONTÉE EN CHARGE
+// ══════════════════════════════════════════════════════════════
+function updMonteeActSel(){
+  const sel=document.getElementById('montee-act-sel');
+  const cur=st.activeMonteeId;
+  sel.innerHTML=`<option value="">— Aucune (tout éditable) —</option>`
+    +st.activities.map(a=>{
+      const dm=a.dmia_exprimee?` (DMIA: ${a.dmia_exprimee})`:'';
+      return `<option value="${a.id}" ${a.id===cur?'selected':''}>${esc(a.name)||'Activité sans nom'}${dm}</option>`;
+    }).join('');
+}
+
+function setMonteeAct(val){
+  st.activeMonteeId=val?+val:null;
+  updMonteeBadge();
+  renderMonteeInputs();
+}
+
+function updMonteeBadge(){
+  const bdg=document.getElementById('montee-dmia-badge');
+  const act=st.activeMonteeId?st.activities.find(a=>a.id===st.activeMonteeId):null;
+  if(act&&act.dmia_exprimee){
+    const mins=parseDmiaMins(act.dmia_exprimee);
+    const blocked=TIME_COLS.filter(c=>isBlocked(c,mins));
+    bdg.innerHTML=`<span style="color:var(--accent)"><i class="fa-solid fa-lock fa-xs"></i> DMIA ${act.dmia_exprimee}</span>`
+      +(blocked.length?` — colonnes bloquées : <strong>${blocked.join(', ')}</strong>`:'');
+  } else {
+    bdg.textContent='';
+  }
+}
+
+function renderMontee(){
+  const leg=document.getElementById('montee-legend');
+  leg.innerHTML=st.activities.map((a,idx)=>{
+    const c=actC(idx);
+    return `<span class="act-chip" style="background:${c.bg};color:${c.tx};border:1px solid ${c.br}">
+      ${esc(a.name)||'—'}${a.dmia_exprimee?`<span class="dmia-hint">DMIA: ${a.dmia_exprimee}</span>`:''}
+    </span>`;
+  }).join('');
+  updMonteeActSel();
+  renderMonteeInputs();
+}
+
+function renderMonteeInputs(){
+  const tbody=document.getElementById('montee-tbody');
+  const act=st.activeMonteeId?st.activities.find(a=>a.id===st.activeMonteeId):null;
+  const dmiaMins=act?parseDmiaMins(act.dmia_exprimee):-1;
+
+  const commHTML=st.activities.length
+    ?st.activities.map((a,idx)=>{
+        const c=actC(idx);
+        return `<span class="act-chip" style="background:${c.bg};color:${c.tx};border:1px solid ${c.br};margin-bottom:3px">
+          ${esc(a.name)||'—'}${a.dmia_exprimee?`<span class="dmia-hint">DMIA: ${a.dmia_exprimee}</span>`:''}
+        </span>`;
+      }).join('')
+    :`<span style="color:var(--muted);font-size:11px">—</span>`;
+
+  tbody.innerHTML=METRIC_ROWS.map((metric,mIdx)=>{
+    const rowData=st.monteeEnCharge[metric]||{};
+    const cells=TIME_COLS.map(col=>{
+      const blocked=isBlocked(col,dmiaMins);
+      const val=rowData[col]||'';
+      if(blocked){
+        return `<td class="blocked" onmouseenter="showTip(event,'Colonne ${col} bloquée — DMIA de ${act?.name||''} : ${act?.dmia_exprimee||''}')" onmouseleave="hideTip()">
+          <input class="cell-inp" disabled tabindex="-1">
+        </td>`;
+      }
+      return `<td><input class="cell-inp" value="${esc(val)}" placeholder="—"
+        oninput="updMontee('${metric}','${col}',this.value)"></td>`;
+    }).join('');
+    const comm=mIdx===0
+      ?`<td class="tc-comm" style="vertical-align:top;padding:6px">${commHTML}</td>`
+      :`<td class="tc-comm"></td>`;
+    return `<tr><td class="tc-metric">${metric}</td>${cells}${comm}</tr>`;
+  }).join('');
+}
+
+function updMontee(metric,col,val){
+  if(!st.monteeEnCharge[metric]) st.monteeEnCharge[metric]={};
+  st.monteeEnCharge[metric][col]=val;
+}
+
+// ══════════════════════════════════════════════════════════════
+// §7.2 COLLABORATEURS
+// ══════════════════════════════════════════════════════════════
+function addCollab(){
+  st.collaborateurs.push({id:nxtId++,fonction:'',nom:'',prenom:'',suppleants:''});
+  renderCollabs();
+}
+function removeCollab(id){ st.collaborateurs=st.collaborateurs.filter(c=>c.id!==id); renderCollabs(); }
+function renderCollabs(){
+  const tbody=document.getElementById('sec72-body');
+  tbody.innerHTML=st.collaborateurs.map(c=>`
+    <tr>
+      <td><input type="text" value="${esc(c.fonction)}" placeholder="Fonction…"
+        oninput="st.collaborateurs.find(x=>x.id===${c.id}).fonction=this.value"></td>
+      <td><input type="text" value="${esc(c.nom)}" placeholder="Nom"
+        oninput="st.collaborateurs.find(x=>x.id===${c.id}).nom=this.value"></td>
+      <td><input type="text" value="${esc(c.prenom)}" placeholder="Prénom"
+        oninput="st.collaborateurs.find(x=>x.id===${c.id}).prenom=this.value"></td>
+      <td><input type="text" value="${esc(c.suppleants)}" placeholder="Nom du suppléant…"
+        oninput="st.collaborateurs.find(x=>x.id===${c.id}).suppleants=this.value"></td>
+      <td><button class="btn-rm" onclick="removeCollab(${c.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// §7.3 APPLICATIONS
+// ══════════════════════════════════════════════════════════════
+function addApp(){
+  st.applications.push({id:nxtId++,application:'',criticite:'',dmia:'',pmdt:'',commentaires:''});
+  renderApps();
+}
+function removeApp(id){ st.applications=st.applications.filter(a=>a.id!==id); renderApps(); }
+function renderApps(){
+  const tbody=document.getElementById('sec73-body');
+  tbody.innerHTML=st.applications.map(a=>`
+    <tr>
+      <td><input type="text" value="${esc(a.application)}" placeholder="Outlook, SAGE…"
+        oninput="st.applications.find(x=>x.id===${a.id}).application=this.value"></td>
+      <td><select onchange="st.applications.find(x=>x.id===${a.id}).criticite=this.value">
+        ${CRIT_OPTS.map(v=>`<option value="${v}" ${v===a.criticite?'selected':''}>${v||'—'}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${esc(a.dmia)}" placeholder="NA"
+        oninput="st.applications.find(x=>x.id===${a.id}).dmia=this.value"></td>
+      <td><input type="text" value="${esc(a.pmdt)}" placeholder="NA"
+        oninput="st.applications.find(x=>x.id===${a.id}).pmdt=this.value"></td>
+      <td><input type="text" value="${esc(a.commentaires)}" placeholder="—"
+        oninput="st.applications.find(x=>x.id===${a.id}).commentaires=this.value"></td>
+      <td><button class="btn-rm" onclick="removeApp(${a.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// §7.3b APP AVAILABILITY
+// ══════════════════════════════════════════════════════════════
+function addAppAvail(){
+  const id=nxtId++;
+  const row={id,designation:''};
+  AVAIL_COLS.forEach(c=>row[c]='');
+  st.appAvailability.push(row);
+  renderAppAvail();
+}
+function removeAppAvail(id){ st.appAvailability=st.appAvailability.filter(a=>a.id!==id); renderAppAvail(); }
+function renderAppAvail(){
+  const tbody=document.getElementById('sec73b-body');
+  tbody.innerHTML=st.appAvailability.map(a=>`
+    <tr>
+      <td><input type="text" value="${esc(a.designation)}" placeholder="Équipement / Application…"
+        oninput="st.appAvailability.find(x=>x.id===${a.id}).designation=this.value"></td>
+      ${AVAIL_COLS.map(col=>`<td><input type="text" style="width:50px;text-align:center" value="${esc(a[col]||'')}"
+        placeholder="—" oninput="st.appAvailability.find(x=>x.id===${a.id})['${col}']=this.value"></td>`).join('')}
+      <td><button class="btn-rm" onclick="removeAppAvail(${a.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// §7.4 DOCUMENTS
+// ══════════════════════════════════════════════════════════════
+function addDoc(){
+  st.documents.push({id:nxtId++,document:'',stockage:'E/P',duplication:''});
+  renderDocs();
+}
+function removeDoc(id){ st.documents=st.documents.filter(d=>d.id!==id); renderDocs(); }
+function renderDocs(){
+  const tbody=document.getElementById('sec74-body');
+  tbody.innerHTML=st.documents.map(d=>`
+    <tr>
+      <td><input type="text" value="${esc(d.document)}" placeholder="Nom du document…"
+        oninput="st.documents.find(x=>x.id===${d.id}).document=this.value"></td>
+      <td><select onchange="st.documents.find(x=>x.id===${d.id}).stockage=this.value">
+        ${['E','P','E/P'].map(v=>`<option value="${v}" ${v===d.stockage?'selected':''}>${v}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${esc(d.duplication)}" placeholder="OUI / NON — Si oui, emplacement…"
+        oninput="st.documents.find(x=>x.id===${d.id}).duplication=this.value"></td>
+      <td><button class="btn-rm" onclick="removeDoc(${d.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// GENERATE
+// ══════════════════════════════════════════════════════════════
+async function generate(){
+  if(!tmplFile){ showToast('Uploadez un template .docx','err'); return; }
+  if(!st.activities.length){ showToast('Ajoutez au moins une activité','err'); return; }
+
+  const btn=document.getElementById('btn-gen');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span> Génération…';
+
+  const fd=new FormData();
+  fd.append('template', tmplFile);
+
+  const payload={
+    suivi: st.suivi,
+    entity: st.entity,
+    participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
+    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})=>
+      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})),
+    echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
+    montee_en_charge: st.monteeEnCharge,
+    collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
+    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires})=>({application,criticite,dmia,pmdt,commentaires})),
+    app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
+    documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
+    observations: st.observations
+  };
+  fd.append('form_data', JSON.stringify(payload));
+
+  try{
+    const r=await fetch('/api/fill-fiche',{method:'POST',body:fd});
+    if(!r.ok){
+      const j=await r.json().catch(()=>({detail:r.statusText}));
+      throw new Error(Array.isArray(j.detail)?j.detail.join('\n'):j.detail);
+    }
+    const blob=await r.blob();
+    const cd=r.headers.get('Content-Disposition')||'';
+    const m=cd.match(/filename="?([^";]+)"?/);
+    const fname=m?m[1]:'fiche_BIA_filled.docx';
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url);
+    showToast(`Fiche générée (${st.activities.length} activité${st.activities.length>1?'s':''})`, 'ok');
+    // Clear sync hint after successful download — mismatch is now resolved
+    if(window._syncHint) dismissSyncHint();
+  } catch(e){
+    showToast(e.message||'Erreur serveur','err');
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML='<i class="fa-solid fa-download"></i> Générer le .docx';
+    updBtn();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI HELPERS
+// ══════════════════════════════════════════════════════════════
+function updBtn(){
+  const btn=document.getElementById('btn-gen');
+  const hint=document.getElementById('sb-hint');
+  const ok=tmplFile&&st.activities.length>0;
+  btn.disabled=!ok;
+  if(!tmplFile) hint.textContent='Uploadez un template pour commencer';
+  else if(!st.activities.length) hint.textContent='Ajoutez au moins une activité';
+  else hint.textContent=`${st.activities.length} activité${st.activities.length>1?'s':''} · prêt à générer`;
+}
+
+let _tt;
+function showToast(msg,cls){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='on'+(cls?' '+cls:'');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('on'),3600);
+}
+function showTip(e,msg){
+  const tip=document.getElementById('tip');
+  tip.textContent=msg;
+  tip.style.left=(e.clientX+14)+'px';
+  tip.style.top=(e.clientY-10)+'px';
+  tip.classList.add('on');
+}
+function hideTip(){ document.getElementById('tip').classList.remove('on'); }
+document.addEventListener('mousemove',e=>{
+  const tip=document.getElementById('tip');
+  if(tip.classList.contains('on')){tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';}
+});
+
+// Sidebar active link on scroll
+const secIds=['s-template','s-toc','s-suivi','s-termi','s-objectif','s-identite','s-sec4','s-sec5','s-sec6','s-sec7','s-obs'];
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting)
+      document.querySelectorAll('.sb-a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+en.target.id));
+  });
+},{threshold:.2});
+secIds.forEach(id=>{ const el=document.getElementById(id); if(el) io.observe(el); });
+
+// ══════════════════════════════════════════════════════════════
+// SAVE MODAL
+// ══════════════════════════════════════════════════════════════
+function openSaveModal(){
+  // Pre-fill sector from URL param
+  const sel = document.getElementById('sm-sector');
+  if(SECTOR) sel.value = SECTOR;
+
+  // If we already have a project_id pre-fill client/name and show update note
+  if(PROJECT_ID){
+    document.getElementById('sm-update-note').style.display = '';
+  } else {
+    document.getElementById('sm-update-note').style.display = 'none';
+  }
+
+  // Pre-fill client from entity field if available
+  if(!document.getElementById('sm-client').value){
+    const org = st.entity.organisation || st.suivi.entite || '';
+    if(org) document.getElementById('sm-client').value = org;
+  }
+
+  document.getElementById('save-modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('sm-client').focus(), 80);
+}
+
+function closeSaveModal(){
+  document.getElementById('save-modal-overlay').classList.remove('open');
+}
+
+async function doSave(){
+  const sector   = document.getElementById('sm-sector').value.trim();
+  const client   = document.getElementById('sm-client').value.trim();
+  const projname = document.getElementById('sm-projname').value.trim();
+  if(!client){ showToast('Entrez un nom de client', 'err'); return; }
+
+  const btn = document.getElementById('btn-sm-ok');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Sauvegarde…';
+
+  // Build the same payload as generate()
+  const payload = {
+    suivi: st.suivi,
+    entity: st.entity,
+    participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
+    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})=>
+      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})),
+    echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
+    montee_en_charge: st.monteeEnCharge,
+    collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
+    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires})=>({application,criticite,dmia,pmdt,commentaires})),
+    app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
+    documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
+    observations: st.observations
+  };
+
+  try{
+    const fd = new FormData();
+    fd.append('sector',       sector);
+    fd.append('client',       client);
+    fd.append('project_name', projname || `Fiche BIA — ${client}`);
+    fd.append('form_data',    JSON.stringify(payload));
+    if(PROJECT_ID) fd.append('project_id', String(PROJECT_ID));
+
+    const r = await fetch('/api/save-fiche-project', {method:'POST', body:fd});
+    if(!r.ok){ const j=await r.json().catch(()=>({detail:r.statusText})); throw new Error(j.detail); }
+
+    const {project_id: pid} = await r.json();
+    PROJECT_ID = pid;
+    SECTOR = sector;
+
+    // Update URL silently (no reload)
+    const url = new URL(window.location);
+    url.searchParams.set('sector', sector);
+    url.searchParams.set('project_id', pid);
+    window.history.replaceState({}, '', url);
+
+    // Update sector badge
+    const badge = document.getElementById('tb-sector-badge');
+    const isBanque = sector === 'banques';
+    badge.textContent = isBanque ? '🏦 Banques' : '🛡 Assurances';
+    badge.style.display = '';
+    badge.style.background = isBanque ? 'rgba(21,101,192,.1)' : 'rgba(46,125,50,.1)';
+    badge.style.color       = isBanque ? '#1565C0'             : '#2E7D32';
+    badge.style.border      = isBanque ? '1px solid rgba(21,101,192,.25)' : '1px solid rgba(46,125,50,.25)';
+
+    // Show "update" note for next save
+    document.getElementById('sm-update-note').style.display = '';
+
+    _markClean();
+    showToast('Fiche sauvegardée dans la base ✓', 'ok');
+    closeSaveModal();
+  } catch(e){
+    showToast(e.message || 'Erreur sauvegarde', 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Sauvegarder';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// LOAD FROM PROJECT (called at init if project_id in URL)
+// ══════════════════════════════════════════════════════════════
+function populateState(data){
+  nxtId = 1;
+
+  // Simple objects
+  if(data.suivi)  Object.assign(st.suivi,  data.suivi);
+  if(data.entity) Object.assign(st.entity, data.entity);
+  st.observations = data.observations || '';
+
+  // Lists with IDs
+  st.participants = (data.participants||[]).map(p=>({...p, id:nxtId++}));
+  st.activities   = (data.activities||[]).map(a=>({
+    id:nxtId++, name:a.name||'', description:a.description||'',
+    ressources_utilisees:a.ressources_utilisees||'',
+    periode_critique:a.periode_critique||'', criticite:a.criticite||'',
+    dmia_exprimee:a.dmia_exprimee||'', premieres_actions:a.premieres_actions||'',
+    impacts:a.impacts||emptyImpacts()
+  }));
+  st.echanges         = (data.echanges||[]).map(e=>({...e, id:nxtId++}));
+  st.collaborateurs   = (data.collaborateurs_cles||[]).map(c=>({...c, id:nxtId++}));
+  st.applications     = (data.applications||[]).map(a=>({...a, id:nxtId++}));
+  st.appAvailability  = (data.app_availability||[]).map(a=>({...a, id:nxtId++}));
+  st.documents        = (data.documents||[]).map(d=>({...d, id:nxtId++}));
+  if(data.montee_en_charge) st.monteeEnCharge = data.montee_en_charge;
+
+  // Re-render dynamic sections
+  renderParticipants(); renderActs(); renderSec4(); renderSec52(); renderSec53();
+  renderEchanges(); renderMontee(); renderCollabs(); renderApps(); renderAppAvail();
+  renderDocs(); renderTOT();
+
+  // Populate simple input fields
+  const fmap = {
+    'suivi-entite':  st.suivi.entite,
+    'suivi-redacteur':st.suivi.redacteur,
+    'suivi-version':  st.suivi.version,
+    'suivi-date':     st.suivi.date_maj,
+    'suivi-ref':      st.suivi.reference,
+    'ei-resp':  st.entity.nom_responsable,
+    'ei-org':   st.entity.organisation,
+    'ei-contr': st.entity.contraintes,
+    'ei-per':   st.entity.periodes_critiques,
+    'ei-hist':  st.entity.historique_interruptions,
+    'obs-txt':  st.observations,
+  };
+  for(const [id,val] of Object.entries(fmap)){
+    const el = document.getElementById(id);
+    if(el) el.value = val||'';
+  }
+
+  updBtn();
+  // Start tracking changes — any modification after this point marks the form dirty
+  setTimeout(() => _markClean(), 100);
+  showToast('Fiche chargée depuis la base', 'ok');
+}
+
+async function loadProjectFromUrl(){
+  if(!PROJECT_ID) return;
+  try{
+    const r = await fetch(`/api/project-form/${PROJECT_ID}`);
+    if(!r.ok){ showToast('Fiche introuvable (id '+PROJECT_ID+')','err'); PROJECT_ID=null; return; }
+    const data = await r.json();
+
+    // Restore sector + save-modal fields from _meta
+    const isDocxImport = data._meta && data._meta.source === 'docx_import';
+    if(data._meta){
+      SECTOR = (data._meta.sector || SECTOR).toLowerCase();
+      document.getElementById('sm-sector').value    = data._meta.sector || 'banques';
+      document.getElementById('sm-client').value    = data._meta.client || '';
+      document.getElementById('sm-projname').value  = data._meta.project_name || '';
+      // Update sector badge to reflect loaded project
+      const badge = document.getElementById('tb-sector-badge');
+      if(SECTOR){
+        const isBanque = SECTOR === 'banques';
+        badge.textContent = isBanque ? '🏦 Banques' : '🛡 Assurances';
+        badge.style.display  = '';
+        badge.style.background = isBanque ? 'rgba(21,101,192,.1)' : 'rgba(46,125,50,.1)';
+        badge.style.color      = isBanque ? '#1565C0'             : '#2E7D32';
+        badge.style.border     = isBanque ? '1px solid rgba(21,101,192,.25)' : '1px solid rgba(46,125,50,.25)';
+      }
+      // Keep PROJECT_ID even for docx imports so that "Sauvegarder dans la base"
+      // updates the existing record instead of creating a duplicate.
+      delete data._meta;
+    }
+
+    populateState(data);
+
+    if(isDocxImport){
+      // Replace the generic populateState toast with a more informative one
+      showToast(`Fiche .docx importée (${(data.activities||[]).length} activités). Vérifiez le contenu puis sauvegardez.`, 'ok');
+    }
+  } catch(e){
+    showToast('Erreur de chargement : '+e.message, 'err');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SYNC HINT — read sessionStorage set by index.html openSyncFiche()
+// ══════════════════════════════════════════════════════════════
+(function initSyncHint(){
+  let hint = null;
+  try{ hint = JSON.parse(sessionStorage.getItem('sync_hint') || 'null'); } catch(_){}
+  if(!hint) return;
+
+  const banner  = document.getElementById('sync-hint-banner');
+  const detail  = document.getElementById('shb-detail');
+  const mainEl  = document.getElementById('main');
+
+  // Format DMIA minutes as human-readable
+  function fmtMin(m){
+    if(m == null || m === '') return '?';
+    m = parseInt(m, 10);
+    if(isNaN(m)) return String(m);
+    if(m === 0) return 'H0 (immédiat)';
+    if(m < 60) return m + ' min';
+    if(m < 1440) return (m/60).toFixed(1).replace('.0','') + 'h';
+    return Math.round(m/1440) + 'j';
+  }
+
+  const act       = hint.activity   || '—';
+  const target    = fmtMin(hint.dmia_target);
+  const current   = fmtMin(hint.dmia_current);
+
+  detail.innerHTML =
+    `Activité ciblée&nbsp;: <strong>${act}</strong> — ` +
+    `DMIA synthèse&nbsp;: <span class="shb-target">${target}</span> · ` +
+    `DMIA fiche actuelle&nbsp;: <span class="shb-target" style="background:rgba(255,100,100,.25)">${current}</span><br>` +
+    `<span style="font-size:10.5px;opacity:.78">Corrigez la valeur DMIA de cette activité dans §5.3 puis régénérez le .docx.</span>`;
+
+  banner.classList.add('visible');
+  mainEl.classList.add('sync-hint-active');
+
+  // Store the hint globally so the generate hook can clear it
+  window._syncHint = hint;
+})();
+
+function dismissSyncHint(){
+  document.getElementById('sync-hint-banner').classList.remove('visible');
+  document.getElementById('main').classList.remove('sync-hint-active');
+  sessionStorage.removeItem('sync_hint');
+  window._syncHint = null;
+}
+
+// ══════════════════════════════════════════════════════════════
+// DIRTY TRACKING & LEAVE GUARD
+// ══════════════════════════════════════════════════════════════
+let _isDirty      = false;   // true when form has unsaved changes
+let _trackDirty   = false;   // enabled after initial load
+let _pendingNav   = null;    // URL to go to after save confirmation
+let _pendingIsNew = false;   // true when pending action is "nouvelle fiche"
+
+// Mark dirty on any user interaction in the form:
+// • input/change catches typed text, selects, checkboxes
+// • click on #main catches "add activity", "delete row", etc. (no input event fires)
+document.addEventListener('input',  () => { if (_trackDirty) _isDirty = true; });
+document.addEventListener('change', () => { if (_trackDirty) _isDirty = true; });
+document.getElementById('main')?.addEventListener('click', () => {
+  if (_trackDirty) _isDirty = true;
+});
+
+function _markClean() {
+  _isDirty    = false;
+  _trackDirty = true;
+}
+
+// ── Back link / browser navigation guard ──────────────────────
+function handleNavBack(e) {
+  e.preventDefault();
+  // Navigate directly — unsaved-changes dialog is handled by beforeunload (browser close)
+  window.location.href = '/fiche-selector';
+}
+
+window.addEventListener('beforeunload', e => {
+  if (_isDirty) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// ── "Nouvelle fiche BIA" button ────────────────────────────────
+function handleNewFiche() {
+  if (_isDirty) {
+    _pendingNav   = null;
+    _pendingIsNew = true;
+    showLeaveModal();
+  } else {
+    doNewFiche();
+  }
+}
+
+function doNewFiche() {
+  // Reset state
+  PROJECT_ID = null;
+  SECTOR     = '';
+  _isDirty   = false;
+  _trackDirty = false;
+
+  // Clear URL params
+  const url = new URL(window.location);
+  url.searchParams.delete('project_id');
+  url.searchParams.delete('sector');
+  window.history.replaceState({}, '', url);
+
+  // Reset all form state
+  st.suivi         = {entite:'',redacteur:'',version:'',date_maj:'',reference:''};
+  st.entity        = {nom_responsable:'',organisation:'',contraintes:'',periodes_critiques:'',historique_interruptions:''};
+  st.participants  = [];
+  st.activities    = [];
+  st.echanges      = [];
+  st.collaborateurs= [];
+  st.applications  = [];
+  st.appAvailability=[];
+  st.documents     = [];
+  st.monteeEnCharge= {};
+  st.observations  = '';
+  nxtId = 1;
+
+  // Clear input fields
+  ['suivi-entite','suivi-redacteur','suivi-version','suivi-date','suivi-ref',
+   'ei-resp','ei-org','ei-contr','ei-per','ei-hist','obs-txt'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  // Re-render all sections
+  renderParticipants(); renderActs(); renderSec4(); renderSec52(); renderSec53();
+  renderEchanges(); renderMontee(); renderCollabs(); renderApps(); renderAppAvail();
+  renderDocs(); renderTOT();
+
+  // Reset save-modal fields
+  document.getElementById('sm-client').value   = '';
+  document.getElementById('sm-projname').value  = '';
+  document.getElementById('sm-update-note').style.display = 'none';
+
+  // Reset sector badge
+  const badge = document.getElementById('tb-sector-badge');
+  if (badge) badge.style.display = 'none';
+
+  updBtn();
+  showToast('Nouvelle fiche prête', 'ok');
+  setTimeout(() => _markClean(), 50);
+}
+
+// ── Leave-confirmation modal ───────────────────────────────────
+function showLeaveModal() {
+  const el = document.getElementById('leave-modal-overlay');
+  el.style.display = 'flex';
+}
+function hideLeaveModal() {
+  document.getElementById('leave-modal-overlay').style.display = 'none';
+}
+function leaveModalNo() {
+  hideLeaveModal();
+  _isDirty = false;  // discard changes
+  if (_pendingIsNew)       { doNewFiche(); }
+  else if (_pendingNav)    { window.location.href = _pendingNav; }
+  _pendingNav   = null;
+  _pendingIsNew = false;
+}
+async function leaveModalYes() {
+  hideLeaveModal();
+  if (PROJECT_ID) {
+    // Already linked to a DB record — save directly
+    await doSaveSilent();
+    if (_pendingIsNew)    { doNewFiche(); }
+    else if (_pendingNav) { window.location.href = _pendingNav; }
+  } else {
+    // New fiche — need the user to pick a project
+    openProjSelect();
+  }
+  _pendingNav   = null;
+  _pendingIsNew = false;
+}
+
+// Silent save (no modal, reuses existing PROJECT_ID)
+async function doSaveSilent() {
+  const sector   = document.getElementById('sm-sector').value.trim()   || SECTOR || 'banques';
+  const client   = document.getElementById('sm-client').value.trim();
+  const projname = document.getElementById('sm-projname').value.trim();
+  if (!client) { openSaveModal(); return; }  // fallback to modal if no client set
+  const payload  = buildSavePayload();
+  try {
+    const fd = new FormData();
+    fd.append('sector',       sector);
+    fd.append('client',       client);
+    fd.append('project_name', projname || `Fiche BIA — ${client}`);
+    fd.append('form_data',    JSON.stringify(payload));
+    if (PROJECT_ID) fd.append('project_id', String(PROJECT_ID));
+    const r = await fetch('/api/save-fiche-project', {method:'POST', body:fd});
+    if (!r.ok) throw new Error((await r.json().catch(()=>({detail:r.statusText}))).detail);
+    const { project_id: pid } = await r.json();
+    PROJECT_ID = pid;
+    SECTOR = sector;
+    _markClean();
+    showToast('Fiche sauvegardée ✓', 'ok');
+    // Update URL silently
+    const url = new URL(window.location);
+    url.searchParams.set('sector', sector);
+    url.searchParams.set('project_id', pid);
+    window.history.replaceState({}, '', url);
+    document.getElementById('sm-update-note').style.display = '';
+  } catch(e) {
+    showToast('Erreur sauvegarde : ' + e.message, 'err');
+  }
+}
+
+function buildSavePayload() {
+  return {
+    suivi: st.suivi,
+    entity: st.entity,
+    participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
+    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})=>
+      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})),
+    echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
+    montee_en_charge: st.monteeEnCharge,
+    collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
+    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires})=>({application,criticite,dmia,pmdt,commentaires})),
+    app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
+    documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
+    observations: st.observations
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROJECT-SELECTION MODAL (for new fiches)
+// ══════════════════════════════════════════════════════════════
+let _psAfterSave  = null;   // callback to run after project-save completes
+let _psActiveTab  = 'existing';
+
+function openProjSelect(afterSaveCb) {
+  _psAfterSave = afterSaveCb || null;
+  _psActiveTab = 'existing';
+  switchProjTab('existing');
+  psLoadClients();
+
+  // Pre-fill fields from the current project (if one is loaded) or from entity data
+  const ent       = st.entity.organisation || st.suivi.entite || '';
+  const curSector = (document.getElementById('sm-sector')?.value  || SECTOR || '').toLowerCase();
+  const curClient = (document.getElementById('sm-client')?.value  || '').trim();
+  const curName   = (document.getElementById('sm-projname')?.value || '').trim();
+
+  if (curSector) document.getElementById('ps-sector').value = curSector;
+  if (curClient) document.getElementById('ps-client').value = curClient;   // will be overridden by psLoadClients() but set as fallback
+
+  const nameFallback = curName || (ent ? `Fiche BIA — ${ent}` : '');
+  document.getElementById('ps-projname').value     = nameFallback;
+  document.getElementById('ps-new-projname').value = nameFallback;
+  document.getElementById('ps-new-client').value   = curClient || ent || '';
+  if (curSector) document.getElementById('ps-new-sector').value = curSector;
+
+  // Update modal title to reflect context
+  const titleEl = document.querySelector('#proj-select-overlay [style*="font-size:15px"]');
+  if (titleEl) {
+    titleEl.textContent = PROJECT_ID ? 'Mettre à jour la fiche' : 'Ajouter à un projet client';
+    titleEl.nextElementSibling && (titleEl.nextElementSibling.textContent =
+      PROJECT_ID ? 'Les modifications seront enregistrées dans le projet existant.'
+                 : 'Choisissez un projet existant ou créez-en un nouveau');
+  }
+
+  document.getElementById('proj-select-overlay').style.display = 'flex';
+}
+
+function closeProjSelect() {
+  document.getElementById('proj-select-overlay').style.display = 'none';
+  _psAfterSave = null;
+}
+
+function switchProjTab(tab) {
+  _psActiveTab = tab;
+  const btnEx = document.getElementById('ps-tab-existing');
+  const btnNw = document.getElementById('ps-tab-new');
+  const panEx = document.getElementById('ps-panel-existing');
+  const panNw = document.getElementById('ps-panel-new');
+  if (tab === 'existing') {
+    btnEx.style.borderBottomColor = '#1565C0'; btnEx.style.color = '#1565C0'; btnEx.style.fontWeight = '700';
+    btnNw.style.borderBottomColor = 'transparent'; btnNw.style.color = 'rgba(26,24,20,0.45)'; btnNw.style.fontWeight = '600';
+    panEx.style.display = ''; panNw.style.display = 'none';
+  } else {
+    btnNw.style.borderBottomColor = '#1565C0'; btnNw.style.color = '#1565C0'; btnNw.style.fontWeight = '700';
+    btnEx.style.borderBottomColor = 'transparent'; btnEx.style.color = 'rgba(26,24,20,0.45)'; btnEx.style.fontWeight = '600';
+    panNw.style.display = ''; panEx.style.display = 'none';
+  }
+}
+
+async function psLoadClients() {
+  const sector     = document.getElementById('ps-sector').value;
+  const sel        = document.getElementById('ps-client');
+  // Remember which client we want pre-selected (current project's client or previously typed)
+  const wantClient = (document.getElementById('sm-client')?.value || '').trim();
+  sel.innerHTML    = '<option value="">Chargement…</option>';
+  try {
+    const url    = '/api/fiche-projects' + (sector ? '?sector=' + encodeURIComponent(sector) : '');
+    const r      = await fetch(url);
+    const groups = await r.json();
+    const clients = [...new Set(groups.map(g => g.client))].sort();
+    sel.innerHTML = '<option value="">Choisir un client…</option>' +
+      clients.map(c => `<option value="${c}"${c === wantClient ? ' selected' : ''}>${c}</option>`).join('');
+  } catch {
+    sel.innerHTML = '<option value="">Erreur de chargement</option>';
+  }
+}
+
+async function confirmProjSelect() {
+  const btn = document.getElementById('ps-confirm-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;"></span>Sauvegarde…';
+
+  let sector, client, projname;
+  if (_psActiveTab === 'existing') {
+    sector   = document.getElementById('ps-sector').value   || 'autres';
+    client   = document.getElementById('ps-client').value.trim();
+    projname = document.getElementById('ps-projname').value.trim();
+    if (!client) { showToast('Sélectionnez un client', 'err'); btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-floppy-disk fa-xs"></i> Sauvegarder'; return; }
+  } else {
+    sector   = document.getElementById('ps-new-sector').value  || 'autres';
+    client   = document.getElementById('ps-new-client').value.trim();
+    projname = document.getElementById('ps-new-projname').value.trim();
+    if (!client) { showToast('Entrez un nom de client', 'err'); btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-floppy-disk fa-xs"></i> Sauvegarder'; return; }
+  }
+
+  const payload = buildSavePayload();
+  try {
+    const fd = new FormData();
+    fd.append('sector',       sector);
+    fd.append('client',       client);
+    fd.append('project_name', projname || `Fiche BIA — ${client}`);
+    fd.append('form_data',    JSON.stringify(payload));
+    // Pass project_id when updating an existing project; omit to create a new one
+    if (PROJECT_ID) fd.append('project_id', String(PROJECT_ID));
+    const r = await fetch('/api/save-fiche-project', {method:'POST', body:fd});
+    if (!r.ok) throw new Error((await r.json().catch(()=>({detail:r.statusText}))).detail);
+    const { project_id: pid } = await r.json();
+    PROJECT_ID = pid;
+    SECTOR     = sector;
+    _markClean();
+
+    // Update URL silently
+    const url = new URL(window.location);
+    url.searchParams.set('sector', sector);
+    url.searchParams.set('project_id', pid);
+    window.history.replaceState({}, '', url);
+
+    // Update sector badge
+    const badge = document.getElementById('tb-sector-badge');
+    const isBanque = sector === 'banques';
+    badge.textContent = isBanque ? '🏦 Banques' : (sector === 'assurances' ? '🛡 Assurances' : sector);
+    badge.style.display = '';
+    badge.style.background = isBanque ? 'rgba(21,101,192,.1)' : 'rgba(46,125,50,.1)';
+    badge.style.color      = isBanque ? '#1565C0' : '#2E7D32';
+    badge.style.border     = isBanque ? '1px solid rgba(21,101,192,.25)' : '1px solid rgba(46,125,50,.25)';
+
+    document.getElementById('sm-client').value   = client;
+    document.getElementById('sm-sector').value   = sector;
+    document.getElementById('sm-projname').value = projname || `Fiche BIA — ${client}`;
+    document.getElementById('sm-update-note').style.display = '';
+
+    showToast(`Fiche sauvegardée dans la base (${client}) ✓`, 'ok');
+    closeProjSelect();
+    if (_psAfterSave) _psAfterSave();
+
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk fa-xs"></i> Sauvegarder';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+renderParticipants();
+renderActs();
+renderTOT();
+renderSec53();
+renderMontee();
+updBtn();
+
+// Load existing project if project_id in URL, then start dirty tracking.
+// Always call _markClean() after a short delay to start watching for changes —
+// populateState() sets its own 100 ms timer so 300 ms here is safely after it.
+loadProjectFromUrl().finally(() => {
+  setTimeout(() => _markClean(), 300);
+});
+</script>
+</body>
+</html>

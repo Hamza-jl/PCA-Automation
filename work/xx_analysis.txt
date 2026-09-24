@@ -1,0 +1,274 @@
+﻿Total xx: 91
+
+xx[ 0] @ char 77818
+  Context: firstColumn="0" w:lastColumn="0" w:oddVBand="0" w:evenVBand="0" w:oddHBand="1" w:evenHBand="0" w:firstRowFirstColumn="0" w:firstRowLastColumn="0" w:lastRowFirstColumn="0" w:lastRowLastColumn="0"/>
+
+xx[ 1] @ char 82047
+  Context: " w:evenVBand="0" w:oddHBand="0" w:evenHBand="1" w:firstRowFirstColumn="0" w:firstRowLastColumn="0" w:lastRowFirstColumn="0" w:lastRowLastColumn="0"/>
+
+xx[ 2] @ char 228092
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[ 3] @ char 230641
+  Context: " w:cstheme="majorHAnsi"/> L&#x2019;entité se compose d&#x2019;un (01) manager et de trois (
+
+xx[ 4] @ char 234703
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[ 5] @ char 238341
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[ 6] @ char 241911
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[ 7] @ char 244055
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[ 8] @ char 259989
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[ 9] @ char 261039
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[10] @ char 262089
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[11] @ char 263079
+  Context: 
+
+xx[12] @ char 264364
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[13] @ char 265414
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[14] @ char 266464
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[15] @ char 267454
+  Context: 
+
+xx[16] @ char 336737
+  Context: w:r> :
+
+xx[17] @ char 339270
+  Context: 
+
+xx[18] @ char 346440
+  Context: g="0" w:after="60" w:afterAutospacing="0"/>
+
+xx[19] @ char 347673
+  Context: g="0" w:after="60" w:afterAutospacing="0"/>
+
+xx[20] @ char 350204
+  Context: ="0"/>
+
+xx[21] @ char 351474
+  Context: ="0"/>
+
+xx[22] @ char 353971
+  Context: g="0" w:after="60" w:afterAutospacing="0"/>
+
+xx[23] @ char 355204
+  Context: g="0" w:after="60" w:afterAutospacing="0"/>
+
+xx[24] @ char 357721
+  Context: ="0"/>
+
+xx[25] @ char 358991
+  Context: ="0"/>
+
+xx[26] @ char 369365
+  Context: 
+
+xx[27] @ char 370479
+  Context: ts w:ascii="Montserrat" w:hAnsi="Montserrat" w:cstheme="majorHAnsi"/>
+
+xx[28] @ char 372996
+  Context: heme="majorHAnsi"/>
+
+xx[29] @ char 374064
+  Context: 
+
+xx[30] @ char 394915
+  Context: 
+
+xx[31] @ char 395885
+  Context: 
+
+xx[32] @ char 396950
+  Context: 
+
+xx[33] @ char 397920
+  Context: 
+
+xx[34] @ char 398949
+  Context: 
+
+xx[35] @ char 400293
+  Context: heme="majorHAnsi"/>
+
+xx[36] @ char 401217
+  Context: A4" w:rsidP="00390699">
+
+xx[37] @ char 402236
+  Context: auto"/>
+
+xx[38] @ char 403160
+  Context: A4" w:rsidP="00390699">
+
+xx[39] @ char 404143
+  Context: 
+
+xx[40] @ char 405487
+  Context: heme="majorHAnsi"/>
+
+xx[41] @ char 406411
+  Context: A4" w:rsidP="00390699">
+
+xx[42] @ char 407430
+  Context: auto"/>
+
+xx[43] @ char 408354
+  Context: A4" w:rsidP="00390699">
+
+xx[44] @ char 409337
+  Context: 
+
+xx[45] @ char 410681
+  Context: heme="majorHAnsi"/>
+
+xx[46] @ char 411605
+  Context: A4" w:rsidP="00390699">
+
+xx[47] @ char 412624
+  Context: auto"/>
+
+xx[48] @ char 413548
+  Context: A4" w:rsidP="00390699">
+
+xx[49] @ char 414531
+  Context: 
+
+xx[50] @ char 415875
+  Context: heme="majorHAnsi"/>
+
+xx[51] @ char 416799
+  Context: A4" w:rsidP="00390699">
+
+xx[52] @ char 417818
+  Context: auto"/>
+
+xx[53] @ char 418742
+  Context: A4" w:rsidP="00390699">
+
+xx[54] @ char 419725
+  Context: 
+
+xx[55] @ char 421069
+  Context: heme="majorHAnsi"/>
+
+xx[56] @ char 421993
+  Context: A4" w:rsidP="00390699">
+
+xx[57] @ char 423033
+  Context: auto"/>
+
+xx[58] @ char 423957
+  Context: A4" w:rsidP="00390699">
+
+xx[59] @ char 424940
+  Context: 
+
+xx[60] @ char 453069
+  Context: 
+
+xx[61] @ char 460184
+  Context: " w:line="276" w:lineRule="auto"/>
+
+xx[62] @ char 472315
+  Context: 
+
+xx[63] @ char 530279
+  Context: 
+
+xx[64] @ char 551454
+  Context: dP="00BF48BE">
+
+xx[65] @ char 552474
+  Context: w:rPr>
+
+xx[66] @ char 553494
+  Context: w:rPr>
+
+xx[67] @ char 554514
+  Context: w:rPr>
+
+xx[68] @ char 556643
+  Context: RPr="00C10459" w:rsidRDefault="00A30826" w:rsidP="00A30826">
+
+xx[69] @ char 557617
+  Context: 
+
+xx[70] @ char 558591
+  Context: 
+
+xx[71] @ char 559565
+  Context: 
+
+xx[72] @ char 561694
+  Context: RPr="00C10459" w:rsidRDefault="00A30826" w:rsidP="00A30826">
+
+xx[73] @ char 562668
+  Context: 
+
+xx[74] @ char 563642
+  Context: 
+
+xx[75] @ char 564616
+  Context: 
+
+xx[76] @ char 566745
+  Context: RPr="00C10459" w:rsidRDefault="00A30826" w:rsidP="00A30826">
+
+xx[77] @ char 567719
+  Context: 
+
+xx[78] @ char 568693
+  Context: 
+
+xx[79] @ char 569667
+  Context: 
+
+xx[80] @ char 571796
+  Context: RPr="00C10459" w:rsidRDefault="00A30826" w:rsidP="00A30826">
+
+xx[81] @ char 572770
+  Context: 
+
+xx[82] @ char 573744
+  Context: 
+
+xx[83] @ char 574718
+  Context: 
+
+xx[84] @ char 576875
+  Context: RPr="00C10459" w:rsidRDefault="00A30826" w:rsidP="00A30826">
+
+xx[85] @ char 577849
+  Context: 
+
+xx[86] @ char 578823
+  Context: 
+
+xx[87] @ char 579797
+  Context: 
+
+xx[88] @ char 606806
+  Context: val="0"/>
+
+xx[89] @ char 620154
+  Context: w:rPr>
+
+xx[90] @ char 621125
+  Context: 

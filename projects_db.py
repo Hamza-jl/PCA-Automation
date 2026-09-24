@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR     = Path(__file__).parent
@@ -67,6 +67,79 @@ def init_db() -> None:
             );
             CREATE INDEX IF NOT EXISTS idx_sfl_syn ON synthese_fiche_links(synthese_project_id);
             CREATE INDEX IF NOT EXISTS idx_sfl_fic ON synthese_fiche_links(fiche_project_id);
+
+            -- ── Risk Assessment Tables ──────────────────────────────────────────
+            CREATE TABLE IF NOT EXISTS risk_assessments (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id         INTEGER REFERENCES projects(id) ON DELETE CASCADE,
+                sector             TEXT    NOT NULL,
+                client             TEXT    NOT NULL,
+                building_type      TEXT    NOT NULL,
+                num_floors         INTEGER NOT NULL DEFAULT 1,
+                assessment_date    TEXT    DEFAULT (datetime('now')),
+                status             TEXT    DEFAULT 'in_progress'
+            );
+
+            CREATE TABLE IF NOT EXISTS assessment_floors (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                assessment_id      INTEGER NOT NULL REFERENCES risk_assessments(id) ON DELETE CASCADE,
+                floor_number       INTEGER NOT NULL,
+                floor_label        TEXT    DEFAULT '',
+                notes_count        INTEGER DEFAULT 0,
+                status             TEXT    DEFAULT 'active'
+            );
+
+            CREATE TABLE IF NOT EXISTS assessment_notes (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                floor_id           INTEGER NOT NULL REFERENCES assessment_floors(id) ON DELETE CASCADE,
+                component          TEXT    NOT NULL,
+                note_text          TEXT    NOT NULL,
+                created_at         TEXT    DEFAULT (datetime('now')),
+                updated_at         TEXT    DEFAULT (datetime('now')),
+                status             TEXT    DEFAULT 'draft'
+            );
+
+            CREATE TABLE IF NOT EXISTS assessment_photos (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                note_id            INTEGER NOT NULL REFERENCES assessment_notes(id) ON DELETE CASCADE,
+                filename           TEXT    NOT NULL,
+                filesize           INTEGER,
+                mime_type          TEXT    DEFAULT 'image/jpeg',
+                width              INTEGER,
+                height             INTEGER,
+                orientation        INTEGER DEFAULT 1,
+                exif_timestamp     TEXT,
+                upload_timestamp   TEXT    DEFAULT (datetime('now')),
+                is_compressed      BOOLEAN DEFAULT 0,
+                thumbnail_path     TEXT,
+                original_path      TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS photo_tags (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                photo_id           INTEGER NOT NULL REFERENCES assessment_photos(id) ON DELETE CASCADE,
+                assessment_id      INTEGER,
+                floor_number       INTEGER,
+                component_type     TEXT,
+                condition          TEXT,
+                risk_level         TEXT,
+                equipment_status   TEXT,
+                created_at         TEXT    DEFAULT (datetime('now'))
+            );
+
+            -- Types de bâtiment ajoutés par l'utilisateur (en plus du catalogue standard)
+            CREATE TABLE IF NOT EXISTS assessment_building_types (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                label              TEXT    NOT NULL UNIQUE,
+                icon               TEXT    DEFAULT 'fa-building',
+                created_at         TEXT    DEFAULT (datetime('now'))
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_risk_assessment_project ON risk_assessments(project_id);
+            CREATE INDEX IF NOT EXISTS idx_assessment_floor ON assessment_floors(assessment_id);
+            CREATE INDEX IF NOT EXISTS idx_assessment_notes ON assessment_notes(floor_id);
+            CREATE INDEX IF NOT EXISTS idx_photo_tags_floor ON photo_tags(assessment_id, floor_number);
+            CREATE INDEX IF NOT EXISTS idx_photo_tags_component ON photo_tags(component_type);
         """)
 
 
@@ -1402,3 +1475,326 @@ def extract_dmias_from_synthese(synthese_path: Path) -> list[dict]:
             })
 
     return results
+
+
+# ── Risk Assessment Functions ───────────────────────────────────────────────────
+
+def _floor_label(floor_num: int) -> str:
+    """Libellé par défaut d'un étage (RDC pour le niveau 1)."""
+    return "Rez-de-chaussée" if floor_num == 1 else f"Étage {floor_num - 1}"
+
+
+def _refresh_notes_count(con, floor_id: int) -> None:
+    con.execute("""
+        UPDATE assessment_floors
+           SET notes_count = (SELECT COUNT(*) FROM assessment_notes WHERE floor_id = ?)
+         WHERE id = ?
+    """, (floor_id, floor_id))
+
+
+def create_risk_assessment(sector: str, client: str, building_type: str,
+                           num_floors: int, project_id: Optional[int] = None) -> int:
+    """Crée une évaluation et ses étages ; retourne l'identifiant."""
+    with _conn() as con:
+        cursor = con.execute("""
+            INSERT INTO risk_assessments (project_id, sector, client, building_type, num_floors)
+            VALUES (?, ?, ?, ?, ?)
+        """, (project_id, sector, client, building_type, num_floors))
+        assessment_id = cursor.lastrowid
+
+        for floor_num in range(1, num_floors + 1):
+            con.execute("""
+                INSERT INTO assessment_floors (assessment_id, floor_number, floor_label)
+                VALUES (?, ?, ?)
+            """, (assessment_id, floor_num, _floor_label(floor_num)))
+
+        con.commit()
+    return assessment_id
+
+
+def list_risk_assessments(sector: Optional[str] = None,
+                          client: Optional[str] = None) -> List[dict]:
+    """Évaluations existantes, les plus récentes d'abord."""
+    sql = """
+        SELECT a.*,
+               (SELECT COUNT(*) FROM assessment_notes n
+                  JOIN assessment_floors f ON f.id = n.floor_id
+                 WHERE f.assessment_id = a.id) AS notes_total,
+               (SELECT COUNT(*) FROM assessment_photos p
+                  JOIN assessment_notes n  ON n.id = p.note_id
+                  JOIN assessment_floors f ON f.id = n.floor_id
+                 WHERE f.assessment_id = a.id) AS photos_total
+          FROM risk_assessments a
+    """
+    where, params = [], []
+    if sector:
+        where.append("a.sector = ?"); params.append(sector)
+    if client:
+        where.append("a.client = ?"); params.append(client)
+    if where:
+        sql += " WHERE " + " AND ".join(where)
+    sql += " ORDER BY a.id DESC"
+    with _conn() as con:
+        return [dict(r) for r in con.execute(sql, params).fetchall()]
+
+
+def get_risk_assessment(assessment_id: int) -> Optional[dict]:
+    """Évaluation avec ses étages (identifiants réels des étages inclus)."""
+    with _conn() as con:
+        ra = con.execute(
+            "SELECT * FROM risk_assessments WHERE id = ?", (assessment_id,)
+        ).fetchone()
+        if not ra:
+            return None
+
+        floors = con.execute("""
+            SELECT id, floor_number, floor_label, notes_count
+              FROM assessment_floors
+             WHERE assessment_id = ?
+             ORDER BY floor_number
+        """, (assessment_id,)).fetchall()
+
+        result = dict(ra)
+        result['floors'] = [dict(f) for f in floors]
+        return result
+
+
+def get_floor(assessment_id: int, floor_number: int) -> Optional[dict]:
+    """Étage d'une évaluation, résolu par son numéro (jamais par son rang)."""
+    with _conn() as con:
+        row = con.execute("""
+            SELECT * FROM assessment_floors
+             WHERE assessment_id = ? AND floor_number = ?
+        """, (assessment_id, floor_number)).fetchone()
+        return dict(row) if row else None
+
+
+def rename_floor(assessment_id: int, floor_number: int, label: str) -> bool:
+    with _conn() as con:
+        cur = con.execute("""
+            UPDATE assessment_floors SET floor_label = ?
+             WHERE assessment_id = ? AND floor_number = ?
+        """, (label, assessment_id, floor_number))
+        con.commit()
+        return cur.rowcount > 0
+
+
+def list_floor_notes(floor_id: int) -> List[dict]:
+    """Notes d'un étage, chacune avec ses photos et ses tags."""
+    with _conn() as con:
+        notes = con.execute("""
+            SELECT * FROM assessment_notes WHERE floor_id = ? ORDER BY id
+        """, (floor_id,)).fetchall()
+
+        out = []
+        for n in notes:
+            photos = con.execute("""
+                SELECT p.id, p.filename, p.width, p.height, p.exif_timestamp,
+                       t.condition, t.risk_level
+                  FROM assessment_photos p
+             LEFT JOIN photo_tags t ON t.photo_id = p.id
+                 WHERE p.note_id = ?
+                 ORDER BY p.id
+            """, (n['id'],)).fetchall()
+            item = dict(n)
+            item['photos'] = [dict(p) for p in photos]
+            out.append(item)
+        return out
+
+
+def create_note(floor_id: int, component: str, note_text: str,
+                condition: str = 'non_renseigne',
+                risk_level: str = 'non_renseigne') -> int:
+    """Crée une note rattachée à un composant d'un étage."""
+    with _conn() as con:
+        cursor = con.execute("""
+            INSERT INTO assessment_notes (floor_id, component, note_text, status)
+            VALUES (?, ?, ?, 'saisie')
+        """, (floor_id, component, note_text))
+        note_id = cursor.lastrowid
+        _refresh_notes_count(con, floor_id)
+        con.commit()
+    return note_id
+
+
+def delete_note(note_id: int) -> bool:
+    """Supprime une note ; les photos et tags suivent par cascade."""
+    with _conn() as con:
+        row = con.execute(
+            "SELECT floor_id FROM assessment_notes WHERE id = ?", (note_id,)
+        ).fetchone()
+        if not row:
+            return False
+        con.execute("DELETE FROM assessment_notes WHERE id = ?", (note_id,))
+        _refresh_notes_count(con, row['floor_id'])
+        con.commit()
+        return True
+
+
+def add_photo_to_note(note_id: int, filename: str, original_path: str,
+                      thumbnail_path: str, meta: dict,
+                      condition: str = 'non_renseigne',
+                      risk_level: str = 'non_renseigne') -> int:
+    """Enregistre une photo et son étiquetage (étage / composant / état)."""
+    with _conn() as con:
+        cursor = con.execute("""
+            INSERT INTO assessment_photos
+                (note_id, filename, filesize, mime_type, original_path,
+                 thumbnail_path, width, height, orientation, exif_timestamp,
+                 is_compressed)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        """, (
+            note_id,
+            filename,
+            meta.get('filesize'),
+            meta.get('mime_type', 'image/jpeg'),
+            original_path,
+            thumbnail_path,
+            meta.get('width'),
+            meta.get('height'),
+            meta.get('orientation', 1),
+            meta.get('timestamp'),
+        ))
+        photo_id = cursor.lastrowid
+
+        note = con.execute(
+            "SELECT floor_id, component FROM assessment_notes WHERE id = ?", (note_id,)
+        ).fetchone()
+        floor = con.execute(
+            "SELECT assessment_id, floor_number FROM assessment_floors WHERE id = ?",
+            (note['floor_id'],)
+        ).fetchone()
+
+        con.execute("""
+            INSERT INTO photo_tags
+                (photo_id, assessment_id, floor_number, component_type,
+                 condition, risk_level)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (photo_id, floor['assessment_id'], floor['floor_number'],
+              note['component'], condition, risk_level))
+
+        con.commit()
+    return photo_id
+
+
+def get_photo(photo_id: int) -> Optional[dict]:
+    """Photo avec les chemins de fichiers, pour la servir."""
+    with _conn() as con:
+        row = con.execute(
+            "SELECT * FROM assessment_photos WHERE id = ?", (photo_id,)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def update_photo_tags(photo_id: int, condition: str, risk_level: str) -> None:
+    """Met à jour l'état et le niveau de risque associés à une photo."""
+    with _conn() as con:
+        con.execute("""
+            UPDATE photo_tags SET condition = ?, risk_level = ? WHERE photo_id = ?
+        """, (condition, risk_level, photo_id))
+        con.commit()
+
+
+# ── Types de bâtiment personnalisés ───────────────────────────────────────────
+
+def list_custom_building_types() -> List[dict]:
+    with _conn() as con:
+        rows = con.execute(
+            "SELECT label, icon FROM assessment_building_types ORDER BY label"
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def add_custom_building_type(label: str, icon: str = 'fa-building') -> None:
+    with _conn() as con:
+        con.execute("""
+            INSERT OR IGNORE INTO assessment_building_types (label, icon) VALUES (?, ?)
+        """, (label, icon))
+        con.commit()
+
+
+# ── Export pour l'agent de synthèse ───────────────────────────────────────────
+
+def get_assessment_export(assessment_id: int) -> Optional[dict]:
+    """Données de l'évaluation structurées pour la génération de synthèse.
+
+    Chaque photo est livrée avec son étiquetage complet — étage, composant,
+    catégorie, état, niveau de risque — afin que l'agent puisse la rattacher
+    au bon constat sans ambiguïté.
+    """
+    with _conn() as con:
+        ra = con.execute(
+            "SELECT * FROM risk_assessments WHERE id = ?", (assessment_id,)
+        ).fetchone()
+        if not ra:
+            return None
+
+        floors_data = []
+        floors = con.execute("""
+            SELECT * FROM assessment_floors WHERE assessment_id = ? ORDER BY floor_number
+        """, (assessment_id,)).fetchall()
+
+        total_notes = total_photos = 0
+
+        for floor_row in floors:
+            notes = con.execute("""
+                SELECT * FROM assessment_notes WHERE floor_id = ? ORDER BY id
+            """, (floor_row['id'],)).fetchall()
+
+            # Regroupement par composant : un composant peut porter plusieurs notes.
+            par_composant: dict = {}
+            for note_row in notes:
+                total_notes += 1
+                photos = con.execute("""
+                    SELECT p.id, p.filename, p.width, p.height, p.exif_timestamp,
+                           p.upload_timestamp, t.condition, t.risk_level
+                      FROM assessment_photos p
+                 LEFT JOIN photo_tags t ON t.photo_id = p.id
+                     WHERE p.note_id = ? ORDER BY p.id
+                """, (note_row['id'],)).fetchall()
+                total_photos += len(photos)
+
+                entry = par_composant.setdefault(note_row['component'], [])
+                entry.append({
+                    'note_id':    note_row['id'],
+                    'texte':      note_row['note_text'],
+                    'cree_le':    note_row['created_at'],
+                    'photos': [{
+                        'photo_id':      p['id'],
+                        'fichier':       p['filename'],
+                        'url':           f"/api/risk-assessment/{assessment_id}/photos/{p['id']}",
+                        'largeur':       p['width'],
+                        'hauteur':       p['height'],
+                        'prise_le':      p['exif_timestamp'] or p['upload_timestamp'],
+                        'etage':         floor_row['floor_number'],
+                        'etage_libelle': floor_row['floor_label'],
+                        'composant':     note_row['component'],
+                        'etat':          p['condition'],
+                        'niveau_risque': p['risk_level'],
+                    } for p in photos],
+                })
+
+            floors_data.append({
+                'numero':   floor_row['floor_number'],
+                'libelle':  floor_row['floor_label'],
+                'composants': [
+                    {'composant': comp, 'notes': items}
+                    for comp, items in par_composant.items()
+                ],
+            })
+
+        meta = dict(ra)
+        return {
+            'evaluation': {
+                'id':             meta['id'],
+                'secteur':        meta['sector'],
+                'client':         meta['client'],
+                'type_batiment':  meta['building_type'],
+                'nombre_etages':  meta['num_floors'],
+                'date':           meta['assessment_date'],
+                'statut':         meta['status'],
+                'total_notes':    total_notes,
+                'total_photos':   total_photos,
+            },
+            'etages': floors_data,
+        }

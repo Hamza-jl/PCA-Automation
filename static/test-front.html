@@ -1,0 +1,456 @@
+<title>BIA Intelligence — Devoteam</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red:         #E8394C;
+    --ink:         #1C1410;
+    --dim:         #8A7E74;
+    --bg:          #EDE8DF;
+    --card-shadow: rgba(28, 20, 16, 0.18);
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  /* ── Page shell ── */
+  .stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background: radial-gradient(ellipse 90% 70% at 50% 60%, #e4ddd2 0%, #EDE8DF 65%);
+  }
+
+  /* ── Page fade ── */
+  .stage { transition: opacity 0.32s ease; }
+  .stage.fading { opacity: 0; pointer-events: none; }
+
+  /* ── Overlay ── */
+  .overlay {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    user-select: none;
+    margin-top: calc(50vh - 12rem);
+    transition: margin-top 0.85s cubic-bezier(0.4,0,0.2,1),
+                opacity      0.32s ease;
+    cursor: pointer;
+    pointer-events: all;
+  }
+  body.lifted .overlay { margin-top: 1.8rem; }
+
+  .click-hint {
+    margin-top: 1.4em;
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--dim);
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    transition: opacity 0.4s ease;
+  }
+  .click-hint::before { content:''; width:1em; height:1px; background:var(--dim); }
+  body.lifted .click-hint { opacity: 0; pointer-events: none; }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    margin-bottom: 0.75em;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content:''; width:2.2em; height:1px;
+    background:var(--red); opacity:0.65;
+  }
+  .eyebrow-text {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 600;
+  }
+
+  .hero-title {
+    font-size: clamp(2.8rem, 8vw, 6.8rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    line-height: 0.88;
+    text-align: center;
+    color: var(--ink);
+    text-wrap: balance;
+    transition: font-size 0.85s cubic-bezier(0.4,0,0.2,1);
+  }
+  body.lifted .hero-title { font-size: clamp(1.6rem, 3.5vw, 2.8rem); }
+  .hero-title em { font-style: normal; color: var(--red); }
+
+  .hero-sub {
+    margin-top: 0.9em;
+    font-size: clamp(0.65rem, 1.2vw, 0.8rem);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 400;
+    transition: opacity 0.5s ease 0.2s;
+  }
+  body.lifted .hero-sub { opacity: 0.6; }
+
+  /* ── Carousel ── */
+  .scene {
+    display: grid;
+    overflow: hidden;
+    perspective: 35em;
+    mask: linear-gradient(90deg, #0000, red 20% 80%, #0000);
+    width: 100vw;
+    flex: 1;
+    transition: opacity 0.6s ease;
+    opacity: 0.15;
+  }
+  body.lifted .scene { opacity: 1; }
+
+  .a3d {
+    display: grid;
+    place-self: center;
+    transform-style: preserve-3d;
+    animation: ry 32s linear infinite;
+  }
+  @keyframes ry { to { rotate: y 1turn; } }
+  @media (prefers-reduced-motion: reduce) { .a3d { animation-duration: 128s; } }
+
+  /* ── Card wrap (3D positioned, contains image + label) ── */
+  .card-wrap {
+    --w: 17.5em;
+    --ba: calc(1turn / var(--n));
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.65em;
+    backface-visibility: hidden;
+    transform:
+      rotatey(calc(var(--i) * var(--ba)))
+      translatez(calc(-1 * (0.5 * var(--w) + 0.5em) / tan(0.5 * var(--ba))));
+  }
+
+  .card-wrap.clickable { cursor: pointer; }
+
+  .card {
+    width: var(--w);
+    aspect-ratio: 7 / 10;
+    object-fit: cover;
+    border-radius: 1.5em;
+    box-shadow: 0 8px 32px var(--card-shadow);
+    display: block;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card-wrap.clickable:hover .card {
+    transform: scale(1.04) translateY(-5px);
+    box-shadow: 0 22px 52px var(--card-shadow);
+  }
+
+  .card-label {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-align: center;
+    width: var(--w);
+    line-height: 1.45;
+    opacity: 0.6;
+    transition: opacity 0.2s ease, color 0.2s ease;
+  }
+  .card-wrap.clickable:hover .card-label { opacity: 1; color: var(--red); }
+
+  /* ── Back button ── */
+  #back-btn {
+    position: absolute;
+    top: 1.4rem;
+    left: 1.8rem;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    gap: 0.5em;
+    background: none;
+    border: 1px solid rgba(28,20,16,0.18);
+    border-radius: 2rem;
+    padding: 0.42em 1.1em;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  #back-btn.visible { display: flex; }
+  #back-btn:hover {
+    background: rgba(28,20,16,0.06);
+    color: var(--ink);
+    border-color: rgba(28,20,16,0.35);
+  }
+  #back-btn svg { width: 0.7em; height: 0.7em; }
+
+  /* ── Brand strip ── */
+  .brand-strip {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 0.65em;
+  }
+  .brand-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 500;
+  }
+  .devoteam-logo { display: flex; align-items: center; gap: 0.4em; }
+  .devoteam-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+</style>
+
+<div class="stage" id="stage">
+
+  <!-- Back navigation -->
+  <button id="back-btn" onclick="goBack()">
+    <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5">
+      <polyline points="6,2 3,5 6,8"/>
+    </svg>
+    Retour
+  </button>
+
+  <!-- Title overlay -->
+  <div class="overlay" id="overlay" role="button" tabindex="0" aria-label="Révéler le carousel">
+    <div class="eyebrow">
+      <span class="eyebrow-text" id="eyebrow-text">Outil de Continuité d'Activité</span>
+    </div>
+    <h1 class="hero-title" id="hero-title">Rapport<br><em>BIA</em></h1>
+    <p class="hero-sub" id="hero-sub">Business Impact Analysis &nbsp;·&nbsp; 2026</p>
+    <span class="click-hint" id="click-hint">cliquer pour révéler</span>
+  </div>
+
+  <!-- 3D carousel -->
+  <div class="scene">
+    <div class="a3d" id="a3d"></div>
+  </div>
+
+  <!-- Devoteam branding -->
+  <div class="brand-strip">
+    <span class="brand-label">Propulsé par</span>
+    <div class="devoteam-logo">
+      <svg width="20" height="20" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+        <path d="M11 1 L21 6.5 L21 15.5 L11 21 L1 15.5 L1 6.5 Z" fill="none" stroke="#E8394C" stroke-width="1.5"/>
+        <path d="M7 11 L11 5 L15 11 L11 17 Z" fill="#E8394C"/>
+      </svg>
+      <span class="devoteam-name">Devoteam</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── Site structure ── */
+  const SITE = {
+    home: {
+      eyebrow: "Outil de Continuité d'Activité",
+      title:   'Rapport<br><em>BIA</em>',
+      sub:     'Business Impact Analysis &nbsp;·&nbsp; 2026',
+      hint:    true,
+      items: [
+        { label: 'Générer les fiches BIA',           img: 'Générer les fiches BIA.png',           page: 'gen-fiches'  },
+        { label: 'Charger les fiches BIA',           img: 'Charger les fiches BIA.png',           page: 'charger'     },
+        { label: 'Générer la synthèse BIA',          img: 'Générer la synthèse BIA.png',          page: 'synthese'    },
+        { label: 'Synchronisation bidirectionnelle', img: 'Synchronisation bidirectionnelle.png', page: 'sync'        },
+        { label: "Génération de l'organigramme",     img: "Génération de l'organigramme.png",     page: 'organigramme'},
+        { label: 'Tableau de bord BIA',              img: 'Tableau de bord BIA.png',              page: 'tdb'         },
+        { label: 'Montée en charge',                 img: 'Montée en charge.png',                 page: 'montee'      },
+        { label: 'Analyse des risques IA',           img: 'Analyse des risques IA.png',           page: 'risques'     },
+        { label: 'Éditeur de fiches',                img: 'Éditeur de fiches BIA.png',            page: 'editeur'     },
+        { label: 'Base de données',                  img: 'Base de données.png',                  page: 'bdd'         },
+      ]
+    },
+    'gen-fiches': {
+      eyebrow: 'Synthèse BIA — Étape 00',
+      title:   'Générer les<br><em>Fiches BIA</em>',
+      sub:     'Génération automatique depuis la fiche de recensement',
+      hint:    false, items: []
+    },
+    charger: {
+      eyebrow: 'Synthèse BIA — Étape 01',
+      title:   'Charger les<br><em>Fiches BIA</em>',
+      sub:     'Chargement et vérification des fiches générées',
+      hint:    false, items: []
+    },
+    synthese: {
+      eyebrow: 'Synthèse BIA — Étape 02',
+      title:   'Générer la<br><em>Synthèse</em>',
+      sub:     'Consolidation de toutes les fiches BIA',
+      hint:    false, items: []
+    },
+    sync: {
+      eyebrow: 'Synthèse BIA — Étape 03',
+      title:   'Synchro-<br><em>nisation</em>',
+      sub:     'Synchronisation bidirectionnelle Fiches ↔ Synthèse',
+      hint:    false, items: []
+    },
+    organigramme: {
+      eyebrow: 'Synthèse BIA — Étape 04',
+      title:   "Génération de<br><em>l'Organigramme</em>",
+      sub:     'Extraction automatique de la hiérarchie organisationnelle',
+      hint:    false, items: []
+    },
+    editeur: {
+      eyebrow: 'Outil BIA',
+      title:   'Éditeur de<br><em>Fiches</em>',
+      sub:     'Édition et validation manuelle des fiches BIA',
+      hint:    false, items: []
+    },
+    bdd: {
+      eyebrow: 'Outil BIA',
+      title:   'Base de<br><em>Données</em>',
+      sub:     'Stockage et gestion des fiches et synthèses',
+      hint:    false, items: []
+    },
+    tdb: {
+      eyebrow: 'Rapport BIA — 01',
+      title:   'Tableau de<br><em>bord BIA</em>',
+      sub:     'Visualisation consolidée des impacts et ressources',
+      hint:    false, items: []
+    },
+    montee: {
+      eyebrow: 'Rapport BIA — 02',
+      title:   'Montée en<br><em>Charge</em>',
+      sub:     'Planification progressive de la reprise d\'activité',
+      hint:    false, items: []
+    },
+    risques: {
+      eyebrow: 'Gestion des risques — 01',
+      title:   'Analyse des<br><em>Risques IA</em>',
+      sub:     'Détection intelligente des risques opérationnels',
+      hint:    false, items: []
+    }
+  };
+
+  /* ── State ── */
+  let navStack = ['home'];
+  const stage   = document.getElementById('stage');
+  const a3d     = document.getElementById('a3d');
+  const overlay = document.getElementById('overlay');
+  const backBtn = document.getElementById('back-btn');
+
+  /* ── Build carousel for a given page ── */
+  function buildCarousel(pageId) {
+    const { items } = SITE[pageId];
+    a3d.innerHTML = '';
+
+    if (!items || items.length === 0) {
+      /* Detail page — show a single large card with the parent image */
+      const parent = SITE['home'].items.find(it => it.page === pageId);
+      if (parent) {
+        a3d.style.setProperty('--n', 1);
+        const wrap = document.createElement('div');
+        wrap.className = 'card-wrap';
+        wrap.style.setProperty('--i', 0);
+        const img = document.createElement('img');
+        img.className = 'card';
+        img.src = `test_pictures/${encodeURIComponent(parent.img)}`;
+        img.alt = parent.label;
+        wrap.appendChild(img);
+        a3d.appendChild(wrap);
+      }
+      return;
+    }
+
+    a3d.style.setProperty('--n', items.length);
+    items.forEach((item, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'card-wrap' + (item.page ? ' clickable' : '');
+      wrap.style.setProperty('--i', i);
+      if (item.page) wrap.addEventListener('click', () => navigateTo(item.page));
+
+      const img = document.createElement('img');
+      img.className = 'card';
+      img.src = `test_pictures/${encodeURIComponent(item.img)}`;
+      img.alt = item.label;
+
+      const lbl = document.createElement('div');
+      lbl.className = 'card-label';
+      lbl.textContent = item.label;
+
+      wrap.appendChild(img);
+      wrap.appendChild(lbl);
+      a3d.appendChild(wrap);
+    });
+  }
+
+  /* ── Update title / eyebrow / sub ── */
+  function updateOverlay(pageId) {
+    const p = SITE[pageId];
+    document.getElementById('eyebrow-text').textContent = p.eyebrow;
+    document.getElementById('hero-title').innerHTML     = p.title;
+    document.getElementById('hero-sub').innerHTML       = p.sub;
+    document.getElementById('click-hint').style.display = p.hint ? '' : 'none';
+  }
+
+  /* ── Navigate forward ── */
+  function navigateTo(pageId) {
+    /* auto-lift if not already lifted */
+    if (!document.body.classList.contains('lifted'))
+      document.body.classList.add('lifted');
+
+    stage.classList.add('fading');
+    setTimeout(() => {
+      navStack.push(pageId);
+      buildCarousel(pageId);
+      updateOverlay(pageId);
+      backBtn.classList.add('visible');
+      stage.classList.remove('fading');
+    }, 320);
+  }
+
+  /* ── Navigate back ── */
+  function goBack() {
+    if (navStack.length <= 1) return;
+    stage.classList.add('fading');
+    setTimeout(() => {
+      navStack.pop();
+      const prev = navStack[navStack.length - 1];
+      buildCarousel(prev);
+      updateOverlay(prev);
+      backBtn.classList.toggle('visible', prev !== 'home');
+      stage.classList.remove('fading');
+    }, 320);
+  }
+
+  /* ── Lift / lower title ── */
+  function toggleLift() { document.body.classList.toggle('lifted'); }
+  overlay.addEventListener('click', toggleLift);
+  overlay.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') toggleLift();
+  });
+
+  /* ── Init ── */
+  buildCarousel('home');
+</script>

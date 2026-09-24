@@ -435,6 +435,14 @@ def extract_slides_data(xlsx_bytes: bytes) -> dict:
                 "contournement": _safe(row.get("Contournement envisageable", ""))[:120],
             })
 
+        # Ascending by real delay within each lot. Sorting on the DMIA text
+        # would put "J+10" before "J+2" (comparing '1' against '2' character
+        # by character); rows without a committed deadline sort last.
+        for bucket in apps:
+            bucket["rows"].sort(
+                key=lambda r: (_dmia_days(r["dmia"]) if _dmia_days(r["dmia"]) is not None
+                               else float("inf")))
+
     # ── 7. Collaborateurs clés ────────────────────────────────────────────────
     collaborateurs: dict = {"pct_with_supp": 0, "total": 0, "rows": []}
     if not col_df.empty:

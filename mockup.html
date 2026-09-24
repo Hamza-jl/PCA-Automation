@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>BIA Automatique — Mockup v3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --poppy:       #F2485E;
+      --poppy-d:     #d63448;
+      --poppy-glow:  rgba(242,72,94,0.13);
+      --poppy-light: rgba(242,72,94,0.07);
+      --sb-w:        272px;
+      --sb-bg:       #ECEAE4;
+      --sb-border:   rgba(26,24,20,0.09);
+      --bg:          #FAF8F4;
+      --surface:     #F3F1EB;
+      --card:        #FFFFFF;
+      --text:        #1A1814;
+      --text-2:      rgba(26,24,20,0.60);
+      --text-3:      rgba(26,24,20,0.38);
+      --border:      rgba(26,24,20,0.08);
+      --topbar-h:    62px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Montserrat', sans-serif;
+      padding-left: var(--sb-w);
+      min-height: 100vh; overflow-x: hidden;
+    }
+
+    /* ══════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════ */
+    #sidebar {
+      position: fixed; left: 0; top: 0;
+      width: var(--sb-w); height: 100vh;
+      background: var(--sb-bg);
+      border-right: 1px solid var(--sb-border);
+      display: flex; flex-direction: column;
+      z-index: 300; overflow: hidden;
+    }
+
+    /* Logo header */
+    .sb-head {
+      display: flex; align-items: center; gap: 0.65rem;
+      padding: 1.1rem 1.1rem 1rem;
+      border-bottom: 1px solid var(--sb-border);
+      flex-shrink: 0;
+    }
+    .sb-logo-mark {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--poppy); display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.78rem; font-weight: 800; flex-shrink: 0;
+    }
+    .sb-brand { font-size: 0.76rem; font-weight: 700; color: var(--text); letter-spacing: 0.04em; }
+    .sb-sub   { font-size: 0.53rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-3); margin-top: 1px; }
+
+    /* Nav scroll area */
+    #sb-nav { flex: 1; overflow-y: auto; padding: 0.75rem 0.55rem; }
+    #sb-nav::-webkit-scrollbar { width: 2px; }
+    #sb-nav::-webkit-scrollbar-thumb { background: rgba(26,24,20,0.06); }
+
+    .sb-section-label {
+      font-size: 0.5rem; letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--text-3); padding: 0.55rem 0.7rem 0.4rem; margin-top: 0.3rem;
+    }
+
+    /* Accordion group */
+    .sb-group { margin-bottom: 0.15rem; }
+    .sb-group-header {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.68rem 0.7rem; border-radius: 0.6rem;
+      cursor: pointer; border: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s;
+      user-select: none; position: relative;
+    }
+    .sb-group-header:hover { background: rgba(26,24,20,0.04); border-color: var(--border); }
+    .sb-group.open .sb-group-header { background: var(--poppy-light); border-color: rgba(242,72,94,0.14); }
+    .sb-group-icon {
+      width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(26,24,20,0.04); border: 1px solid var(--border);
+      color: var(--text-3); font-size: 0.72rem;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sb-group.open .sb-group-icon { background: var(--poppy); color: #fff; border-color: var(--poppy); }
+    .sb-group-label { flex: 1; font-size: 0.72rem; font-weight: 600; color: var(--text-2); line-height: 1.3; }
+    .sb-group.open .sb-group-label { color: var(--text); }
+    .sb-group-locked { font-size: 0.6rem; color: var(--text-3); }
+    .sb-chevron {
+      font-size: 0.55rem; color: var(--text-3); flex-shrink: 0;
+      transition: transform 0.25s, color 0.2s;
+    }
+    .sb-group.open .sb-chevron { transform: rotate(180deg); color: var(--poppy); }
+
+    /* Phase badge on group */
+    .sb-phase-tag {
+      font-size: 0.46rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+    }
+    .sb-phase-tag.p1 { background: rgba(242,72,94,0.10); color: var(--poppy); border: 1px solid rgba(242,72,94,0.18); }
+    .sb-phase-tag.p2 { background: rgba(234,88,12,0.08); color: #ea580c; border: 1px solid rgba(234,88,12,0.18); }
+
+    /* Sub-items */
+    .sb-children { overflow: hidden; max-height: 0; transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1); }
+    .sb-group.open .sb-children { max-height: 500px; }
+    .sb-child {
+      display: flex; align-items: center; gap: 0.55rem;
+      padding: 0.5rem 0.7rem 0.5rem 2.35rem;
+      border-radius: 0.5rem; cursor: pointer;
+      border: 1px solid transparent;
+      font-size: 0.69rem; font-weight: 500; color: var(--text-2);
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+      position: relative; margin: 0.08rem 0;
+    }
+    .sb-child::before {
+      content: ''; position: absolute; left: 1.15rem; top: 50%; transform: translateY(-50%);
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--text-3); transition: background 0.2s;
+    }
+    .sb-child:hover { background: rgba(26,24,20,0.04); color: var(--text); border-color: var(--border); }
+    .sb-child:hover::before { background: var(--poppy); }
+    .sb-child.active { background: var(--poppy-glow); color: var(--poppy); border-color: rgba(242,72,94,0.18); font-weight: 600; }
+    .sb-child.active::before { background: var(--poppy); }
+    .sb-child-step {
+      font-size: 0.48rem; font-weight: 700; letter-spacing: 0.06em;
+      color: var(--text-3); background: rgba(26,24,20,0.05);
+      border: 1px solid var(--border); border-radius: 3px; padding: 1px 4px;
+      flex-shrink: 0; transition: background 0.2s, color 0.2s;
+    }
+    .sb-child.active .sb-child-step { background: rgba(242,72,94,0.10); color: var(--poppy); border-color: rgba(242,72,94,0.20); }
+
+    .sb-divider { height: 1px; background: var(--sb-border); margin: 0.6rem 0.4rem; }
+
+    /* Footer */
+    .sb-foot {
+      padding: 0.85rem 1.1rem; border-top: 1px solid var(--sb-border); flex-shrink: 0;
+    }
+    .sb-pulse-row { display: flex; align-items: center; gap: 0.5rem; }
+    .sb-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--poppy); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.4;transform:scale(.65);} }
+    .sb-status { font-size: 0.57rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); }
+    .sb-version { font-size: 0.5rem; color: var(--text-3); margin-top: 0.3rem; letter-spacing: 0.08em; }
+
+    /* ══════════════════════════════════════
+       TOP BAR
+    ══════════════════════════════════════ */
+    #topbar {
+      position: fixed; top: 0; left: var(--sb-w); right: 0;
+      height: var(--topbar-h); z-index: 200;
+      background: rgba(250,248,244,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem;
+    }
+    .tb-breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; }
+    .tb-crumb-group { color: var(--text-3); font-weight: 500; }
+    .tb-crumb-sep   { color: var(--text-3); font-size: 0.6rem; }
+    .tb-crumb-page  { color: var(--text); font-weight: 600; }
+    .tb-actions { display: flex; align-items: center; gap: 0.65rem; }
+    .tb-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.52rem 1.1rem; border-radius: 0.5rem;
+      font-size: 0.67rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.22s; font-family: 'Montserrat', sans-serif; border: 1px solid transparent;
+    }
+    .tb-btn-outline { background: transparent; border-color: var(--border); color: var(--text-2); }
+    .tb-btn-outline:hover { border-color: rgba(242,72,94,0.25); color: var(--poppy); }
+    .tb-btn-primary { background: var(--poppy); color: #fff; border-color: var(--poppy); box-shadow: 0 2px 12px rgba(242,72,94,0.22); }
+    .tb-btn-primary:hover { background: var(--poppy-d); box-shadow: 0 4px 16px rgba(242,72,94,0.32); }
+    .tb-btn-primary i, .tb-btn-outline i { font-size: 0.72rem; }
+
+    /* ══════════════════════════════════════
+       MAIN LAYOUT
+    ══════════════════════════════════════ */
+    #main {
+      margin-top: var(--topbar-h);
+      min-height: calc(100vh - var(--topbar-h));
+      padding: 2.5rem 2.5rem 4rem;
+    }
+
+    /* ── Page visibility ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Page header ── */
+    .pg-header { margin-bottom: 2rem; }
+    .pg-label {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.4em; text-transform: uppercase;
+      color: rgba(242,72,94,0.65); margin-bottom: 0.55rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .pg-label::after { content:''; flex: 1; height: 1px; background: rgba(242,72,94,0.12); max-width: 60px; }
+    .pg-title { font-size: clamp(1.55rem, 3vw, 2rem); font-weight: 300; line-height: 1.2; margin-bottom: 0.5rem; }
+    .pg-title strong { font-weight: 700; }
+    .pg-desc { font-size: 0.78rem; color: var(--text-2); line-height: 1.75; max-width: 640px; }
+
+    /* ── Step pipeline ── */
+    .pipeline {
+      display: flex; align-items: stretch; gap: 0; margin-bottom: 2.2rem;
+      background: var(--card); border: 1px solid var(--border); border-radius: 0.875rem;
+      overflow: hidden;
+    }
+    .pipe-step {
+      flex: 1; display: flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 1.1rem; position: relative;
+      border-right: 1px solid var(--border); transition: background 0.2s;
+    }
+    .pipe-step:last-child { border-right: none; }
+    .pipe-step.done { background: rgba(22,163,74,0.03); }
+    .pipe-step.current { background: var(--poppy-light); }
+    .pipe-step.current::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--poppy);
+    }
+    .pipe-num {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.68rem; font-weight: 700;
+      background: rgba(26,24,20,0.05); border: 1px solid var(--border); color: var(--text-3);
+      transition: all 0.2s;
+    }
+    .pipe-step.done .pipe-num { background: rgba(22,163,74,0.10); border-color: rgba(22,163,74,0.3); color: #16a34a; }
+    .pipe-step.current .pipe-num { background: var(--poppy); border-color: var(--poppy); color: #fff; box-shadow: 0 0 12px rgba(242,72,94,0.22); }
+    .pipe-body { flex: 1; min-width: 0; }
+    .pipe-name { font-size: 0.72rem; font-weight: 600; color: var(--text-2); line-height: 1.2; }
+    .pipe-step.current .pipe-name { color: var(--text); }
+    .pipe-sub  { font-size: 0.6rem; color: var(--text-3); margin-top: 0.15rem; }
+    .pipe-icon-done { color: #16a34a; font-size: 0.75rem; }
+
+    /* ── Content grid ── */
+    .pg-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .pg-grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+    .col-span-2 { grid-column: span 2; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 0.875rem; padding: 1.5rem;
+    }
+    .card-sm { padding: 1.1rem 1.2rem; }
+    .card-title {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-2); margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .card-title i { color: var(--poppy); font-size: 0.8rem; }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 1.5px dashed rgba(26,24,20,0.12); border-radius: 0.75rem;
+      background: rgba(26,24,20,0.02); padding: 2.2rem 1.5rem;
+      text-align: center; cursor: pointer; transition: border-color 0.25s, background 0.25s;
+    }
+    .drop-zone:hover { border-color: rgba(242,72,94,0.22); background: rgba(242,72,94,0.02); }
+    .dz-icon { font-size: 2rem; color: rgba(242,72,94,0.25); margin-bottom: 0.75rem; }
+    .dz-title { font-size: 0.85rem; font-weight: 600; color: var(--text-2); }
+    .dz-sub { font-size: 0.62rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; }
+    .dz-hint { font-size: 0.65rem; color: var(--text-3); margin-top: 0.85rem; line-height: 1.65; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.72rem 1.5rem; border-radius: 0.5rem;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.22s; font-family: 'Montserrat', sans-serif; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--poppy); color: #fff; border-color: var(--poppy); box-shadow: 0 2px 10px rgba(242,72,94,0.22); }
+    .btn-primary:hover { background: var(--poppy-d); box-shadow: 0 4px 16px rgba(242,72,94,0.3); }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--text-2); }
+    .btn-secondary:hover { border-color: rgba(242,72,94,0.2); color: var(--poppy); }
+    .btn-sm { padding: 0.48rem 0.95rem; font-size: 0.62rem; }
+    .btn i { font-size: 0.8rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── Form elements ── */
+    .form-label {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--text-3); display: block; margin-bottom: 0.45rem;
+    }
+    .form-input {
+      width: 100%; background: rgba(26,24,20,0.03);
+      border: 1px solid var(--border); border-radius: 0.5rem;
+      padding: 0.68rem 0.9rem; font-family: 'Montserrat', sans-serif;
+      font-size: 0.75rem; color: var(--text); outline: none;
+      transition: border-color 0.22s;
+    }
+    .form-input:focus { border-color: rgba(242,72,94,0.3); }
+    .form-input::placeholder { color: var(--text-3); }
+
+    .version-toggle { display: flex; gap: 0.4rem; }
+    .ver-btn {
+      flex: 1; padding: 0.6rem; border-radius: 0.5rem; cursor: pointer;
+      border: 1px solid var(--border); background: rgba(26,24,20,0.02);
+      font-family: 'Montserrat', sans-serif; font-size: 0.67rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); transition: all 0.2s;
+    }
+    .ver-btn.on { background: rgba(242,72,94,0.05); color: var(--poppy); border-color: rgba(242,72,94,0.2); }
+
+    /* ── Info box ── */
+    .info-box {
+      background: rgba(242,72,94,0.04); border: 1px solid rgba(242,72,94,0.12);
+      border-radius: 0.65rem; padding: 0.85rem 1rem;
+      font-size: 0.7rem; color: rgba(26,24,20,0.65); line-height: 1.65;
+    }
+    .info-box i { color: var(--poppy); margin-right: 0.4rem; }
+    .warn-box {
+      background: rgba(234,88,12,0.05); border: 1px solid rgba(234,88,12,0.15);
+      border-radius: 0.65rem; padding: 0.85rem 1rem;
+      font-size: 0.7rem; color: #92400e; line-height: 1.65;
+    }
+    .warn-box i { color: #ea580c; margin-right: 0.4rem; }
+    .success-box {
+      background: rgba(22,163,74,0.05); border: 1px solid rgba(22,163,74,0.15);
+      border-radius: 0.65rem; padding: 0.85rem 1rem;
+      font-size: 0.7rem; color: #14532d; line-height: 1.65;
+    }
+    .success-box i { color: #16a34a; margin-right: 0.4rem; }
+
+    /* ── Table ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+    .data-table th {
+      padding: 0.5rem 0.85rem; font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3);
+      border-bottom: 1px solid var(--border); text-align: left;
+    }
+    .data-table td { padding: 0.58rem 0.85rem; border-bottom: 1px solid rgba(26,24,20,0.04); color: var(--text-2); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(242,72,94,0.015); }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; font-size: 0.55rem; font-weight: 700; padding: 0.18rem 0.55rem; border-radius: 9999px; }
+    .badge-red    { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+    .badge-orange { background: #ffedd5; color: #ea580c; border: 1px solid #fdba74; }
+    .badge-yellow { background: #fef9c3; color: #ca8a04; border: 1px solid #fde047; }
+    .badge-green  { background: #dcfce7; color: #16a34a; border: 1px solid #86efac; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+    .badge-gray   { background: rgba(26,24,20,0.05); color: var(--text-3); border: 1px solid var(--border); }
+    .badge-p2     { background: rgba(234,88,12,0.08); color: #ea580c; border: 1px solid rgba(234,88,12,0.2); }
+
+    /* ── Result placeholder ── */
+    .result-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 180px; color: var(--text-3); gap: 0.6rem;
+    }
+    .result-empty i { font-size: 1.8rem; opacity: 0.25; }
+    .result-empty p { font-size: 0.7rem; }
+
+    /* ── Dashboard cards ── */
+    .dash-stat {
+      background: var(--card); border: 1px solid var(--border); border-radius: 0.875rem;
+      padding: 1.35rem 1.4rem; position: relative; overflow: hidden;
+    }
+    .dash-stat::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--poppy), transparent);
+    }
+    .dash-stat-num { font-size: 2rem; font-weight: 700; color: var(--text); line-height: 1; }
+    .dash-stat-label { font-size: 0.64rem; color: var(--text-2); margin-top: 0.3rem; font-weight: 500; }
+    .dash-stat-icon {
+      position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%);
+      font-size: 1.6rem; opacity: 0.07; color: var(--poppy);
+    }
+
+    .workflow-row {
+      display: flex; align-items: center; gap: 0;
+      background: var(--card); border: 1px solid var(--border); border-radius: 0.875rem; overflow: hidden;
+    }
+    .wf-block {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+      padding: 1.4rem 0.9rem; text-align: center; border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .wf-block:last-child { border-right: none; }
+    .wf-block-icon {
+      width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      background: rgba(242,72,94,0.07); color: var(--poppy); font-size: 1.1rem;
+    }
+    .wf-block-label { font-size: 0.72rem; font-weight: 600; color: var(--text); }
+    .wf-block-sub { font-size: 0.58rem; color: var(--text-3); }
+    .wf-arrow {
+      position: absolute; right: -0.5px; top: 50%; transform: translateY(-50%);
+      width: 18px; height: 18px; background: var(--poppy); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.45rem; z-index: 1;
+    }
+    .wf-block:last-child .wf-arrow { display: none; }
+
+    /* ── Sync comparison ── */
+    .sync-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); font-size: 0.72rem; }
+    .sync-row:last-child { border-bottom: none; }
+    .sync-label { flex: 1; color: var(--text-2); }
+    .sync-val-a { width: 38%; color: var(--text); text-align: right; font-size: 0.68rem; }
+    .sync-val-b { width: 38%; color: var(--text); text-align: left; font-size: 0.68rem; }
+    .sync-icon { width: 28px; text-align: center; flex-shrink: 0; font-size: 0.7rem; }
+    .sync-match { color: #16a34a; }
+    .sync-diff  { color: #ea580c; }
+
+    /* ── Org chart placeholder ── */
+    .orgchart-placeholder {
+      background: var(--card); border: 1px solid var(--border); border-radius: 0.875rem;
+      padding: 2rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+    }
+    .org-node {
+      background: rgba(242,72,94,0.07); border: 1px solid rgba(242,72,94,0.18);
+      border-radius: 0.5rem; padding: 0.5rem 1.2rem;
+      font-size: 0.68rem; font-weight: 600; color: var(--poppy); text-align: center;
+    }
+    .org-node.small { font-size: 0.6rem; font-weight: 500; color: var(--text-2); background: var(--surface); border-color: var(--border); }
+    .org-children { display: flex; gap: 1rem; }
+    .org-branch { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+    .org-line-v { width: 1px; height: 20px; background: var(--border); }
+    .org-line-h { height: 1px; background: var(--border); width: 100%; }
+    .org-row { display: flex; gap: 0.5rem; }
+
+    /* ── Phase 2 placeholder ── */
+    .p2-page {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; text-align: center; gap: 1.2rem;
+    }
+    .p2-icon {
+      width: 80px; height: 80px; border-radius: 20px;
+      background: rgba(234,88,12,0.08); border: 1px solid rgba(234,88,12,0.2);
+      display: flex; align-items: center; justify-content: center;
+      color: #ea580c; font-size: 2rem;
+    }
+    .p2-title { font-size: 1.4rem; font-weight: 300; color: var(--text); }
+    .p2-desc  { font-size: 0.78rem; color: var(--text-2); max-width: 420px; line-height: 1.75; }
+
+    /* ── Misc ── */
+    .gap-xs { margin-bottom: 0.5rem; }
+    .gap-sm { margin-bottom: 0.85rem; }
+    .gap-md { margin-bottom: 1.25rem; }
+    .gap-lg { margin-bottom: 1.75rem; }
+    .text-xs { font-size: 0.65rem; color: var(--text-3); }
+    .tag-new { background: rgba(242,72,94,0.10); color: var(--poppy); font-size: 0.5rem; font-weight: 800; letter-spacing: 0.06em; padding: 1px 5px; border-radius: 3px; border: 1px solid rgba(242,72,94,0.2); text-transform: uppercase; vertical-align: middle; margin-left: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<aside id="sidebar">
+  <div class="sb-head">
+    <div class="sb-logo-mark">B</div>
+    <div>
+      <div class="sb-brand">BIA Automatique</div>
+      <div class="sb-sub">Devoteam · Phase 1</div>
+    </div>
+  </div>
+
+  <nav id="sb-nav">
+    <div class="sb-section-label">Menu principal</div>
+
+    <!-- Dashboard -->
+    <div class="sb-child active" onclick="navigate('page-dashboard','','Tableau de bord')">
+      <i class="fa-solid fa-gauge-high" style="font-size:0.68rem;color:var(--text-3);position:absolute;left:0.9rem;"></i>
+      &nbsp;&nbsp;&nbsp;&nbsp;Tableau de bord
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- 1. Génération des fiches BIA -->
+    <div class="sb-group open" id="grp-fiches">
+      <div class="sb-group-header" onclick="toggleGroup('grp-fiches')">
+        <div class="sb-group-icon"><i class="fa-regular fa-file-lines"></i></div>
+        <div class="sb-group-label">Génération des fiches BIA</div>
+        <span class="sb-phase-tag p1">Ph.1</span>
+        <i class="fa-solid fa-chevron-down sb-chevron"></i>
+      </div>
+      <div class="sb-children">
+        <div class="sb-child" onclick="navigate('page-upload-recensement','Génération des fiches BIA','Upload recensement')">
+          <span class="sb-child-step">01</span>Upload fiche de recensement
+        </div>
+        <div class="sb-child" onclick="navigate('page-gestion-activites','Génération des fiches BIA','Gestion des activités')">
+          <span class="sb-child-step">02</span>Gestion des activités
+        </div>
+        <div class="sb-child" onclick="navigate('page-generer-fiches','Génération des fiches BIA','Générer les fiches')">
+          <span class="sb-child-step">03</span>Générer les fiches BIA
+        </div>
+        <div class="sb-child" onclick="navigate('page-fill-activities','Génération des fiches BIA','Remplir les activités')">
+          <span class="sb-child-step">04</span>Remplir les activités
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Générer la synthèse BIA -->
+    <div class="sb-group" id="grp-synthese">
+      <div class="sb-group-header" onclick="toggleGroup('grp-synthese')">
+        <div class="sb-group-icon"><i class="fa-regular fa-table-cells"></i></div>
+        <div class="sb-group-label">Générer la synthèse BIA</div>
+        <span class="sb-phase-tag p1">Ph.1</span>
+        <i class="fa-solid fa-chevron-down sb-chevron"></i>
+      </div>
+      <div class="sb-children">
+        <div class="sb-child" onclick="navigate('page-charger-fiches','Générer la synthèse BIA','Charger les fiches BIA')">
+          <span class="sb-child-step">01</span>Charger les fiches BIA
+        </div>
+        <div class="sb-child" onclick="navigate('page-generer-synthese','Générer la synthèse BIA','Générer la synthèse')">
+          <span class="sb-child-step">02</span>Générer la synthèse BIA
+        </div>
+        <div class="sb-child" onclick="navigate('page-sync','Générer la synthèse BIA','Synchronisation bidirectionnelle')">
+          <span class="sb-child-step">03</span>Synchronisation bidirectionnelle
+        </div>
+        <div class="sb-child" onclick="navigate('page-organigramme','Générer la synthèse BIA','Organigramme')">
+          <span class="sb-child-step">04</span>Génération de l'organigramme
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Générer rapport BIA -->
+    <div class="sb-group" id="grp-rapport">
+      <div class="sb-group-header" onclick="toggleGroup('grp-rapport')">
+        <div class="sb-group-icon"><i class="fa-regular fa-file-pdf"></i></div>
+        <div class="sb-group-label">Générer rapport BIA</div>
+        <span class="sb-phase-tag p1">Ph.1</span>
+        <i class="fa-solid fa-chevron-down sb-chevron"></i>
+      </div>
+      <div class="sb-children">
+        <div class="sb-child" onclick="navigate('page-rapport','Générer rapport BIA','Rapport de synthèse')">
+          <span class="sb-child-step">01</span>Rapport de synthèse
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Gestion des risques -->
+    <div class="sb-group" id="grp-risques">
+      <div class="sb-group-header" onclick="toggleGroup('grp-risques')">
+        <div class="sb-group-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="sb-group-label">Gestion des risques</div>
+        <span class="sb-phase-tag p1">Ph.1</span>
+        <i class="fa-solid fa-chevron-down sb-chevron"></i>
+      </div>
+      <div class="sb-children">
+        <div class="sb-child" onclick="navigate('page-risques','Gestion des risques','Cartographie des risques')">
+          <span class="sb-child-step">01</span>Cartographie des risques
+        </div>
+      </div>
+    </div>
+
+  </nav>
+
+  <div class="sb-foot">
+    <div class="sb-pulse-row">
+      <div class="sb-pulse"></div>
+      <span class="sb-status">Système actif</span>
+    </div>
+    <div class="sb-version">BIA Automatique v3.0 · Devoteam 2025</div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════
+     TOP BAR
+══════════════════════════════════════ -->
+<header id="topbar">
+  <div class="tb-breadcrumb">
+    <span class="tb-crumb-group" id="tb-group">Tableau de bord</span>
+    <span class="tb-crumb-sep" id="tb-sep" style="display:none"><i class="fa-solid fa-chevron-right"></i></span>
+    <span class="tb-crumb-page" id="tb-page"></span>
+  </div>
+  <div class="tb-actions">
+    <button class="tb-btn tb-btn-outline"><i class="fa-regular fa-circle-question"></i> Aide</button>
+    <button class="tb-btn tb-btn-primary"><i class="fa-solid fa-play"></i> Lancer le traitement</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     MAIN — PAGES
+══════════════════════════════════════ -->
+<main id="main">
+
+  <!-- ─────────────────────────────
+       PAGE: DASHBOARD
+  ───────────────────────────── -->
+  <div class="page active" id="page-dashboard">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-gauge-high"></i> Vue d'ensemble</div>
+      <div class="pg-title">Bienvenue sur <strong>BIA Automatique</strong></div>
+      <div class="pg-desc">
+        Automatisez l'intégralité du processus d'analyse d'impact sur l'activité (BIA) : génération des fiches, consolidation de la synthèse, organigramme et rapports — le tout en quelques clics.
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="pg-grid-3 gap-md">
+      <div class="dash-stat">
+        <div class="dash-stat-num">4</div>
+        <div class="dash-stat-label">Modules disponibles</div>
+        <i class="fa-solid fa-cubes dash-stat-icon"></i>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-num">Phase 1</div>
+        <div class="dash-stat-label">Périmètre actuel</div>
+        <i class="fa-solid fa-flag dash-stat-icon"></i>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-num">GPT-4o</div>
+        <div class="dash-stat-label">Moteur IA intégré</div>
+        <i class="fa-solid fa-microchip dash-stat-icon"></i>
+      </div>
+    </div>
+
+    <!-- Workflow overview -->
+    <div class="card gap-md" style="margin-bottom:1.5rem;">
+      <div class="card-title"><i class="fa-solid fa-route"></i> Workflow global BIA</div>
+      <div class="workflow-row">
+        <div class="wf-block">
+          <div class="wf-block-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+          <div class="wf-block-label">Recensement</div>
+          <div class="wf-block-sub">Upload &amp; détection</div>
+          <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+        <div class="wf-block">
+          <div class="wf-block-icon"><i class="fa-solid fa-list-check"></i></div>
+          <div class="wf-block-label">Activités</div>
+          <div class="wf-block-sub">Chargement &amp; config.</div>
+          <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+        <div class="wf-block">
+          <div class="wf-block-icon"><i class="fa-regular fa-file-lines"></i></div>
+          <div class="wf-block-label">Fiches BIA</div>
+          <div class="wf-block-sub">Génération auto.</div>
+          <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+        <div class="wf-block">
+          <div class="wf-block-icon"><i class="fa-regular fa-table-cells"></i></div>
+          <div class="wf-block-label">Synthèse BIA</div>
+          <div class="wf-block-sub">Consolidation</div>
+          <div class="wf-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+        <div class="wf-block">
+          <div class="wf-block-icon"><i class="fa-regular fa-file-pdf"></i></div>
+          <div class="wf-block-label">Rapport</div>
+          <div class="wf-block-sub">Export final</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick access -->
+    <div class="pg-grid-2">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-bolt"></i> Accès rapide</div>
+        <div style="display:flex;flex-direction:column;gap:0.55rem;">
+          <button class="btn btn-primary" onclick="navigate('page-upload-recensement','Génération des fiches BIA','Upload recensement')">
+            <i class="fa-solid fa-arrow-right"></i> Commencer — Upload recensement
+          </button>
+          <button class="btn btn-secondary" onclick="navigate('page-charger-fiches','Générer la synthèse BIA','Charger les fiches BIA')">
+            <i class="fa-regular fa-table-cells"></i> Générer la synthèse BIA
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-circle-info"></i> À propos du projet</div>
+        <p class="text-xs" style="line-height:1.8;color:var(--text-2);">
+          BIA Automatique est un outil développé par <strong>Devoteam</strong> pour automatiser l'analyse d'impact sur l'activité (BIA) dans le cadre du Plan de Continuité d'Activité (PCA).<br><br>
+          Conforme aux exigences réglementaires tunisiennes et aux normes ISO 22301.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: UPLOAD RECENSEMENT
+  ───────────────────────────── -->
+  <div class="page" id="page-upload-recensement">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-upload"></i> Génération des fiches BIA · Étape 1/3</div>
+      <div class="pg-title"><strong>Upload</strong> la fiche de recensement</div>
+      <div class="pg-desc">Importez le fichier Excel de recensement de votre client. Le système détecte automatiquement les colonnes Organisation (Division / Unité / Département) et initialise la structure.</div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipe-step current">
+        <div class="pipe-num">01</div>
+        <div class="pipe-body">
+          <div class="pipe-name">Upload recensement</div>
+          <div class="pipe-sub">Fiche de recensement .xlsx</div>
+        </div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">02</div>
+        <div class="pipe-body">
+          <div class="pipe-name">Gestion des activités</div>
+          <div class="pipe-sub">Chargement &amp; configuration</div>
+        </div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">03</div>
+        <div class="pipe-body">
+          <div class="pipe-name">Générer les fiches</div>
+          <div class="pipe-sub">Export .docx par entité</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pg-grid-2">
+      <!-- Upload zone -->
+      <div>
+        <div class="card">
+          <div class="card-title"><i class="fa-regular fa-file-excel"></i> Fichier de recensement</div>
+          <div class="drop-zone" onclick="mockFileSelect(this,'recensement')">
+            <div class="dz-icon"><i class="fa-regular fa-file-arrow-up"></i></div>
+            <div class="dz-title">Déposez votre fichier Excel</div>
+            <div class="dz-sub">ou cliquez pour parcourir</div>
+            <div class="dz-hint">Format accepté : .xlsx · Taille max : 20 Mo<br>Le fichier doit contenir les colonnes Organisation</div>
+          </div>
+          <div class="gap-sm"></div>
+          <div class="info-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <strong>Détection automatique :</strong> Le système analyse les entêtes pour identifier Division, Unité et Département. Une confirmation vous sera demandée si la détection est incertaine.
+          </div>
+        </div>
+      </div>
+
+      <!-- Mapping config -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-sliders"></i> Correspondance des colonnes</div>
+          <div class="gap-xs"></div>
+          <div class="warn-box gap-sm">
+            <i class="fa-solid fa-triangle-exclamation"></i> Aucun fichier chargé. Importez d'abord la fiche de recensement.
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.7rem;opacity:0.45;pointer-events:none;">
+            <div>
+              <label class="form-label">Colonne Division</label>
+              <input class="form-input" type="text" placeholder="Auto-détecté" />
+            </div>
+            <div>
+              <label class="form-label">Colonne Unité</label>
+              <input class="form-input" type="text" placeholder="Auto-détecté" />
+            </div>
+            <div>
+              <label class="form-label">Colonne Département</label>
+              <input class="form-input" type="text" placeholder="Auto-détecté" />
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-eye"></i> Aperçu structure</div>
+          <div class="result-empty">
+            <i class="fa-regular fa-building"></i>
+            <p>Chargez un fichier pour voir l'arborescence</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+      <button class="btn btn-secondary">Annuler</button>
+      <button class="btn btn-primary" onclick="navigate('page-gestion-activites','Génération des fiches BIA','Gestion des activités')">
+        Étape suivante <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: GESTION DES ACTIVITÉS
+  ───────────────────────────── -->
+  <div class="page" id="page-gestion-activites">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-list-check"></i> Génération des fiches BIA · Étape 2/3</div>
+      <div class="pg-title"><strong>Gestion</strong> des activités</div>
+      <div class="pg-desc">Chargez, vérifiez et configurez les activités issues de la fiche de recensement. Vous pouvez ajouter, modifier ou supprimer des activités avant la génération des fiches.</div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipe-step done">
+        <div class="pipe-num"><i class="fa-solid fa-check pipe-icon-done"></i></div>
+        <div class="pipe-body">
+          <div class="pipe-name">Upload recensement</div>
+          <div class="pipe-sub">Fiche de recensement .xlsx</div>
+        </div>
+      </div>
+      <div class="pipe-step current">
+        <div class="pipe-num">02</div>
+        <div class="pipe-body">
+          <div class="pipe-name">Gestion des activités</div>
+          <div class="pipe-sub">Chargement &amp; configuration</div>
+        </div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">03</div>
+        <div class="pipe-body">
+          <div class="pipe-name">Générer les fiches</div>
+          <div class="pipe-sub">Export .docx par entité</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options chargement activités -->
+    <div class="info-box gap-md" style="margin-bottom:1.25rem;">
+      <i class="fa-solid fa-circle-info"></i>
+      Choisissez la méthode de chargement des activités adaptée à votre cas d'usage. Ces options sont indépendantes — vous pouvez en combiner plusieurs avant de passer à l'étape suivante.
+    </div>
+    <div class="pg-grid-3 gap-md">
+
+      <!-- Option 1 : Ancienne fiche BIA (cas de mise à jour) -->
+      <div class="card" id="opt-fiche" style="cursor:pointer;transition:border-color 0.2s,background 0.2s;" onclick="selectActivityOption('opt-fiche')">
+        <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+          <div class="act-opt-icon" style="width:38px;height:38px;border-radius:9px;background:rgba(26,24,20,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:0.95rem;flex-shrink:0;transition:background 0.2s,color 0.2s,border-color 0.2s;">
+            <i class="fa-regular fa-clock-rotate-left"></i>
+          </div>
+          <div>
+            <div style="font-size:0.74rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;line-height:1.3;">Charger depuis l'ancienne fiche BIA</div>
+            <div class="text-xs" style="line-height:1.65;">Cas de <strong>mise à jour</strong> : récupère automatiquement les activités définies lors du précédent cycle BIA. Idéal pour réviser une fiche existante sans repartir de zéro.</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div class="drop-zone" style="padding:1rem;text-align:left;display:flex;align-items:center;gap:0.65rem;" onclick="event.stopPropagation();mockFileSelect(this,'old-fiche')">
+            <i class="fa-regular fa-file-word" style="font-size:1.2rem;color:rgba(242,72,94,0.3);flex-shrink:0;"></i>
+            <div>
+              <div style="font-size:0.7rem;font-weight:600;color:var(--text-2);">Ancienne fiche BIA</div>
+              <div style="font-size:0.58rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;">Déposer le fichier .docx</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem;">
+          <button class="btn btn-secondary btn-sm btn-full" onclick="event.stopPropagation();">
+            <i class="fa-solid fa-rotate"></i> Importer les activités
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 2 : Référentiel / benchmark -->
+      <div class="card" id="opt-referentiel" style="cursor:pointer;transition:border-color 0.2s,background 0.2s;" onclick="selectActivityOption('opt-referentiel')">
+        <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+          <div class="act-opt-icon" style="width:38px;height:38px;border-radius:9px;background:rgba(26,24,20,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:0.95rem;flex-shrink:0;transition:background 0.2s,color 0.2s,border-color 0.2s;">
+            <i class="fa-solid fa-database"></i>
+          </div>
+          <div>
+            <div style="font-size:0.74rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;line-height:1.3;">Charger depuis un référentiel ou benchmark</div>
+            <div class="text-xs" style="line-height:1.65;">Utilisez un référentiel sectoriel ou un benchmark d'activités types pour pré-remplir les fiches. Adaptez ensuite à votre contexte.</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div style="display:flex;flex-direction:column;gap:0.45rem;">
+            <select class="form-input" style="font-size:0.7rem;" onclick="event.stopPropagation();">
+              <option value="" disabled selected>-- Sélectionner un référentiel --</option>
+              <option>Secteur Assurances (Tunisie)</option>
+              <option>Secteur Bancaire (BCT)</option>
+              <option>ISO 22301 — Activités types</option>
+              <option>Benchmark Devoteam interne</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem;">
+          <button class="btn btn-secondary btn-sm btn-full" onclick="event.stopPropagation();">
+            <i class="fa-solid fa-database"></i> Charger le référentiel
+          </button>
+        </div>
+      </div>
+
+      <!-- Option 3 : Saisie manuelle -->
+      <div class="card" id="opt-manuelle" style="cursor:pointer;transition:border-color 0.2s,background 0.2s;" onclick="selectActivityOption('opt-manuelle')">
+        <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+          <div class="act-opt-icon" style="width:38px;height:38px;border-radius:9px;background:rgba(26,24,20,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:0.95rem;flex-shrink:0;transition:background 0.2s,color 0.2s,border-color 0.2s;">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </div>
+          <div>
+            <div style="font-size:0.74rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;line-height:1.3;">Saisie manuelle des activités</div>
+            <div class="text-xs" style="line-height:1.65;">Renseignez les activités manuellement, une par une. Convient pour un premier BIA ou quand aucune source de données préalable n'est disponible.</div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <div style="display:flex;gap:0.4rem;">
+            <input class="form-input" type="text" placeholder="Nom de l'activité…" style="font-size:0.7rem;" onclick="event.stopPropagation();" />
+            <button class="btn btn-secondary btn-sm" style="flex-shrink:0;" onclick="event.stopPropagation();"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem;">
+          <button class="btn btn-secondary btn-sm btn-full" onclick="event.stopPropagation();">
+            <i class="fa-solid fa-list-ul"></i> Ouvrir l'éditeur
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Table des activités -->
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between;">
+        <span><i class="fa-solid fa-table-list"></i> Activités chargées</span>
+        <span style="display:flex;gap:0.4rem;">
+          <button class="btn btn-secondary btn-sm"><i class="fa-solid fa-plus"></i> Ajouter</button>
+          <button class="btn btn-secondary btn-sm"><i class="fa-solid fa-file-export"></i> Exporter</button>
+        </span>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Entité</th>
+            <th>Activité</th>
+            <th>DMIA</th>
+            <th>Criticité</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Direction GAT VIE</td><td>Souscription</td><td>4h</td><td><span class="badge badge-red">Critique</span></td><td><i class="fa-regular fa-pen-to-square" style="color:var(--text-3);cursor:pointer;margin-right:6px;"></i><i class="fa-regular fa-trash-can" style="color:var(--text-3);cursor:pointer;"></i></td></tr>
+          <tr><td>Direction GAT VIE</td><td>Gestion des sinistres</td><td>24h</td><td><span class="badge badge-orange">Majeur</span></td><td><i class="fa-regular fa-pen-to-square" style="color:var(--text-3);cursor:pointer;margin-right:6px;"></i><i class="fa-regular fa-trash-can" style="color:var(--text-3);cursor:pointer;"></i></td></tr>
+          <tr><td>Direction GAT VIE</td><td>Encaissement primes</td><td>48h</td><td><span class="badge badge-yellow">Modéré</span></td><td><i class="fa-regular fa-pen-to-square" style="color:var(--text-3);cursor:pointer;margin-right:6px;"></i><i class="fa-regular fa-trash-can" style="color:var(--text-3);cursor:pointer;"></i></td></tr>
+          <tr><td>Direction GAT Invest</td><td>Gestion portefeuilles</td><td>72h</td><td><span class="badge badge-green">Faible</span></td><td><i class="fa-regular fa-pen-to-square" style="color:var(--text-3);cursor:pointer;margin-right:6px;"></i><i class="fa-regular fa-trash-can" style="color:var(--text-3);cursor:pointer;"></i></td></tr>
+          <tr><td>Direction Comptabilité</td><td>États financiers</td><td>48h</td><td><span class="badge badge-orange">Majeur</span></td><td><i class="fa-regular fa-pen-to-square" style="color:var(--text-3);cursor:pointer;margin-right:6px;"></i><i class="fa-regular fa-trash-can" style="color:var(--text-3);cursor:pointer;"></i></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:1.5rem;">
+      <button class="btn btn-secondary" onclick="navigate('page-upload-recensement','Génération des fiches BIA','Upload recensement')"><i class="fa-solid fa-arrow-left"></i> Étape précédente</button>
+      <button class="btn btn-primary" onclick="navigate('page-generer-fiches','Génération des fiches BIA','Générer les fiches')">Étape suivante <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: GÉNÉRER LES FICHES BIA
+  ───────────────────────────── -->
+  <div class="page" id="page-generer-fiches">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-regular fa-file-lines"></i> Génération des fiches BIA · Étape 3/4</div>
+      <div class="pg-title"><strong>Générer</strong> les fiches BIA</div>
+      <div class="pg-desc">Sélectionnez le modèle de fiche BIA et configurez les options de génération. Le système crée automatiquement une fiche par entité/département à partir des données du recensement.</div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipe-step done">
+        <div class="pipe-num"><i class="fa-solid fa-check pipe-icon-done"></i></div>
+        <div class="pipe-body"><div class="pipe-name">Upload recensement</div><div class="pipe-sub">Terminé</div></div>
+      </div>
+      <div class="pipe-step done">
+        <div class="pipe-num"><i class="fa-solid fa-check pipe-icon-done"></i></div>
+        <div class="pipe-body"><div class="pipe-name">Gestion des activités</div><div class="pipe-sub">5 activités configurées</div></div>
+      </div>
+      <div class="pipe-step current">
+        <div class="pipe-num">03</div>
+        <div class="pipe-body"><div class="pipe-name">Générer les fiches</div><div class="pipe-sub">Export .docx par entité</div></div>
+      </div>
+    </div>
+
+    <div class="pg-grid-2">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title"><i class="fa-regular fa-file-word"></i> Modèle de fiche BIA</div>
+          <div class="drop-zone" style="padding:1.5rem;" onclick="mockFileSelect(this,'template')">
+            <div class="dz-icon" style="font-size:1.5rem;"><i class="fa-regular fa-file-word"></i></div>
+            <div class="dz-title" style="font-size:0.78rem;">Déposez le modèle .docx</div>
+            <div class="dz-sub">Template BIA · .docx uniquement</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-gear"></i> Options de génération</div>
+          <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div>
+              <label class="form-label">Version du document</label>
+              <div class="version-toggle">
+                <button class="ver-btn on" onclick="selectVer(this)">v1.0</button>
+                <button class="ver-btn" onclick="selectVer(this)">v2.0</button>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Nom du client (optionnel)</label>
+              <input class="form-input" type="text" placeholder="Ex : GAT Assurances" />
+            </div>
+            <div>
+              <label class="form-label">Clé API OpenAI (optionnel)</label>
+              <input class="form-input" type="password" placeholder="sk-…" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-list"></i> Récapitulatif avant génération</div>
+          <div style="display:flex;flex-direction:column;gap:0.55rem;font-size:0.72rem;">
+            <div style="display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-2);">Entités détectées</span>
+              <span style="font-weight:600;">3 entités</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-2);">Activités totales</span>
+              <span style="font-weight:600;">5 activités</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:0.45rem 0;border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-2);">Fiches à générer</span>
+              <span style="font-weight:600;">3 fichiers .docx</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:0.45rem 0;">
+              <span style="color:var(--text-2);">Modèle</span>
+              <span style="font-weight:600;color:var(--text-3);">Non sélectionné</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-download"></i> Résultat</div>
+          <div class="result-empty">
+            <i class="fa-regular fa-file-zipper"></i>
+            <p>Les fiches générées apparaîtront ici</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:1.5rem;">
+      <button class="btn btn-secondary" onclick="navigate('page-gestion-activites','Génération des fiches BIA','Gestion des activités')"><i class="fa-solid fa-arrow-left"></i> Étape précédente</button>
+      <div style="display:flex;gap:0.75rem;">
+        <button class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Lancer la génération</button>
+        <button class="btn btn-secondary" onclick="navigate('page-fill-activities','Génération des fiches BIA','Remplir les activités')">Remplir les activités <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: REMPLIR LES ACTIVITÉS
+  ───────────────────────────── -->
+  <div class="page" id="page-fill-activities">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-regular fa-file-lines"></i> Génération des fiches BIA · Étape 4/4</div>
+      <div class="pg-title"><strong>Remplir</strong> les activités</div>
+      <div class="pg-desc">Sélectionnez une fiche BIA générée, saisissez les activités de l'entité. Le système met automatiquement à jour les sections correspondantes du document Word.</div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipe-step done">
+        <div class="pipe-num"><i class="fa-solid fa-check pipe-icon-done"></i></div>
+        <div class="pipe-body"><div class="pipe-name">Upload recensement</div><div class="pipe-sub">Terminé</div></div>
+      </div>
+      <div class="pipe-step done">
+        <div class="pipe-num"><i class="fa-solid fa-check pipe-icon-done"></i></div>
+        <div class="pipe-body"><div class="pipe-name">Gestion des activités</div><div class="pipe-sub">Terminé</div></div>
+      </div>
+      <div class="pipe-step done">
+        <div class="pipe-num"><i class="fa-solid fa-check pipe-icon-done"></i></div>
+        <div class="pipe-body"><div class="pipe-name">Générer les fiches</div><div class="pipe-sub">ZIP téléchargé</div></div>
+      </div>
+      <div class="pipe-step current">
+        <div class="pipe-num">04</div>
+        <div class="pipe-body"><div class="pipe-name">Remplir les activités</div><div class="pipe-sub">Mise à jour du .docx</div></div>
+      </div>
+    </div>
+
+    <!-- Sections info cards -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+      <div style="background:var(--poppy-light);border:1px solid rgba(242,72,94,0.2);border-radius:10px;padding:0.9rem;font-size:0.7rem;">
+        <div style="font-weight:700;color:var(--poppy);margin-bottom:0.3rem;">§ 3 — Présentation</div>
+        <div style="color:var(--text-2);">Nom + description de chaque activité</div>
+      </div>
+      <div style="background:var(--poppy-light);border:1px solid rgba(242,72,94,0.2);border-radius:10px;padding:0.9rem;font-size:0.7rem;">
+        <div style="font-weight:700;color:var(--poppy);margin-bottom:0.3rem;">§ 4 — Criticité</div>
+        <div style="color:var(--text-2);">Une ligne par activité dans le tableau</div>
+      </div>
+      <div style="background:var(--poppy-light);border:1px solid rgba(242,72,94,0.2);border-radius:10px;padding:0.9rem;font-size:0.7rem;">
+        <div style="font-weight:700;color:var(--poppy);margin-bottom:0.3rem;">§ 5.2 — Impacts</div>
+        <div style="color:var(--text-2);">Un tableau d'impact par activité</div>
+      </div>
+      <div style="background:var(--poppy-light);border:1px solid rgba(242,72,94,0.2);border-radius:10px;padding:0.9rem;font-size:0.7rem;">
+        <div style="font-weight:700;color:var(--poppy);margin-bottom:0.3rem;">§ 5.3 — DMIA</div>
+        <div style="color:var(--text-2);">Une ligne par activité dans le tableau</div>
+      </div>
+    </div>
+
+    <div class="pg-grid-2">
+      <!-- Left: upload + activities -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title"><i class="fa-regular fa-file-word"></i> Fiche BIA à mettre à jour</div>
+          <div class="drop-zone" id="fiche-drop" style="padding:1.5rem;" onclick="mockFileSelect(this,'fiche-fill')">
+            <div class="dz-icon" style="font-size:1.5rem;"><i class="fa-regular fa-file-word"></i></div>
+            <div class="dz-title" style="font-size:0.78rem;">Déposez la fiche .docx générée</div>
+            <div class="dz-sub">Fiche BIA · .docx uniquement</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span><i class="fa-solid fa-list-check"></i> Activités de l'entité</span>
+            <button class="btn btn-secondary" style="padding:0.35rem 0.75rem;font-size:0.7rem;" onclick="addActivityRow()">
+              <i class="fa-solid fa-plus"></i> Ajouter
+            </button>
+          </div>
+          <div id="activities-list" style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.5rem;">
+            <!-- rows injected by JS -->
+          </div>
+          <div id="activities-empty" style="text-align:center;padding:1.5rem;color:var(--text-3);font-size:0.72rem;">
+            <i class="fa-solid fa-layer-group" style="font-size:1.4rem;margin-bottom:0.5rem;display:block;"></i>
+            Aucune activité — cliquez sur « Ajouter »
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: result -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-circle-info"></i> Comment ça marche ?</div>
+          <ol style="font-size:0.72rem;color:var(--text-2);display:flex;flex-direction:column;gap:0.55rem;padding-left:1.1rem;line-height:1.5;">
+            <li>Uploadez la fiche .docx générée à l'étape précédente.</li>
+            <li>Saisissez chaque activité avec son nom et sa description.</li>
+            <li>Cliquez <strong>Appliquer</strong> pour télécharger la fiche mise à jour.</li>
+          </ol>
+          <div style="margin-top:1rem;padding:0.75rem;background:var(--surface);border-radius:8px;font-size:0.68rem;color:var(--text-2);">
+            <strong style="color:var(--text);">Sections automatiquement mises à jour :</strong><br/>
+            § 3 Présentation · § 4 Criticité · § 5.2 Évaluation des impacts · § 5.3 DMIA
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-download"></i> Résultat</div>
+          <div id="fill-result-empty" class="result-empty">
+            <i class="fa-regular fa-file-word"></i>
+            <p>La fiche mise à jour apparaîtra ici</p>
+          </div>
+          <div id="fill-result-ok" style="display:none;text-align:center;padding:1rem;">
+            <div style="font-size:2rem;color:#22c55e;margin-bottom:0.5rem;"><i class="fa-solid fa-circle-check"></i></div>
+            <div style="font-weight:600;font-size:0.8rem;margin-bottom:0.75rem;">Fiche mise à jour avec succès !</div>
+            <button class="btn btn-primary" style="width:100%;" id="fill-download-btn">
+              <i class="fa-solid fa-download"></i> Télécharger la fiche
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:1.5rem;">
+      <button class="btn btn-secondary" onclick="navigate('page-generer-fiches','Génération des fiches BIA','Générer les fiches')"><i class="fa-solid fa-arrow-left"></i> Étape précédente</button>
+      <button class="btn btn-primary" onclick="applyActivities()"><i class="fa-solid fa-wand-magic-sparkles"></i> Appliquer et télécharger</button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: CHARGER LES FICHES BIA
+  ───────────────────────────── -->
+  <div class="page" id="page-charger-fiches">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-upload"></i> Générer la synthèse BIA · Étape 1/2</div>
+      <div class="pg-title"><strong>Charger</strong> les fiches BIA</div>
+      <div class="pg-desc">Importez les fiches BIA remplies par les différents départements (.docx). Vous pouvez charger plusieurs fiches à la fois. Le système les analyse et extrait les données nécessaires à la synthèse.</div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipe-step current">
+        <div class="pipe-num">01</div>
+        <div class="pipe-body"><div class="pipe-name">Charger les fiches BIA</div><div class="pipe-sub">Fichiers .docx</div></div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">02</div>
+        <div class="pipe-body"><div class="pipe-name">Générer la synthèse</div><div class="pipe-sub">Consolidation Excel</div></div>
+      </div>
+    </div>
+
+    <div class="pg-grid-2">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title"><i class="fa-regular fa-file-word"></i> Fiches BIA (.docx)</div>
+          <div class="drop-zone" style="padding:2.5rem 1.5rem;">
+            <div class="dz-icon"><i class="fa-solid fa-files"></i></div>
+            <div class="dz-title">Déposez vos fiches BIA</div>
+            <div class="dz-sub">Sélection multiple acceptée</div>
+            <div class="dz-hint">Format : .docx · Toutes les fiches d'un lot peuvent être déposées simultanément</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-regular fa-file-excel"></i> Fiche de recensement (optionnel)</div>
+          <div class="drop-zone" style="padding:1.4rem;" onclick="mockFileSelect(this,'rec2')">
+            <div class="dz-icon" style="font-size:1.4rem;"><i class="fa-regular fa-file-spreadsheet"></i></div>
+            <div class="dz-title" style="font-size:0.78rem;">Recensement .xlsx</div>
+            <div class="dz-sub">Seed la structure organisationnelle</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="height:100%;">
+          <div class="card-title" style="justify-content:space-between;">
+            <span><i class="fa-solid fa-inbox"></i> Fiches importées</span>
+            <span class="badge badge-gray">0 fichier</span>
+          </div>
+          <div class="result-empty">
+            <i class="fa-regular fa-file-word"></i>
+            <p>Aucune fiche chargée</p>
+          </div>
+          <div class="info-box" style="margin-top:1rem;">
+            <i class="fa-solid fa-circle-info"></i>
+            <strong>Conseil :</strong> Associez la fiche de recensement pour que le système puisse mapper chaque fiche à la bonne entité dans la synthèse.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+      <button class="btn btn-secondary">Réinitialiser</button>
+      <button class="btn btn-primary" onclick="navigate('page-generer-synthese','Générer la synthèse BIA','Générer la synthèse')">Étape suivante <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: GÉNÉRER LA SYNTHÈSE
+  ───────────────────────────── -->
+  <div class="page" id="page-generer-synthese">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-regular fa-table-cells"></i> Générer la synthèse BIA · Étape 2/2</div>
+      <div class="pg-title"><strong>Générer</strong> la synthèse BIA</div>
+      <div class="pg-desc">Consolidez les données extraites de toutes les fiches BIA dans un fichier Excel de synthèse. Sélectionnez le modèle de synthèse et lancez le traitement.</div>
+    </div>
+
+    <!-- Pipeline -->
+    <div class="pipeline">
+      <div class="pipe-step done">
+        <div class="pipe-num"><i class="fa-solid fa-check pipe-icon-done"></i></div>
+        <div class="pipe-body"><div class="pipe-name">Charger les fiches BIA</div><div class="pipe-sub">15 fiches importées</div></div>
+      </div>
+      <div class="pipe-step current">
+        <div class="pipe-num">02</div>
+        <div class="pipe-body"><div class="pipe-name">Générer la synthèse</div><div class="pipe-sub">Consolidation Excel</div></div>
+      </div>
+    </div>
+
+    <div class="pg-grid-2">
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="card">
+          <div class="card-title"><i class="fa-regular fa-file-excel"></i> Modèle de synthèse BIA</div>
+          <div class="drop-zone" onclick="mockFileSelect(this,'synthese')">
+            <div class="dz-icon"><i class="fa-regular fa-file-spreadsheet"></i></div>
+            <div class="dz-title">Déposez le modèle .xlsx</div>
+            <div class="dz-sub">Template Synthèse BIA</div>
+            <div class="dz-hint">Le modèle doit contenir les feuilles de travail requises (MCO, DMIA, RTO, etc.)</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-robot"></i> Options IA (optionnel)</div>
+          <div>
+            <label class="form-label">Modèle Ollama local</label>
+            <input class="form-input" type="text" placeholder="Ex : qwen2.5:3b (laisser vide si non utilisé)" />
+          </div>
+          <div style="margin-top:0.85rem;">
+            <div class="info-box">
+              <i class="fa-solid fa-circle-info"></i> L'IA locale améliore l'extraction pour les champs ambigus. Elle nécessite qu'Ollama soit installé et en cours d'exécution.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="height:100%;">
+          <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Résultat de traitement</div>
+          <div class="result-empty" style="min-height:220px;">
+            <i class="fa-regular fa-file-excel"></i>
+            <p>La synthèse générée apparaîtra ici</p>
+          </div>
+          <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+            <button class="btn btn-primary btn-full"><i class="fa-solid fa-wand-magic-sparkles"></i> Lancer la génération</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: SYNCHRONISATION BIDIRECTIONNELLE
+  ───────────────────────────── -->
+  <div class="page" id="page-sync">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-arrows-rotate"></i> Générer la synthèse BIA</div>
+      <div class="pg-title"><strong>Synchronisation</strong> bidirectionnelle</div>
+      <div class="pg-desc">Comparez la synthèse originale remplie manuellement avec la synthèse générée automatiquement. Identifiez les conflits et arbitrez les différences avant de finaliser.</div>
+    </div>
+
+    <div class="pg-grid-2" style="margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-file-circle-check"></i> Synthèse originale</div>
+        <div class="drop-zone" style="padding:1.4rem;">
+          <div class="dz-icon" style="font-size:1.4rem;"><i class="fa-regular fa-file-excel"></i></div>
+          <div class="dz-title" style="font-size:0.78rem;">Synthèse remplie manuellement</div>
+          <div class="dz-sub">.xlsx · Source de référence</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-robot"></i> Synthèse générée</div>
+        <div class="drop-zone" style="padding:1.4rem;">
+          <div class="dz-icon" style="font-size:1.4rem;color:rgba(22,163,74,0.4);"><i class="fa-regular fa-file-excel"></i></div>
+          <div class="dz-title" style="font-size:0.78rem;">Synthèse auto-générée</div>
+          <div class="dz-sub">.xlsx · Générée par le système</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison table mock -->
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between;">
+        <span><i class="fa-solid fa-code-compare"></i> Rapport de comparaison</span>
+        <span style="display:flex;gap:0.4rem;">
+          <span class="badge badge-orange">3 conflits</span>
+          <span class="badge badge-green">12 concordances</span>
+        </span>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 2fr 2fr 60px;gap:0;border-bottom:1px solid var(--border);padding:0.45rem 0.85rem;">
+          <span style="font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);">Entité</span>
+          <span style="font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);">Synthèse originale</span>
+          <span style="font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);">Synthèse générée</span>
+          <span style="font-size:0.58rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);">Statut</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 2fr 2fr 60px;gap:0;padding:0.58rem 0.85rem;border-bottom:1px solid rgba(26,24,20,0.04);font-size:0.7rem;">
+          <span style="color:var(--text-2);">GAT VIE</span>
+          <span>DMIA = 4h</span>
+          <span>DMIA = 4h</span>
+          <span><i class="fa-solid fa-circle-check" style="color:#16a34a;"></i></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 2fr 2fr 60px;gap:0;padding:0.58rem 0.85rem;border-bottom:1px solid rgba(26,24,20,0.04);font-size:0.7rem;background:rgba(234,88,12,0.03);">
+          <span style="color:var(--text-2);">GAT Invest</span>
+          <span>DMIA = 24h</span>
+          <span style="color:#ea580c;font-weight:600;">DMIA = 48h</span>
+          <span><i class="fa-solid fa-triangle-exclamation" style="color:#ea580c;"></i></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 2fr 2fr 60px;gap:0;padding:0.58rem 0.85rem;border-bottom:1px solid rgba(26,24,20,0.04);font-size:0.7rem;">
+          <span style="color:var(--text-2);">Comptabilité</span>
+          <span>RTO = 8h</span>
+          <span>RTO = 8h</span>
+          <span><i class="fa-solid fa-circle-check" style="color:#16a34a;"></i></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 2fr 2fr 60px;gap:0;padding:0.58rem 0.85rem;font-size:0.7rem;background:rgba(234,88,12,0.03);">
+          <span style="color:var(--text-2);">Risk Management</span>
+          <span>Criticité = Critique</span>
+          <span style="color:#ea580c;font-weight:600;">Criticité = Majeur</span>
+          <span><i class="fa-solid fa-triangle-exclamation" style="color:#ea580c;"></i></span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.2rem;">
+        <button class="btn btn-secondary"><i class="fa-solid fa-download"></i> Exporter le rapport</button>
+        <button class="btn btn-primary"><i class="fa-solid fa-check-double"></i> Arbitrer et finaliser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: ORGANIGRAMME
+  ───────────────────────────── -->
+  <div class="page" id="page-organigramme">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-sitemap"></i> Générer la synthèse BIA</div>
+      <div class="pg-title"><strong>Génération</strong> de l'organigramme</div>
+      <div class="pg-desc">Visualisez la hiérarchie organisationnelle extraite de la synthèse BIA sous forme d'arbre interactif. Exportez l'organigramme en image ou PDF.</div>
+    </div>
+
+    <div class="pg-grid-2" style="margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="card-title"><i class="fa-regular fa-file-excel"></i> Source : Synthèse BIA</div>
+        <div class="drop-zone" onclick="mockFileSelect(this,'synth2')">
+          <div class="dz-icon"><i class="fa-regular fa-file-spreadsheet"></i></div>
+          <div class="dz-title">Déposez la synthèse .xlsx</div>
+          <div class="dz-sub">Fichier de synthèse BIA finalisée</div>
+          <div class="dz-hint">Le système extrait automatiquement l'arborescence Division → Unité → Département</div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+          <button class="btn btn-primary btn-full"><i class="fa-solid fa-sitemap"></i> Générer l'organigramme</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-sliders"></i> Options d'affichage</div>
+        <div style="display:flex;flex-direction:column;gap:0.7rem;">
+          <div>
+            <label class="form-label">Orientation</label>
+            <div class="version-toggle">
+              <button class="ver-btn on" onclick="selectVer(this)">Vertical</button>
+              <button class="ver-btn" onclick="selectVer(this)">Horizontal</button>
+            </div>
+          </div>
+          <div>
+            <label class="form-label">Profondeur</label>
+            <div class="version-toggle">
+              <button class="ver-btn on" onclick="selectVer(this)">Division</button>
+              <button class="ver-btn" onclick="selectVer(this)">Unité</button>
+              <button class="ver-btn" onclick="selectVer(this)">Dép.</button>
+            </div>
+          </div>
+          <div style="margin-top:0.4rem;display:flex;gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm"><i class="fa-regular fa-image"></i> Export PNG</button>
+            <button class="btn btn-secondary btn-sm"><i class="fa-regular fa-file-pdf"></i> Export PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Org chart preview -->
+    <div class="orgchart-placeholder">
+      <div class="org-node">GAT Assurances</div>
+      <div class="org-line-v"></div>
+      <div class="org-children">
+        <div class="org-branch">
+          <div class="org-node" style="font-size:0.62rem;">Direction GAT VIE</div>
+          <div class="org-line-v"></div>
+          <div class="org-row">
+            <div class="org-node small">MCO</div>
+            <div class="org-node small">Sinistres</div>
+          </div>
+        </div>
+        <div class="org-branch">
+          <div class="org-node" style="font-size:0.62rem;">Direction GAT Invest</div>
+          <div class="org-line-v"></div>
+          <div class="org-row">
+            <div class="org-node small">Portefeuilles</div>
+          </div>
+        </div>
+        <div class="org-branch">
+          <div class="org-node" style="font-size:0.62rem;">Dir. Comptabilité</div>
+          <div class="org-line-v"></div>
+          <div class="org-row">
+            <div class="org-node small">Reporting</div>
+            <div class="org-node small">États fin.</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-xs">Aperçu · Connectez une synthèse pour voir l'organigramme complet</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: RAPPORT BIA
+  ───────────────────────────── -->
+  <div class="page" id="page-rapport">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-regular fa-file-pdf"></i> Générer rapport BIA</div>
+      <div class="pg-title"><strong>Rapport</strong> de synthèse BIA</div>
+      <div class="pg-desc">Générez le rapport consolidé de l'analyse BIA, prêt à être présenté à la direction et aux autorités de régulation.</div>
+    </div>
+
+    <div class="p2-page" style="min-height:50vh;">
+      <div class="p2-icon" style="background:rgba(242,72,94,0.07);border-color:rgba(242,72,94,0.18);color:var(--poppy);">
+        <i class="fa-regular fa-file-pdf"></i>
+      </div>
+      <div class="p2-title">Rapport BIA</div>
+      <div class="p2-desc">
+        Cette fonctionnalité permet de générer le rapport final BIA en format PDF/Word à partir de la synthèse consolidée.<br><br>
+        <strong>Prochainement disponible</strong> dans la version complète de l'application.
+      </div>
+      <button class="btn btn-secondary"><i class="fa-regular fa-clock"></i> Phase 1 — Bientôt disponible</button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────
+       PAGE: GESTION DES RISQUES
+  ───────────────────────────── -->
+  <div class="page" id="page-risques">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-shield-halved"></i> Gestion des risques</div>
+      <div class="pg-title"><strong>Cartographie</strong> des risques</div>
+      <div class="pg-desc">Identifiez, évaluez et cartographiez les risques associés à chaque activité critique identifiée lors de l'analyse BIA.</div>
+    </div>
+
+    <div class="p2-page" style="min-height:50vh;">
+      <div class="p2-icon">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div class="p2-title">Gestion des risques</div>
+      <div class="p2-desc">
+        Ce module permettra d'associer des risques métier aux activités critiques, de les évaluer selon une matrice de probabilité/impact et d'établir la cartographie globale des risques PCA.<br><br>
+        <strong>Planifié pour la Phase 1 finale</strong> de déploiement.
+      </div>
+      <button class="btn btn-secondary"><i class="fa-regular fa-clock"></i> Phase 1 — En développement</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════ -->
+<script>
+  /* ── Navigation ── */
+  function navigate(pageId, groupLabel, pageLabel) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    // Show target
+    const target = document.getElementById(pageId);
+    if (target) target.classList.add('active');
+
+    // Update breadcrumb
+    const tbGroup = document.getElementById('tb-group');
+    const tbSep   = document.getElementById('tb-sep');
+    const tbPage  = document.getElementById('tb-page');
+    if (groupLabel) {
+      tbGroup.textContent = groupLabel;
+      tbSep.style.display = 'inline-flex';
+      tbPage.textContent  = pageLabel;
+    } else {
+      tbGroup.textContent = pageLabel;
+      tbSep.style.display = 'none';
+      tbPage.textContent  = '';
+    }
+
+    // Update sidebar active child
+    document.querySelectorAll('.sb-child').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.sb-child').forEach(c => {
+      if (c.getAttribute('onclick') && c.getAttribute('onclick').includes(pageId)) {
+        c.classList.add('active');
+      }
+    });
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Accordion ── */
+  function toggleGroup(id) {
+    const grp = document.getElementById(id);
+    if (!grp) return;
+    grp.classList.toggle('open');
+  }
+
+  /* ── Version toggle ── */
+  function selectVer(btn) {
+    const siblings = btn.parentElement.querySelectorAll('.ver-btn');
+    siblings.forEach(s => s.classList.remove('on'));
+    btn.classList.add('on');
+  }
+
+  /* ── Activity option selection ── */
+  function selectActivityOption(id) {
+    const ids = ['opt-fiche','opt-referentiel','opt-manuelle'];
+    ids.forEach(function(oid) {
+      const card = document.getElementById(oid);
+      const icon = card.querySelector('.act-opt-icon');
+      if (oid === id) {
+        card.style.borderColor  = 'rgba(242,72,94,0.28)';
+        card.style.background   = 'rgba(242,72,94,0.05)';
+        icon.style.background   = 'var(--poppy)';
+        icon.style.color        = '#fff';
+        icon.style.borderColor  = 'var(--poppy)';
+      } else {
+        card.style.borderColor  = 'var(--border)';
+        card.style.background   = 'var(--card)';
+        icon.style.background   = 'rgba(26,24,20,0.05)';
+        icon.style.color        = 'var(--text-2)';
+        icon.style.borderColor  = 'var(--border)';
+      }
+    });
+  }
+
+  /* ── Mock file select ── */
+  function mockFileSelect(zone, type) {
+    const names = {
+      recensement: 'GAT_recensement_2025.xlsx',
+      template: 'Template_BIA_v2.docx',
+      synthese: 'Synthese_BIA_template.xlsx',
+      rec2: 'GAT_recensement_2025.xlsx',
+      synth2: 'Synthese_BIA_filled.xlsx',
+    };
+    const filename = names[type] || 'fichier.xlsx';
+    zone.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;background:rgba(22,163,74,0.05);border-radius:0.5rem;border:1px solid rgba(22,163,74,0.15);">
+        <i class="fa-solid fa-circle-check" style="color:#16a34a;font-size:1.2rem;flex-shrink:0;"></i>
+        <div style="text-align:left;">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--text);">${filename}</div>
+          <div style="font-size:0.6rem;color:var(--text-3);margin-top:2px;">Fichier chargé · cliquer pour remplacer</div>
+        </div>
+      </div>`;
+    zone.onclick = function() {
+      zone.innerHTML = `<div class="dz-icon"><i class="fa-regular fa-file-arrow-up"></i></div><div class="dz-title">Déposez votre fichier</div><div class="dz-sub">ou cliquez pour parcourir</div>`;
+      zone.onclick = function() { mockFileSelect(zone, type); };
+    };
+  }
+
+  /* ── Activity Filler ─────────────────────────────────────────────── */
+  let _activityCount = 0;
+
+  function addActivityRow(name = '', description = '') {
+    const id = ++_activityCount;
+    const list = document.getElementById('activities-list');
+    const empty = document.getElementById('activities-empty');
+    if (empty) empty.style.display = 'none';
+
+    const row = document.createElement('div');
+    row.id = `act-row-${id}`;
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 1.5fr auto;gap:0.5rem;align-items:start;';
+    row.innerHTML = `
+      <div>
+        <input id="act-name-${id}" class="form-input" type="text" placeholder="Nom de l'activité"
+               value="${name.replace(/"/g,'&quot;')}"
+               style="font-size:0.72rem;padding:0.45rem 0.65rem;" />
+      </div>
+      <div>
+        <input id="act-desc-${id}" class="form-input" type="text" placeholder="Description de l'activité"
+               value="${description.replace(/"/g,'&quot;')}"
+               style="font-size:0.72rem;padding:0.45rem 0.65rem;" />
+      </div>
+      <button onclick="removeActivityRow(${id})" title="Supprimer"
+              style="margin-top:2px;background:none;border:1px solid var(--border);border-radius:6px;
+                     padding:0.4rem 0.55rem;cursor:pointer;color:var(--text-2);font-size:0.75rem;">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>`;
+    list.appendChild(row);
+  }
+
+  function removeActivityRow(id) {
+    const row = document.getElementById(`act-row-${id}`);
+    if (row) row.remove();
+    const list = document.getElementById('activities-list');
+    if (!list.children.length) {
+      document.getElementById('activities-empty').style.display = 'block';
+    }
+  }
+
+  function _collectActivities() {
+    const rows = document.querySelectorAll('[id^="act-row-"]');
+    const result = [];
+    rows.forEach(row => {
+      const m = row.id.match(/act-row-(\d+)/);
+      if (!m) return;
+      const id = m[1];
+      const name = (document.getElementById(`act-name-${id}`)?.value || '').trim();
+      const desc = (document.getElementById(`act-desc-${id}`)?.value || '').trim();
+      if (name) result.push({ name, description: desc });
+    });
+    return result;
+  }
+
+  function applyActivities() {
+    const activities = _collectActivities();
+    if (!activities.length) {
+      alert('Veuillez saisir au moins une activité.');
+      return;
+    }
+
+    // In the real app this would POST to /api/fill-activities
+    // Here we simulate success after a short delay
+    const btn = event.target.closest('button');
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Traitement…';
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+      document.getElementById('fill-result-empty').style.display = 'none';
+      document.getElementById('fill-result-ok').style.display = 'block';
+      document.getElementById('fill-download-btn').onclick = () => {
+        alert('(Mockup) Téléchargement simulé — ' + activities.length + ' activité(s) injectée(s).');
+      };
+    }, 1400);
+  }
+</script>
+</body>
+</html>

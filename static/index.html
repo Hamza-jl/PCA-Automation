@@ -1454,6 +1454,11 @@
           <span class="sb-child-num">03</span>
           <span class="sb-child-label">Cartographie des risques</span>
         </div>
+        <!-- Analyse des risques — Floor-based photo tagging -->
+        <div class="sb-child" id="child-risques-assessment" onclick="navigatePage('page-risques-assessment','Gestion des risques','Analyse des risques','child-risques-assessment')">
+          <span class="sb-child-num">04</span>
+          <span class="sb-child-label">Analyse des risques</span>
+        </div>
       </div>
     </div>
 
@@ -3229,6 +3234,245 @@
   <!-- /page-collecte-reponses -->
 
   <style>
+    /* ══ Analyse des risques — relevé photo par étage ══ */
+    .ra-step        { margin-bottom:1.25rem; }
+    .ra-field-row   { display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem; }
+    .ra-label       { display:block;font-size:.63rem;font-weight:700;letter-spacing:.1em;
+                      text-transform:uppercase;color:rgba(60,60,58,.5);margin-bottom:.4rem; }
+    .ra-input, .ra-select, .ra-textarea {
+      width:100%;padding:.6rem .7rem;font-family:inherit;font-size:.78rem;color:#3c3c3a;
+      background:#fff;border:1px solid rgba(60,60,58,.14);border-radius:.5rem;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .ra-input:focus, .ra-select:focus, .ra-textarea:focus {
+      outline:none;border-color:#B91C1C;box-shadow:0 0 0 3px rgba(185,28,28,.1);
+    }
+    .ra-textarea    { min-height:110px;resize:vertical;line-height:1.6; }
+
+    /* Tuiles (types de bâtiment, niveaux, composants) */
+    .ra-tiles       { display:grid;gap:.6rem; }
+    .ra-tiles-bt    { grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); }
+    .ra-tiles-floor { grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); }
+    .ra-tiles-comp  { grid-template-columns:repeat(auto-fill,minmax(124px,1fr)); }
+    .ra-tile {
+      position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      gap:.45rem;padding:.85rem .5rem;text-align:center;cursor:pointer;
+      background:#fff;border:1px solid rgba(60,60,58,.12);border-radius:.65rem;
+      font-family:inherit;font-size:.66rem;font-weight:600;line-height:1.3;color:#3c3c3a;
+      transition:border-color .15s, background .15s, transform .15s;
+    }
+    .ra-tile i      { font-size:1.05rem;color:rgba(60,60,58,.4);transition:color .15s; }
+    .ra-tile:hover  { border-color:rgba(185,28,28,.45);background:rgba(185,28,28,.03);transform:translateY(-1px); }
+    .ra-tile:hover i{ color:#B91C1C; }
+    .ra-tile.ra-on  { border-color:#B91C1C;background:rgba(185,28,28,.07);box-shadow:0 0 0 1px #B91C1C inset; }
+    .ra-tile.ra-on i{ color:#B91C1C; }
+    .ra-tile-add    { border-style:dashed;color:rgba(60,60,58,.5); }
+    .ra-tile-badge  {
+      position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;
+      display:flex;align-items:center;justify-content:center;
+      background:#B91C1C;color:#fff;border-radius:999px;font-size:.6rem;font-weight:700;
+    }
+    .ra-tile-sub    { font-size:.58rem;font-weight:500;color:rgba(60,60,58,.45); }
+
+    /* Sections de composants par catégorie */
+    .ra-cat         { margin-bottom:1.15rem; }
+    .ra-cat:last-child { margin-bottom:0; }
+    .ra-cat-name    {
+      font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      color:rgba(60,60,58,.42);margin-bottom:.55rem;display:flex;align-items:center;gap:.5rem;
+    }
+    .ra-cat-name::after { content:'';flex:1;height:1px;background:rgba(60,60,58,.08); }
+
+    /* Photos */
+    .ra-photo-btns  { display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem; }
+    .ra-btn-ghost   {
+      display:inline-flex;align-items:center;gap:.45rem;
+      padding:.55rem .9rem;font-family:inherit;font-size:.7rem;font-weight:700;
+      color:#3c3c3a;background:#fff;border:1px solid rgba(60,60,58,.16);
+      border-radius:.5rem;cursor:pointer;transition:border-color .15s,background .15s;
+    }
+    .ra-btn-ghost:hover { border-color:#B91C1C;background:rgba(185,28,28,.04);color:#B91C1C; }
+    .ra-thumbs      { display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:.5rem; }
+    .ra-thumb       { position:relative;aspect-ratio:1;border-radius:.5rem;overflow:hidden;
+                      background:rgba(60,60,58,.06);border:1px solid rgba(60,60,58,.1); }
+    .ra-thumb img   { width:100%;height:100%;object-fit:cover;display:block; }
+    .ra-thumb-del   {
+      position:absolute;top:3px;right:3px;width:20px;height:20px;padding:0;line-height:1;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;
+      cursor:pointer;font-size:.6rem;
+    }
+    .ra-thumb-del:hover { background:#B91C1C; }
+
+    /* Relevé du niveau */
+    .ra-note        { padding:.9rem 0;border-top:1px solid rgba(60,60,58,.08); }
+    .ra-note:first-child { border-top:none;padding-top:0; }
+    .ra-note-head   { display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap; }
+    .ra-note-comp   { font-size:.74rem;font-weight:700;color:#3c3c3a; }
+    .ra-note-text   { font-size:.74rem;line-height:1.65;color:rgba(60,60,58,.75);
+                      white-space:pre-wrap;margin-bottom:.55rem; }
+    .ra-pill        { padding:.15rem .5rem;border-radius:999px;font-size:.58rem;font-weight:700;
+                      letter-spacing:.04em;text-transform:uppercase; }
+    .ra-pill-bon      { background:rgba(22,163,74,.12);color:#15803d; }
+    .ra-pill-moyen    { background:rgba(234,179,8,.16);color:#92610a; }
+    .ra-pill-mauvais  { background:rgba(220,38,38,.12);color:#b91c1c; }
+    .ra-pill-faible   { background:rgba(22,163,74,.12);color:#15803d; }
+    .ra-pill-eleve    { background:rgba(234,88,12,.14);color:#c2410c; }
+    .ra-pill-critique { background:rgba(220,38,38,.14);color:#b91c1c; }
+    .ra-pill-na       { background:rgba(60,60,58,.07);color:rgba(60,60,58,.5); }
+    .ra-note-del    { margin-left:auto;background:none;border:none;cursor:pointer;
+                      color:rgba(60,60,58,.3);font-size:.72rem;padding:.2rem .35rem; }
+    .ra-note-del:hover { color:#B91C1C; }
+
+    .ra-status      { font-size:.7rem;margin-top:.7rem;min-height:1em; }
+    .ra-status-ok   { color:#15803d; }
+    .ra-status-err  { color:#b91c1c; }
+    .ra-status-busy { color:rgba(60,60,58,.5); }
+    .ra-empty       { font-size:.72rem;color:rgba(60,60,58,.4);font-style:italic; }
+    .ra-ctx         { display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;
+                      font-size:.68rem;color:rgba(60,60,58,.55); }
+    .ra-ctx strong  { color:#3c3c3a;font-weight:700; }
+  </style>
+
+  <!-- ══ Analyse des risques — relevé photo par étage ══ -->
+  <div class="app-page" id="page-risques-assessment">
+    <div class="pg-header">
+      <div class="pg-label"><i class="fa-solid fa-camera-retro"></i> Gestion des risques · Analyse des risques</div>
+      <div class="pg-title"><strong>Analyse des risques</strong> — relevé photo par niveau</div>
+      <div class="pg-desc">
+        Lors des visites de sites, chaque observation est rattachée à un niveau et à un composant précis.
+        Les photos prises sur place sont étiquetées automatiquement (niveau, composant, état, niveau de risque)
+        pour que rien ne soit perdu au retour au bureau.
+      </div>
+    </div>
+
+    <!-- ── Étape 1 : contexte de la visite ── -->
+    <div class="app-card ra-step" id="ra-card-setup">
+      <div class="app-card-title"><i class="fa-solid fa-location-dot"></i> Contexte de la visite</div>
+
+      <div class="ra-field-row" style="margin-bottom:1.1rem;">
+        <div>
+          <label class="ra-label" for="ra-sector">Secteur</label>
+          <select class="ra-select" id="ra-sector">
+            <option value="Bancaire">Bancaire</option>
+            <option value="Assurances">Assurances</option>
+          </select>
+        </div>
+        <div>
+          <label class="ra-label" for="ra-client">Client</label>
+          <input class="ra-input" type="text" id="ra-client" placeholder="Ex. STAR Assurances" autocomplete="off">
+        </div>
+        <div>
+          <label class="ra-label" for="ra-floors">Nombre de niveaux</label>
+          <input class="ra-input" type="number" id="ra-floors" value="1" min="1" max="50">
+        </div>
+      </div>
+
+      <label class="ra-label">Type de bâtiment</label>
+      <div class="ra-tiles ra-tiles-bt" id="ra-building-types" style="margin-bottom:1.1rem;"></div>
+
+      <button class="btn-gold" id="ra-start-btn" style="font-size:.74rem;padding:.7rem 1.4rem;">
+        <i class="fa-solid fa-play"></i> Démarrer le relevé
+      </button>
+      <div class="ra-status" id="ra-setup-status"></div>
+    </div>
+
+    <!-- ── Étape 2 : plan du bâtiment ── -->
+    <div class="app-card ra-step" id="ra-card-floors" style="display:none;">
+      <div class="app-card-title" style="align-items:baseline;">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>Niveaux du bâtiment</span>
+        <span class="ra-ctx" id="ra-context" style="margin-left:auto;"></span>
+      </div>
+      <div class="ra-tiles ra-tiles-floor" id="ra-floors-grid"></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem;">
+        <button class="ra-btn-ghost" id="ra-rename-btn" style="display:none;">
+          <i class="fa-solid fa-pen"></i> Renommer le niveau
+        </button>
+        <button class="ra-btn-ghost" id="ra-export-btn">
+          <i class="fa-solid fa-file-arrow-down"></i> Exporter le relevé (JSON)
+        </button>
+        <button class="ra-btn-ghost" id="ra-new-btn">
+          <i class="fa-solid fa-rotate-left"></i> Nouveau relevé
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Étape 3 : composants du niveau ── -->
+    <div class="app-card ra-step" id="ra-card-components" style="display:none;">
+      <div class="app-card-title">
+        <i class="fa-solid fa-diagram-project"></i>
+        <span id="ra-components-title">Composants</span>
+      </div>
+      <div id="ra-components-body"></div>
+    </div>
+
+    <!-- ── Étape 4 : saisie de l'observation ── -->
+    <div class="app-card ra-step" id="ra-card-note" style="display:none;">
+      <div class="app-card-title">
+        <i class="fa-solid fa-pen-to-square"></i>
+        <span id="ra-note-title">Observation</span>
+      </div>
+
+      <textarea class="ra-textarea" id="ra-note-text"
+                placeholder="Ce que vous constatez sur place : état, anomalies, éléments manquants…"></textarea>
+
+      <div class="ra-field-row" style="margin-top:.9rem;">
+        <div>
+          <label class="ra-label" for="ra-condition">État constaté</label>
+          <select class="ra-select" id="ra-condition">
+            <option value="non_renseigne">Non renseigné</option>
+            <option value="bon">Bon</option>
+            <option value="moyen">Moyen</option>
+            <option value="mauvais">Mauvais</option>
+          </select>
+        </div>
+        <div>
+          <label class="ra-label" for="ra-risk">Niveau de risque</label>
+          <select class="ra-select" id="ra-risk">
+            <option value="non_renseigne">Non renseigné</option>
+            <option value="faible">Faible</option>
+            <option value="moyen">Moyen</option>
+            <option value="eleve">Élevé</option>
+            <option value="critique">Critique</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:1.1rem;">
+        <label class="ra-label">Photos</label>
+        <div class="ra-photo-btns">
+          <button class="ra-btn-ghost" id="ra-cam-btn"><i class="fa-solid fa-camera"></i> Prendre une photo</button>
+          <button class="ra-btn-ghost" id="ra-file-btn"><i class="fa-solid fa-images"></i> Depuis l'appareil</button>
+        </div>
+        <!-- capture="environment" ouvre directement l'appareil photo arrière sur mobile
+             et retombe sur le sélecteur de fichiers sur poste fixe. -->
+        <input type="file" id="ra-cam-input"  accept="image/*" capture="environment" multiple hidden>
+        <input type="file" id="ra-file-input" accept="image/*" multiple hidden>
+        <div class="ra-thumbs" id="ra-thumbs"></div>
+      </div>
+
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1.2rem;">
+        <button class="btn-gold" id="ra-save-btn" style="font-size:.74rem;padding:.65rem 1.3rem;">
+          <i class="fa-solid fa-floppy-disk"></i> Enregistrer l'observation
+        </button>
+        <button class="ra-btn-ghost" id="ra-cancel-btn"><i class="fa-solid fa-xmark"></i> Annuler</button>
+      </div>
+      <div class="ra-status" id="ra-note-status"></div>
+    </div>
+
+    <!-- ── Relevé déjà saisi sur le niveau ── -->
+    <div class="app-card ra-step" id="ra-card-log" style="display:none;">
+      <div class="app-card-title">
+        <i class="fa-solid fa-list-check"></i>
+        <span id="ra-log-title">Relevé du niveau</span>
+      </div>
+      <div id="ra-log-body"></div>
+    </div>
+  </div>
+  <!-- /page-risques-assessment -->
+
+  <style>
     .risk-tab {
       padding:.55rem 1.1rem;font-size:.75rem;font-weight:600;border:none;background:transparent;
       cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;
@@ -3904,9 +4148,10 @@ const _WF_GROUPS = [
     ]
   },
   {
-    pages: ['page-risques'],
+    pages: ['page-risques','page-risques-assessment'],
     steps: [
-      { label:'Cartographie des risques', page:'page-risques', group:'Gestion des risques', name:'Cartographie des risques', child:'child-risques-analyse' },
+      { label:'Cartographie des risques', page:'page-risques',            group:'Gestion des risques', name:'Cartographie des risques', child:'child-risques-analyse'     },
+      { label:'Analyse des risques',      page:'page-risques-assessment', group:'Gestion des risques', name:'Analyse des risques',      child:'child-risques-assessment' },
     ]
   },
 ];
@@ -4005,6 +4250,8 @@ window.navigatePage = function(pageId, group, pageName, childId) {
   if (page) page.classList.add('active');
   // Update stepper
   updateStepper(pageId);
+  // Chargements différés propres à certaines pages
+  if (pageId === 'page-risques-assessment' && typeof raInit === 'function') raInit();
   // Update breadcrumb
   const grpEl  = document.getElementById('tb-group');
   const pageEl = document.getElementById('tb-page');
@@ -11589,6 +11836,550 @@ function qzrBackToType() {
   document.getElementById('qzr-screen-type').style.display    = '';
   document.getElementById('qzr-screen-compare').style.display = 'none';
 }
+
+/* ════════════════════════════════════════════════════════════
+   ANALYSE DES RISQUES — relevé photo par niveau
+
+   Hiérarchie : évaluation → niveau → composant → note → photos.
+   Les libellés de composants viennent du serveur et contiennent des
+   apostrophes ; ils ne sont jamais injectés dans du HTML ni dans un
+   attribut onclick — on passe par textContent et dataset.
+════════════════════════════════════════════════════════════ */
+const RA = {
+  assessment:   null,   // évaluation en cours (réponse de l'API)
+  buildingType: null,   // type choisi avant démarrage
+  floorNumber:  null,   // niveau actif
+  component:    null,   // composant actif
+  photos:       [],     // [{ file, url }] en attente d'envoi
+  typesLoaded:  false,
+};
+
+const RA_ETATS   = { bon:'Bon', moyen:'Moyen', mauvais:'Mauvais', non_renseigne:'État n.r.' };
+const RA_RISQUES = { faible:'Risque faible', moyen:'Risque moyen', eleve:'Risque élevé',
+                     critique:'Risque critique', non_renseigne:'Risque n.r.' };
+
+function raEl(id) { return document.getElementById(id); }
+
+function raStatus(id, message, kind) {
+  const el = raEl(id);
+  if (!el) return;
+  el.textContent = message || '';
+  el.className = 'ra-status' + (kind ? ' ra-status-' + kind : '');
+}
+
+/** Tuile générique : icône + libellé, libellé posé en textContent. */
+function raTile(label, icon, dataset, extras) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'ra-tile' + ((extras && extras.className) ? ' ' + extras.className : '');
+  b.title = label;
+
+  const i = document.createElement('i');
+  i.className = 'fa-solid ' + (icon || 'fa-circle-dot');
+  b.appendChild(i);
+
+  const span = document.createElement('span');
+  span.textContent = label;
+  b.appendChild(span);
+
+  if (extras && extras.sub) {
+    const s = document.createElement('span');
+    s.className = 'ra-tile-sub';
+    s.textContent = extras.sub;
+    b.appendChild(s);
+  }
+  if (extras && extras.badge) {
+    const g = document.createElement('span');
+    g.className = 'ra-tile-badge';
+    g.textContent = extras.badge;
+    b.appendChild(g);
+  }
+  Object.keys(dataset || {}).forEach(k => { b.dataset[k] = dataset[k]; });
+  return b;
+}
+
+/* ── Étape 1 : types de bâtiment ─────────────────────────── */
+
+async function raInit() {
+  if (RA.typesLoaded) return;
+  try {
+    const res = await fetch('/api/risk-assessment/building-types');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    raRenderBuildingTypes(data.building_types || []);
+    RA.typesLoaded = true;
+  } catch (e) {
+    raStatus('ra-setup-status', 'Impossible de charger les types de bâtiment : ' + e.message, 'err');
+  }
+}
+
+function raRenderBuildingTypes(types) {
+  const grid = raEl('ra-building-types');
+  grid.innerHTML = '';
+  types.forEach(t => grid.appendChild(raTile(t.label, t.icon, { btype: t.label })));
+
+  const add = raTile('Ajouter un type', 'fa-plus', { addType: '1' }, { className: 'ra-tile-add' });
+  grid.appendChild(add);
+
+  // Ré-applique la sélection si l'utilisateur avait déjà choisi.
+  if (RA.buildingType) raMarkBuildingType(RA.buildingType);
+}
+
+function raMarkBuildingType(label) {
+  raEl('ra-building-types').querySelectorAll('.ra-tile').forEach(t => {
+    t.classList.toggle('ra-on', t.dataset.btype === label);
+  });
+}
+
+async function raAddBuildingType() {
+  const label = (prompt('Libellé du nouveau type de bâtiment :') || '').trim();
+  if (!label) return;
+  try {
+    const res = await fetch('/api/risk-assessment/building-types', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label }),
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || 'HTTP ' + res.status);
+    RA.typesLoaded = false;
+    RA.buildingType = label;
+    await raInit();
+    raStatus('ra-setup-status', 'Type « ' + label + ' » ajouté.', 'ok');
+  } catch (e) {
+    raStatus('ra-setup-status', 'Ajout impossible : ' + e.message, 'err');
+  }
+}
+
+/* ── Démarrage du relevé ─────────────────────────────────── */
+
+async function raStart() {
+  const client = raEl('ra-client').value.trim();
+  if (!RA.buildingType) { raStatus('ra-setup-status', 'Choisissez un type de bâtiment.', 'err'); return; }
+  if (!client)          { raStatus('ra-setup-status', 'Renseignez le nom du client.', 'err'); return; }
+
+  const numFloors = parseInt(raEl('ra-floors').value, 10);
+  if (!numFloors || numFloors < 1 || numFloors > 50) {
+    raStatus('ra-setup-status', 'Le nombre de niveaux doit être compris entre 1 et 50.', 'err');
+    return;
+  }
+
+  raStatus('ra-setup-status', 'Création du relevé…', 'busy');
+  try {
+    const res = await fetch('/api/risk-assessment/start', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sector: raEl('ra-sector').value,
+        client,
+        building_type: RA.buildingType,
+        num_floors: numFloors,
+      }),
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || 'HTTP ' + res.status);
+
+    RA.assessment = await res.json();
+    raStatus('ra-setup-status', '');
+    raEl('ra-card-setup').style.display = 'none';
+    raEl('ra-card-floors').style.display = '';
+    raRenderContext();
+    raRenderFloors();
+  } catch (e) {
+    raStatus('ra-setup-status', 'Erreur : ' + e.message, 'err');
+  }
+}
+
+function raRenderContext() {
+  const a = RA.assessment;
+  const el = raEl('ra-context');
+  el.innerHTML = '';
+  const mk = (txt, strong) => {
+    const s = document.createElement(strong ? 'strong' : 'span');
+    s.textContent = txt;
+    return s;
+  };
+  el.appendChild(mk(a.client, true));
+  el.appendChild(mk(' · ' + a.building_type));
+  el.appendChild(mk(' · ' + a.num_floors + (a.num_floors > 1 ? ' niveaux' : ' niveau')));
+}
+
+/* ── Étape 2 : niveaux ───────────────────────────────────── */
+
+function raRenderFloors() {
+  const grid = raEl('ra-floors-grid');
+  grid.innerHTML = '';
+  (RA.assessment.floors || []).forEach(f => {
+    const tile = raTile(f.floor_label, 'fa-building', { floor: f.floor_number }, {
+      sub: 'Niveau ' + f.floor_number,
+      badge: f.notes_count > 0 ? String(f.notes_count) : null,
+    });
+    if (f.floor_number === RA.floorNumber) tile.classList.add('ra-on');
+    grid.appendChild(tile);
+  });
+}
+
+async function raSelectFloor(floorNumber) {
+  RA.floorNumber = floorNumber;
+  RA.component = null;
+  raRenderFloors();
+  raEl('ra-rename-btn').style.display = '';
+  raEl('ra-card-note').style.display = 'none';
+  raEl('ra-card-components').style.display = '';
+  raRenderComponents();
+  await raLoadLog();
+}
+
+function raFloorLabel(floorNumber) {
+  const f = (RA.assessment.floors || []).find(x => x.floor_number === floorNumber);
+  return f ? f.floor_label : 'Niveau ' + floorNumber;
+}
+
+/* ── Étape 3 : composants, groupés par catégorie ─────────── */
+
+function raRenderComponents() {
+  raEl('ra-components-title').textContent = 'Composants — ' + raFloorLabel(RA.floorNumber);
+
+  const body = raEl('ra-components-body');
+  body.innerHTML = '';
+  (RA.assessment.components || []).forEach(group => {
+    const section = document.createElement('div');
+    section.className = 'ra-cat';
+
+    const name = document.createElement('div');
+    name.className = 'ra-cat-name';
+    name.appendChild(document.createTextNode(group.category));
+    section.appendChild(name);
+
+    const tiles = document.createElement('div');
+    tiles.className = 'ra-tiles ra-tiles-comp';
+    group.components.forEach(c => {
+      const tile = raTile(c.label, c.icon, { comp: c.label });
+      if (c.label === RA.component) tile.classList.add('ra-on');
+      tiles.appendChild(tile);
+    });
+    section.appendChild(tiles);
+    body.appendChild(section);
+  });
+}
+
+function raSelectComponent(label) {
+  RA.component = label;
+  raRenderComponents();
+
+  raEl('ra-note-title').textContent = label + ' — ' + raFloorLabel(RA.floorNumber);
+  raEl('ra-note-text').value = '';
+  raEl('ra-condition').value = 'non_renseigne';
+  raEl('ra-risk').value = 'non_renseigne';
+  raClearPhotos();
+  raStatus('ra-note-status', '');
+  raEl('ra-card-note').style.display = '';
+  raEl('ra-note-text').focus();
+}
+
+/* ── Photos en attente ───────────────────────────────────── */
+
+function raAddPhotos(fileList) {
+  Array.from(fileList || []).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    RA.photos.push({ file, url: URL.createObjectURL(file) });
+  });
+  raRenderThumbs();
+}
+
+function raRemovePhoto(index) {
+  const p = RA.photos[index];
+  if (p) URL.revokeObjectURL(p.url);
+  RA.photos.splice(index, 1);
+  raRenderThumbs();
+}
+
+function raClearPhotos() {
+  RA.photos.forEach(p => URL.revokeObjectURL(p.url));
+  RA.photos = [];
+  raRenderThumbs();
+}
+
+function raRenderThumbs() {
+  const box = raEl('ra-thumbs');
+  box.innerHTML = '';
+  RA.photos.forEach((p, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'ra-thumb';
+
+    const img = document.createElement('img');
+    img.src = p.url;
+    img.alt = p.file.name;
+    wrap.appendChild(img);
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'ra-thumb-del';
+    del.dataset.rmPhoto = String(i);
+    del.title = 'Retirer cette photo';
+    del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    wrap.appendChild(del);
+
+    box.appendChild(wrap);
+  });
+}
+
+/* ── Enregistrement de l'observation ─────────────────────── */
+
+async function raSaveNote() {
+  const text = raEl('ra-note-text').value.trim();
+  if (!text) { raStatus('ra-note-status', 'Saisissez une observation.', 'err'); return; }
+
+  const fd = new FormData();
+  fd.append('floor_number', RA.floorNumber);   // numéro du niveau, résolu côté serveur
+  fd.append('component',    RA.component);
+  fd.append('note_text',    text);
+  fd.append('condition',    raEl('ra-condition').value);
+  fd.append('risk_level',   raEl('ra-risk').value);
+  RA.photos.forEach(p => fd.append('photos', p.file, p.file.name));
+
+  const btn = raEl('ra-save-btn');
+  btn.disabled = true;
+  raStatus('ra-note-status', 'Enregistrement…', 'busy');
+
+  try {
+    const res = await fetch('/api/risk-assessment/' + RA.assessment.id + '/notes',
+                            { method: 'POST', body: fd });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).detail || 'HTTP ' + res.status);
+    const data = await res.json();
+
+    let msg = 'Observation enregistrée';
+    if (data.photos.length) {
+      msg += ' — ' + data.photos.length + ' photo' + (data.photos.length > 1 ? 's' : '') + ' étiquetée';
+      if (data.photos.length > 1) msg += 's';
+    }
+    if (data.rejetees && data.rejetees.length) {
+      msg += ' (' + data.rejetees.length + ' fichier(s) refusé(s))';
+    }
+    raStatus('ra-note-status', msg + '.', 'ok');
+
+    raEl('ra-note-text').value = '';
+    raClearPhotos();
+    await raRefresh();
+    await raLoadLog();
+  } catch (e) {
+    raStatus('ra-note-status', 'Erreur : ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/** Recharge l'évaluation pour rafraîchir les compteurs de notes. */
+async function raRefresh() {
+  try {
+    const res = await fetch('/api/risk-assessment/' + RA.assessment.id);
+    if (!res.ok) return;
+    RA.assessment = await res.json();
+    raRenderFloors();
+  } catch (e) { /* le compteur se remettra à jour au prochain chargement */ }
+}
+
+/* ── Relevé du niveau ────────────────────────────────────── */
+
+async function raLoadLog() {
+  const card = raEl('ra-card-log');
+  card.style.display = '';
+  raEl('ra-log-title').textContent = 'Relevé — ' + raFloorLabel(RA.floorNumber);
+
+  try {
+    const res = await fetch('/api/risk-assessment/' + RA.assessment.id +
+                            '/floors/' + RA.floorNumber + '/notes');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    raRenderLog(data.notes || []);
+  } catch (e) {
+    raEl('ra-log-body').textContent = 'Chargement impossible : ' + e.message;
+  }
+}
+
+function raPill(text, variant) {
+  const s = document.createElement('span');
+  s.className = 'ra-pill ra-pill-' + variant;
+  s.textContent = text;
+  return s;
+}
+
+function raRenderLog(notes) {
+  const body = raEl('ra-log-body');
+  body.innerHTML = '';
+
+  if (!notes.length) {
+    const p = document.createElement('p');
+    p.className = 'ra-empty';
+    p.textContent = 'Aucune observation sur ce niveau pour le moment.';
+    body.appendChild(p);
+    return;
+  }
+
+  notes.forEach(n => {
+    const card = document.createElement('div');
+    card.className = 'ra-note';
+
+    const head = document.createElement('div');
+    head.className = 'ra-note-head';
+
+    const comp = document.createElement('span');
+    comp.className = 'ra-note-comp';
+    comp.textContent = n.component;
+    head.appendChild(comp);
+
+    // L'état et le risque sont portés par les photos (mêmes valeurs pour toute la note).
+    const tag = (n.photos && n.photos[0]) || {};
+    const etat   = tag.condition  || 'non_renseigne';
+    const risque = tag.risk_level || 'non_renseigne';
+    if (etat !== 'non_renseigne')   head.appendChild(raPill(RA_ETATS[etat] || etat, etat));
+    if (risque !== 'non_renseigne') head.appendChild(raPill(RA_RISQUES[risque] || risque, risque));
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'ra-note-del';
+    del.dataset.delNote = String(n.id);
+    del.title = 'Supprimer cette observation';
+    del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    head.appendChild(del);
+
+    card.appendChild(head);
+
+    const txt = document.createElement('div');
+    txt.className = 'ra-note-text';
+    txt.textContent = n.note_text;
+    card.appendChild(txt);
+
+    if (n.photos && n.photos.length) {
+      const thumbs = document.createElement('div');
+      thumbs.className = 'ra-thumbs';
+      n.photos.forEach(p => {
+        const a = document.createElement('a');
+        a.className = 'ra-thumb';
+        a.href = p.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.title = 'Ouvrir la photo';
+        const img = document.createElement('img');
+        img.src = p.thumb;
+        img.alt = n.component;
+        img.loading = 'lazy';
+        a.appendChild(img);
+        thumbs.appendChild(a);
+      });
+      card.appendChild(thumbs);
+    }
+
+    body.appendChild(card);
+  });
+}
+
+async function raDeleteNote(noteId) {
+  if (!confirm('Supprimer cette observation et ses photos ?')) return;
+  try {
+    const res = await fetch('/api/risk-assessment/' + RA.assessment.id + '/notes/' + noteId,
+                            { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    await raRefresh();
+    await raLoadLog();
+  } catch (e) {
+    raEl('ra-log-body').insertAdjacentText('afterbegin', 'Suppression impossible : ' + e.message);
+  }
+}
+
+/* ── Niveau : renommage, export, réinitialisation ────────── */
+
+async function raRenameFloor() {
+  if (!RA.floorNumber) return;
+  const current = raFloorLabel(RA.floorNumber);
+  const label = (prompt('Nom du niveau :', current) || '').trim();
+  if (!label || label === current) return;
+  try {
+    const res = await fetch('/api/risk-assessment/' + RA.assessment.id +
+                            '/floors/' + RA.floorNumber, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ floor_label: label }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    await raRefresh();
+    raRenderComponents();
+    raEl('ra-log-title').textContent = 'Relevé — ' + raFloorLabel(RA.floorNumber);
+  } catch (e) { /* le libellé reste inchangé */ }
+}
+
+async function raExport() {
+  try {
+    const res = await fetch('/api/risk-assessment/' + RA.assessment.id + '/export');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = 'releve-risques-' + RA.assessment.id + '.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (e) { /* export indisponible */ }
+}
+
+function raReset() {
+  if (!confirm('Démarrer un nouveau relevé ? Le relevé en cours reste enregistré.')) return;
+  raClearPhotos();
+  RA.assessment = null;
+  RA.floorNumber = null;
+  RA.component = null;
+  ['ra-card-floors','ra-card-components','ra-card-note','ra-card-log']
+    .forEach(id => { raEl(id).style.display = 'none'; });
+  raEl('ra-card-setup').style.display = '';
+  raStatus('ra-setup-status', '');
+}
+
+/* ── Câblage des événements (délégation) ─────────────────── */
+
+(function raWire() {
+  const page = raEl('page-risques-assessment');
+  if (!page) return;
+
+  page.addEventListener('click', ev => {
+    const tile = ev.target.closest('.ra-tile');
+    if (tile && page.contains(tile)) {
+      if (tile.dataset.addType) { raAddBuildingType(); return; }
+      if (tile.dataset.btype)   { RA.buildingType = tile.dataset.btype;
+                                  raMarkBuildingType(RA.buildingType);
+                                  raStatus('ra-setup-status', ''); return; }
+      if (tile.dataset.floor)   { raSelectFloor(parseInt(tile.dataset.floor, 10)); return; }
+      if (tile.dataset.comp)    { raSelectComponent(tile.dataset.comp); return; }
+    }
+    const rm = ev.target.closest('[data-rm-photo]');
+    if (rm) { raRemovePhoto(parseInt(rm.dataset.rmPhoto, 10)); return; }
+
+    const dn = ev.target.closest('[data-del-note]');
+    if (dn) { raDeleteNote(parseInt(dn.dataset.delNote, 10)); return; }
+  });
+
+  raEl('ra-start-btn') .addEventListener('click', raStart);
+  raEl('ra-rename-btn').addEventListener('click', raRenameFloor);
+  raEl('ra-export-btn').addEventListener('click', raExport);
+  raEl('ra-new-btn')   .addEventListener('click', raReset);
+  raEl('ra-save-btn')  .addEventListener('click', raSaveNote);
+  raEl('ra-cancel-btn').addEventListener('click', () => {
+    raClearPhotos();
+    RA.component = null;
+    raRenderComponents();
+    raEl('ra-card-note').style.display = 'none';
+  });
+
+  raEl('ra-cam-btn') .addEventListener('click', () => raEl('ra-cam-input').click());
+  raEl('ra-file-btn').addEventListener('click', () => raEl('ra-file-input').click());
+  ['ra-cam-input','ra-file-input'].forEach(id => {
+    raEl(id).addEventListener('change', ev => {
+      raAddPhotos(ev.target.files);
+      ev.target.value = '';           // permet de reprendre deux fois la même photo
+    });
+  });
+
+  raEl('ra-client').addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') { ev.preventDefault(); raStart(); }
+  });
+})();
 
 /* ════════════════════════════════════════════════════════════
    INIT DEFAULT PAGE

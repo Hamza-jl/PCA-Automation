@@ -386,12 +386,18 @@ def _find_sheet_xml_path(zf: zipfile.ZipFile, sheet_name: str) -> str:
         sh = wb_xml.find(".//x:sheet", ns)
         sheet_rId = sh.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
 
-    # Parse xl/_rels/workbook.xml.rels to get the actual file path
+    # Parse xl/_rels/workbook.xml.rels to get the actual file path.
+    # Per OPC, a Target starting with "/" is package-root-relative (openpyxl
+    # writes worksheet targets this way, e.g. "/xl/worksheets/sheet1.xml");
+    # anything else is relative to the .rels file's own folder, i.e. "xl/"
+    # (e.g. "worksheets/sheet1.xml" or "styles.xml").
     rels_xml = _ET.fromstring(zf.read("xl/_rels/workbook.xml.rels"))
     for rel in rels_xml:
         if rel.get("Id") == sheet_rId:
             target = rel.get("Target")
-            if not target.startswith("xl/"):
+            if target.startswith("/"):
+                target = target.lstrip("/")
+            else:
                 target = "xl/" + target
             return target
 
@@ -778,6 +784,23 @@ Option de traitement retenue : {row['option']}
 Propose un Plan d'actions pour traiter ce constat."""
 
 
+def _looks_degenerate(text: str) -> bool:
+    """
+    Small models occasionally echo their own system prompt back instead of
+    answering it, or fall into a loop repeating the same sentence until the
+    token budget runs out. Both failure modes leave a tell: the same
+    non-trivial line appears several times. Catch that rather than shipping
+    it into a client's action-plan spreadsheet.
+    """
+    lines = [l.strip() for l in text.split("\n") if len(l.strip()) > 15]
+    if not lines:
+        return False
+    from collections import Counter
+    counts = Counter(lines)
+    most_common, n = counts.most_common(1)[0]
+    return n >= 3
+
+
 def stream_suggestion(
     row: dict,
     model: str,
@@ -786,45 +809,84 @@ def stream_suggestion(
     """
     Stream an AI suggestion for a risk row via Ollama.
     Yields SSE-formatted strings: data lines + final timing line.
+
+    Uses /api/chat with the instructions on the "system" role and the risk
+    constat on "user", rather than /api/generate's flat system+prompt
+    concatenation — small instruct models follow the former far more
+    reliably and are much less prone to echoing the instructions back as
+    if they were the answer. repeat_penalty is set explicitly (Ollama's
+    default is too weak to reliably stop a small model from looping on the
+    same sentence).
     """
     prompt = build_prompt(row)
-    payload = {
-        "model": model,
-        "system": PCA_CONTEXT,
-        "prompt": prompt,
-        "stream": True,
-        "options": {
-            "temperature": 0.3,
-            "top_p": 0.9,
-            "num_predict": 512,
+
+    def _payload(repeat_penalty: float, temperature: float) -> dict:
+        return {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": PCA_CONTEXT},
+                {"role": "user", "content": prompt},
+            ],
+            "stream": True,
+            "options": {
+                "temperature": temperature,
+                "top_p": 0.9,
+                "repeat_penalty": repeat_penalty,
+                "num_predict": 400,
+            }
         }
-    }
+
+    def _run(client: httpx.Client, repeat_penalty: float, temperature: float,
+             live: bool):
+        """One generation attempt. If live, tokens are yielded as they
+        arrive (normal streaming feel); if not, they're only accumulated —
+        used for the silent retry so a bad first attempt is never shown."""
+        text = ""
+        first_tok = None
+        t0 = time.perf_counter()
+        with client.stream("POST", f"{OLLAMA_BASE}/api/chat",
+                           json=_payload(repeat_penalty, temperature)) as resp:
+            resp.raise_for_status()
+            for line in resp.iter_lines():
+                if not line:
+                    continue
+                try:
+                    chunk = json.loads(line)
+                except Exception:
+                    continue
+                token = chunk.get("message", {}).get("content", "")
+                if token:
+                    if first_tok is None:
+                        first_tok = time.perf_counter() - t0
+                    text += token
+                    if live:
+                        yield f"data: {json.dumps({'type':'token','text':token})}\n\n"
+                if chunk.get("done"):
+                    break
+        return text, (first_tok or (time.perf_counter() - t0)), time.perf_counter() - t0
 
     start = time.perf_counter()
-    first_token_time: float | None = None
-    full_text = ""
-
     try:
         with httpx.Client(timeout=timeout) as client:
-            with client.stream("POST", f"{OLLAMA_BASE}/api/generate", json=payload) as resp:
-                resp.raise_for_status()
-                for line in resp.iter_lines():
-                    if not line:
-                        continue
-                    try:
-                        chunk = json.loads(line)
-                    except Exception:
-                        continue
-                    token = chunk.get("response", "")
-                    if token:
-                        if first_token_time is None:
-                            first_token_time = time.perf_counter() - start
-                        full_text += token
-                        yield f"data: {json.dumps({'type':'token','text':token})}\n\n"
-                    if chunk.get("done"):
-                        elapsed = time.perf_counter() - start
-                        yield f"data: {json.dumps({'type':'done','elapsed':round(elapsed,2),'ttft':round(first_token_time or elapsed,2),'model':model,'text':full_text})}\n\n"
-                        return
+            full_text, first_token_time, _ = yield from _run(
+                client, repeat_penalty=1.3, temperature=0.3, live=True)
+
+            if _looks_degenerate(full_text):
+                # First attempt looped or echoed the prompt. Retry once,
+                # silently (no tokens sent to the client until we have a
+                # clean result) with a stronger repeat penalty.
+                retry_text, _, _ = yield from _run(client, repeat_penalty=1.6,
+                                                   temperature=0.5, live=False)
+                if retry_text.strip() and not _looks_degenerate(retry_text):
+                    full_text = retry_text
+                    for chunk_text in [full_text[i:i+40] for i in range(0, len(full_text), 40)]:
+                        yield f"data: {json.dumps({'type':'token','text':chunk_text})}\n\n"
+                # If the retry is also degenerate, ship the original first
+                # attempt rather than nothing — it's visibly wrong in the
+                # editor and the user can hit "regenerate" themselves.
+
+            elapsed = time.perf_counter() - start
+            yield f"data: {json.dumps({'type':'done','elapsed':round(elapsed,2),'ttft':round(first_token_time or elapsed,2),'model':model,'text':full_text})}\n\n"
     except httpx.ConnectError:
         yield f"data: {json.dumps({'type':'error','message':'Ollama non disponible — lancez `ollama serve` sur ce PC.'})}\n\n"
     except Exception as e:

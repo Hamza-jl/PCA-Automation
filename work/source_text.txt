@@ -1,0 +1,645 @@
+﻿   0: PLAN DE CONTINUIT
+   1: É
+   2: D’ACTIVIT
+   3: É
+   4: DOCPROPERTY  Title  \* MERGEFORMAT
+   5: EXPRESSION DES BESOINS M
+   6: É
+   7: TIERS
+   8: Division animation commerciale
+   9: Ce document contient des informations confidentielles qui sont la propriété
+  10: de la
+  11: STAR
+  12: . Il ne peut être diffusé ou transféré en dehors de votre organisation sans l’autorisation écrit
+  13: e d’
+  14: une personne habilitée
+  15: par
+  16: la
+  17: STAR
+  18: .
+  19: Fiche de suivi
+  20: Entité
+  21: Division animation commerciale
+  22: Présents
+  23: Nom
+  24: Fonction
+  25: Naoufel Jawadi
+  26: Anis BERREJEB
+  27: Asma BOUZAIEN
+  28: Aymen Salhi
+  29: Houcem LIMAM
+  30: Rania CHERIF
+  31: Risk & Cyber Advisory Senior -
+  32: Devoteam
+  33: Rédacteur
+  34: Devoteam
+  35: Version
+  36: 2
+  37: .0
+  38: Dernière mise à jour
+  39: Référence du document
+  40: FILENAME   \* MERGEFORMAT
+  41: STAR - MCO - BIA
+  42: Division animation commerciale
+  43: -  V
+  44: 2.0
+  45: Table des matières
+  46: TOC \o "1-3" \h \z \u
+  47: 1 Objectif
+  48: PAGEREF _Toc96935381 \h
+  49: 4
+  50: 2 Fiche d’identité de l’entité
+  51: PAGEREF _Toc96935382 \h
+  52: 5
+  53: 3 Description et criticité des activités métiers
+  54: PAGEREF _Toc96935383 \h
+  55: 6
+  56: 4 Métrique d’impact pour les processus métier
+  57: PAGEREF _Toc96935384 \h
+  58: 7
+  59: 4.1 Matrice d’impact
+  60: PAGEREF _Toc96935385 \h
+  61: 7
+  62: 4.2 Evaluation des impacts
+  63: PAGEREF _Toc96935386 \h
+  64: 7
+  65: 4.3 Durée Maximale d’interruption d’activités
+  66: PAGEREF _Toc96935387 \h
+  67: 9
+  68: 5 Analyse des échanges d’information
+  69: PAGEREF _Toc96935388 \h
+  70: 10
+  71: 6 Besoins de redémarrage des activités
+  72: PAGEREF _Toc96935389 \h
+  73: 11
+  74: 6.1 Effectifs et positions de travail
+  75: PAGEREF _Toc96935390 \h
+  76: 11
+  77: 6.2 Collaborateurs clés
+  78: PAGEREF _Toc96935391 \h
+  79: 11
+  80: 6.3 Applications informatiques
+  81: PAGEREF _Toc96935392 \h
+  82: 12
+  83: 6.4 Autres équipements et outils de communication
+  84: PAGEREF _Toc96935393 \h
+  85: 12
+  86: 6.5 Documents et fichiers critiques
+  87: PAGEREF _Toc96935394 \h
+  88: 13
+  89: 7 Observations
+  90: PAGEREF _Toc96935395 \h
+  91: 14
+  92: Table des matières
+  93: Table des tableaux
+  94: TOC \h \z \c "Tableau"
+  95: Tableau 1 : Terminologies
+  96: PAGEREF _Toc97023666 \h
+  97: 5
+  98: Tableau 2 : Abréviations
+  99: PAGEREF _Toc97023667 \h
+ 100: 5
+ 101: Tableau 3 : Fiche identité de l’entité
+ 102: PAGEREF _Toc97023668 \h
+ 103: 7
+ 104: Tableau 4 : Description et criticité des activités métiers
+ 105: PAGEREF _Toc97023669 \h
+ 106: 8
+ 107: Tableau 5 : Matrice d’impact
+ 108: PAGEREF _Toc97023670 \h
+ 109: 9
+ 110: Tableau 6 : Impact entité X
+ 111: PAGEREF _Toc97023671 \h
+ 112: 10
+ 113: Tableau 7 : Impact entité X
+ 114: PAGEREF _Toc97023672 \h
+ 115: 10
+ 116: Tableau 8 : Durée maximale d’interruption d’activité
+ 117: PAGEREF _Toc97023673 \h
+ 118: 11
+ 119: Tableau 9 : Analyse des échanges d’information
+ 120: PAGEREF _Toc97023674 \h
+ 121: 12
+ 122: Tableau 10 : Effectif et positions de travail
+ 123: PAGEREF _Toc97023675 \h
+ 124: 13
+ 125: Tableau 11 : Les collaborateurs de repli
+ 126: PAGEREF _Toc97023676 \h
+ 127: 13
+ 128: Tableau 12 : Les applications informatiques
+ 129: PAGEREF _Toc97023677 \h
+ 130: 14
+ 131: Tableau 13 : Autres équipements et outils de communication
+ 132: PAGEREF _Toc97023678 \h
+ 133: 14
+ 134: Tableau 14 : Documents et fichiers critiques
+ 135: PAGEREF _Toc97023679 \h
+ 136: 15
+ 137: Terminologie et abréviations
+ 138: Terminologie
+ 139: s
+ 140: Terme
+ 141: Description
+ 142: Plan de Continuité d’Activité (PCA)
+ 143: Ensemble du dispositif de continuité d’activité
+ 144: Plan de secours informatique (PSI)
+ 145: Plan déclenché pour la reprise du système d’information
+ 146: Analyse d’impact
+ 147: Analyse d’impacts d’un sinistre sur les activités
+ 148: Expression de Besoins en Continuité des Activités
+ 149: Estimation des locaux, matériels, personnels et services pour assurer la continuité des activités
+ 150: DMIA
+ 151: D
+ 152: urée au-delà de laquelle une interruption de l’activité peut être préjudiciable pour la pérennité de l’entité et de l’entreprise
+ 153: PMDT
+ 154: D
+ 155: urée maximale d’enregistrement des données qu’il est acceptable de perdre entre la dernière sauvegarde et le sinistre provoquant une perte de données
+ 156: Tableau
+ 157: SEQ Tableau \* ARABIC
+ 158: 1
+ 159: : Terminologie
+ 160: s
+ 161: Abréviations
+ 162: Abréviation
+ 163: Définition
+ 164: PCA
+ 165: Plan de Continuité d’activité
+ 166: DMIA
+ 167: Durée Maximale d’Interruption Admissible
+ 168: PMDT
+ 169: Perte Maximale de Données Tolérée
+ 170: V
+ 171: Vitale
+ 172: C
+ 173: Critique
+ 174: PC
+ 175: Peu critique
+ 176: MC
+ 177: Moyennement critique
+ 178: NA
+ 179: Non applicable
+ 180: Tableau
+ 181: SEQ Tableau \* ARABIC
+ 182: 2
+ 183: :
+ 184: Abréviations
+ 185: Objectif
+ 186: L’objectif de ce document est de recueillir les besoins métiers en termes de continuité d’activité dans
+ 187: le cadre
+ 188: du projet
+ 189: du maintien en condition opérationnelle
+ 190: de
+ 191: la
+ 192: STAR
+ 193: .
+ 194: La phase d’identification des besoins métiers a pour objectifs de :
+ 195: Inventorier
+ 196: les processus métiers et supports ;
+ 197: Évaluer
+ 198: les contraintes de fonctionnement normal de chacun des processus (réglementaires, contractuels, confidentialité, déontologie, etc.) ;
+ 199: Analyser
+ 200: les impacts d’arrêt de chacun des processus (image de marque, financiers, désorganisation interne, juridiques) ;
+ 201: Déduire
+ 202: en fonction des contraintes de fonctionnement et des impacts d’arrêt le périmètre des processus critiques à secourir ;
+ 203: Modéliser
+ 204: la chaîne d’activité de chacun des processus critiques.
+ 205: Pour ce faire, les responsables des activités métiers doivent être rencontrés afin de déterminer les impacts et les besoins suite à un sinistre majeur.
+ 206: Fiche d’identité de l’entité
+ 207: Nom du (des) responsable(s)
+ 208: Naoufel JAOUADI
+ 209: Organisation et effectifs
+ 210: L’entité
+ 211: se compose
+ 212: de 5 personnes divisées comme suit :
+ 213: Un responsable de la division
+ 214: Un d
+ 215: épartement pilotage et suivi de l’activité des points de vente composé
+ 216: d’
+ 217: un sous-directeur et
+ 218: 3
+ 219: collaborateur
+ 220: s
+ 221: Les
+ 222: Régions commerciales
+ 223: sont
+ 224: composées de 6 chefs de régions
+ 225: Présentation générale de l’activité (produits, services, etc.)
+ 226: Les activités principales de l
+ 227: ’entité
+ 228: sont les suivantes :
+ 229: Animation, suivi et pilotage du réseau commercial de la STAR (succursales et agences)
+ 230: Principales contraintes liées à l’activité (réglementaires, juridiques, contractuelles, etc.)
+ 231: Les contraintes de l’activité sont les suivantes :
+ 232: Retard des demandes de cotations
+ 233: Chaque mois : envoi les tableaux de bords de l’activité des points de vente
+ 234: Périodes critiques
+ 235: Les périodes critiques de l’activité sont les suivantes :
+ 236: Période estivale
+ 237: Le premier trimestre de l’année
+ 238: Historique des interruptions majeures
+ 239: Arrêt du système (pendant une heure)
+ 240: Tableau
+ 241: SEQ Tableau \* ARABIC
+ 242: 3
+ 243: : Fiche identité de l’entité
+ 244: Description et criticité des activités métiers
+ 245: Pour chaque processus :
+ 246: Indiquer
+ 247: les ressources IT ou autres utilisées ;
+ 248: Préciser
+ 249: les périodes critiques ;
+ 250: Déterminer
+ 251: la criticité correspondante, à savoir :
+ 252: Faible
+ 253: : L’activité correspondante peut être reportée pour une période relativement flexible ;
+ 254: Moyenne
+ 255: : L’activité correspondante peut être reportée pour une période limitée ;
+ 256: Forte
+ 257: : L’activité correspondante ne peut pas être reportée, elle doit être opérationnelle même de façon dégradée.
+ 258: Activité
+ 259: Ressources utilisées
+ 260: (Outils informatique, téléphone, Fax, documents, …)
+ 261: Période critique
+ 262: Criticité
+ 263: Animation, suivi et pilotage du réseau commercial de la STAR (succursales et agences)
+ 264: Espace commun
+ 265: reporting
+ 266: Office 365
+ 267: PC
+ 268: Le premier trimestre de l’année (Décembre
+ 269: Mars)
+ 270: Forte
+ 271: Tableau
+ 272: SEQ Tableau \* ARABIC
+ 273: 4
+ 274: : Description et criticité des activités métiers
+ 275: Métrique d’impact pour les processus métier
+ 276: Matrice d’impact
+ 277: Le tableau suivant présente la matrice d’impact qui va être utilisée durant toute la phase d’analyse des impacts métiers.
+ 278: Impacts /
+ 279: Sévérité
+ 280: Poids
+ 281: Description
+ 282: Niveau 1
+ 283: Faible
+ 284: Niveau 2
+ 285: Significatif
+ 286: Niveau 3
+ 287: Majeur
+ 288: Niveau 4
+ 289: Catastrophique
+ 290: Image
+ 291: de marque
+ 292: 4
+ 293: Perte de confiance
+ 294: Perte de clientèle
+ 295: Faible nuisance
+ 296: nécessitant quelques jours pour être résorbées
+ 297: Nuisance significative sur le Front Office et dégradation de l’image en interne
+ 298: Nuisance grave sur la
+ 299: société
+ 300: Dégradation auprès des tiers (fournisseur, régulateur, …)
+ 301: Couverture médiatique négative limitée dans le temps
+ 302: Vaste couverture médiatique négative
+ 303: Perte de confiance dans la
+ 304: société
+ 305: Désorganisation interne
+ 306: 1
+ 307: Désorganisation liée au fonctionnement dégradé
+ 308: Surcharge pour rattraper le retard
+ 309: Faible nuisance interne à l’entité
+ 310: Désorganisation significative limitée à un service
+ 311: Désorganisation durable
+ 312: Détérioration du climat social
+ 313: Chômage technique d’une importante proportion du personnel
+ 314: Incapacité à résorber le travail en retard
+ 315: Réglementaire
+ 316: 2
+ 317: Non-respect des obligations contractuelle, réglementaires
+ 318: Faible
+ 319: Non-respect de la réglementation comptable, fiscale…
+ 320: Infraction majeure à la législation
+ 321: Sanction judiciaire
+ 322: Financier
+ 323: 3
+ 324: Manque à gagner
+ 325: Pénalité de retard
+ 326: Perte inférieure à 10.000 DT
+ 327: Perte entre 10.000 et 50.000 DT
+ 328: Perte entre 50.000 et 100.000 DT
+ 329: Perte supérieure à 100.000 DT
+ 330: Tableau
+ 331: SEQ Tableau \* ARABIC
+ 332: 5
+ 333: : Matrice d’impact
+ 334: É
+ 335: valuation des impacts
+ 336: Selon la matrice d’impact présentée ci-dessus (
+ 337: cf.5.1
+ 338: ), il faut préciser le niveau d’évaluation de l’impact d’arrêt des activités de
+ 339: l’entité
+ 340: (faible, significatif, majeur ou catastrophique) pour chacun des critères d’impact mentionnés dans la première colonne à gauche.
+ 341: Pour cela, il faut prendre en considération la période la plus critique (début ou fin de mois, journalier, autre).
+ 342: Animation, suivi et pilotage du réseau commercial de la STAR
+ 343: A
+ 344: Interruption
+ 345: <
+ 346: 1
+ 347: jour
+ 348: B
+ 349: Interruption
+ 350: ≥
+ 351: 5
+ 352: jours
+ 353: Image
+ 354: de marque
+ 355: 1
+ 356: 1
+ 357: Désorganisation interne
+ 358: 1
+ 359: 2
+ 360: Juridique et réglementaire
+ 361: 1
+ 362: 1
+ 363: Financier
+ 364: 4
+ 365: 4
+ 366: Tableau
+ 367: 6
+ 368: :
+ 369: Animation, suivi et pilotage du réseau commercial de la STAR
+ 370: Durée
+ 371: m
+ 372: aximale d’interruption d’activités
+ 373: Dans le tableau présenté ci-dessous, il faut indiquer la Durée Maximale d’Interruption Admissible (DMIA) dans le cas d’un sinistre majeur.
+ 374: Processus
+ 375: DMIA Exprimée
+ 376: Premières actions à mener en cas de survenance d’un sinistre
+ 377: Animation, suivi et pilotage du réseau commercial de la STAR
+ 378: 1J
+ 379: -
+ 380: Tableau
+ 381: 7
+ 382: :
+ 383: Durée maximale d’interruption d’activité
+ 384: Analyse des échanges d’information
+ 385: Dans le tableau présenté ci-dessous, il faut :
+ 386: Lister
+ 387: les groupes fonctionnels (internes / externes) avec lesquels vous interagissez ;
+ 388: Préciser
+ 389: si ce
+ 390: groupe fonctionnel est interne
+ 391: ou externe ;
+ 392: Décrire
+ 393: le type d’informations échangées (fichier, fax, etc.) et le sens de transfert (Transmis et/ou Reçu) ;
+ 394: Lister
+ 395: les outils, applications
+ 396: et ressources
+ 397: SI utilisées.
+ 398: Groupes fonctionnels / Correspondants
+ 399: (I/E)
+ 400: Interne / Externe
+ 401: Type d’information
+ 402: (T/R)
+ 403: Transmis/ Reçu
+ 404: Ressources SI utilisées
+ 405: Tous les départements métiers et transverses
+ 406: I
+ 407: Demandes de cotations
+ 408: Propositions d’offres
+ 409: Réclamations réseau
+ 410: T / R
+ 411: Mail
+ 412: Téléphone
+ 413: Agents de la STAR
+ 414: I
+ 415: Réclamations
+ 416: Demandes de cotations
+ 417: T / R
+ 418: Mail
+ 419: Téléphone
+ 420: Les chefs des régions
+ 421: I
+ 422: Statistiques
+ 423: Rapports d’activité hebdomadaire
+ 424: Réclamations
+ 425: T / R
+ 426: Mail
+ 427: Téléphone
+ 428: Les clients
+ 429: E
+ 430: Informations sur l’activité pour une éventuelle offre d’assurance
+ 431: T / R
+ 432: Mail
+ 433: Téléphone
+ 434: Les prestataires, Hôtels, boites de communications, etc.
+ 435: E
+ 436: Bons de commandes
+ 437: Statistiques
+ 438: Devis
+ 439: Validations
+ 440: Contrats
+ 441: T / R
+ 442: Mail
+ 443: Tableau
+ 444: 8
+ 445: :
+ 446: A
+ 447: nalyse des échanges d’information
+ 448: Besoins de redémarrage des activités
+ 449: Effectifs et positions de travail
+ 450: Cette table décrit les besoins de continuité de l’entité en termes d’effectifs et de positions de travail. Il s’agit de :
+ 451: Préciser
+ 452: l’effectif nominal ;
+ 453: Évaluer
+ 454: les besoins en termes d’effectif et de position de travail pour la continuité d’activité, en fonction de la DMIA ;
+ 455: Spécifier
+ 456: le besoin en termes de positions spécifiques ou spéciales ainsi que les équipements et/ou logiciels spécifiques associés.
+ 457: Montée en charge souhaitée
+ 458: Nominal
+ 459: H+2
+ 460: H+4
+ 461: J+1
+ 462: J+2
+ 463: J+3
+ 464: J+5
+ 465: J+10
+ 466: J+15
+ 467: Commentaires
+ 468: Effectif
+ 469: 5
+ 470: Animation, suivi et pilotage du réseau commercial de la STAR
+ 471: Positions
+ 472: Télétravail
+ 473: +2
+ 474: Effectif cumulé
+ 475: Positions cumulées
+ 476: Télétravail cumulés
+ 477: +2
+ 478: % Effectif cumulé
+ 479: Tableau
+ 480: 9
+ 481: :
+ 482: E
+ 483: ffectif et position
+ 484: s
+ 485: de travail
+ 486: Collaborateurs clés
+ 487: Par collaborateur clé on entend :
+ 488: Tout
+ 489: collaborateur qui dispose d’une expertise rare/pointue ;
+ 490: Tout
+ 491: collaborateur assurant une tâche tout seul ;
+ 492: Tout
+ 493: collaborateur dont le potentiel d’encadrement est affirmé au sein de l’équipe.
+ 494: Fonction
+ 495: Nom
+ 496: Prénom
+ 497: Ancienneté
+ 498: Suppléants possibles
+ 499: Responsable de la division animation commerciale
+ 500: JAOUADI
+ 501: Naoufel
+ 502: 24 ans
+ 503: Anis BERREJEB
+ 504: Manager du département
+ 505: BERREJEB
+ 506: Anis
+ 507: 20 ans
+ 508: Naoufel JAOUADI
+ 509: Latifa CHAARANA
+ 510: Refka EL AYEB
+ 511: Samar
+ 512: JANDOUBI
+ 513: Fondé pouvoirs
+ 514: CHAARANA
+ 515: Latifa
+ 516: +20 ans
+ 517: Refka
+ 518: Chef service adjoint
+ 519: EL AYEB
+ 520: Refka
+ 521: 18 ans
+ 522: Latifa
+ 523: Chef section
+ 524: JANDOUBI
+ 525: Samar
+ 526: 8 ans
+ 527: Anis BERREJEB
+ 528: Tableau
+ 529: 1
+ 530: 0
+ 531: :
+ 532: L
+ 533: es collaborateurs de repli
+ 534: Applications informatiques
+ 535: Le tableau suivant représente les applications informatiques utilisées par
+ 536: l’
+ 537: entité ainsi que :
+ 538: La
+ 539: criticité :
+ 540: Vitale
+ 541: (V) : si le processus métier est arrêté en cas d’indisponibilité de l’application ;
+ 542: Critique
+ 543: (C) : si le processus nécessite un travail manuel pour contourner l’application ;
+ 544: Moyennement
+ 545: critique (MC) : si le processus métier nécessite un contournement de l’application indisponible par une autre application ;
+ 546: Peu
+ 547: critique (PC) : si le processus métier est opérationnel et peu impacté ;
+ 548: La
+ 549: DMIA - Durée Maximale d’Interruption Admissible : durée au-delà de laquelle une interruption de l’activité peut être préjudiciable pour la pérennité de l’entité et de l’entreprise ;
+ 550: La
+ 551: PMDT– Perte Maximale de Données tolérée : durée maximale d’enregistrement des données qu’il est acceptable de perdre entre la dernière sauvegarde et le sinistre provoquant une perte de données.
+ 552: Application
+ 553: Criticité
+ 554: DMIA
+ 555: PMDT
+ 556: Commentaires
+ 557: Commun
+ 558: reporting
+ 559: V
+ 560: 3J
+ 561: 5J
+ 562: -
+ 563: PI
+ 564: V
+ 565: 3J
+ 566: 3J
+ 567: (La DMIA
+ 568: / PMDT
+ 569: dépend parfois du client)
+ 570: Pro ASSUR
+ 571: V
+ 572: 3J
+ 573: 5J
+ 574: -
+ 575: Application IRDS
+ 576: PC
+ 577: 10J
+ 578: 15J
+ 579: -
+ 580: UNICOM
+ 581: C
+ 582: 3J
+ 583: 3J
+ 584: (La DMIA / PMDT dépend parfois du client)
+ 585: Refection
+ 586: PC
+ 587: 10J
+ 588: 15J
+ 589: -
+ 590: Office 365
+ 591: -
+ 592: -
+ 593: -
+ 594: -
+ 595: Application réseau STAR
+ 596: PC
+ 597: 10J
+ 598: 15J
+ 599: -
+ 600: Tableau
+ 601: 1
+ 602: 1
+ 603: :
+ 604: Les
+ 605: applications informatiques
+ 606: Autres équipements et outils de communication
+ 607: Le tableau suivant présente les équipements et outils de communication qui doivent être disponible
+ 608: s
+ 609: au niveau du site de secours.
+ 610: Désignation
+ 611: H+2
+ 612: H+4
+ 613: J+1
+ 614: J+2
+ 615: J+3
+ 616: J+5
+ 617: J+10
+ 618: J+15
+ 619: PC
+ 620: +2
+ 621: Casques
+ 622: +2
+ 623: Internet / VPN
+ 624: Tableau
+ 625: 1
+ 626: 2
+ 627: : Autres équipements et outils de communication
+ 628: Documents et fichiers critiques
+ 629: Dans le tableau suivant, il faut détailler les documents et fichiers critiques utilisés au niveau de
+ 630: l’entité
+ 631: .
+ 632: Documents /
+ 633: Fichiers
+ 634: Type de stockage
+ 635: (Electronique/Papier)
+ 636: Duplication (O/N)
+ 637: Si oui, où ?
+ 638: RAS
+ 639: Tableau
+ 640: 1
+ 641: 3
+ 642: SEQ Tableau \* ARABIC
+ 643: : Documents et fichiers critiques
+ 644: Observations

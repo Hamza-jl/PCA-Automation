@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  bia-app:
+    image: bia-automatique:latest
+    container_name: bia-automatique
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist the SQLite database and any generated files between restarts
+      - bia_data:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  bia_data:

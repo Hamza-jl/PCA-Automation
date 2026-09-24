@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<w:ftr xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex" xmlns:cx1="http://schemas.microsoft.com/office/drawing/2015/9/8/chartex" xmlns:cx2="http://schemas.microsoft.com/office/drawing/2015/10/21/chartex" xmlns:cx3="http://schemas.microsoft.com/office/drawing/2016/5/9/chartex" xmlns:cx4="http://schemas.microsoft.com/office/drawing/2016/5/10/chartex" xmlns:cx5="http://schemas.microsoft.com/office/drawing/2016/5/11/chartex" xmlns:cx6="http://schemas.microsoft.com/office/drawing/2016/5/12/chartex" xmlns:cx7="http://schemas.microsoft.com/office/drawing/2016/5/13/chartex" xmlns:cx8="http://schemas.microsoft.com/office/drawing/2016/5/14/chartex" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:aink="http://schemas.microsoft.com/office/drawing/2016/ink" xmlns:am3d="http://schemas.microsoft.com/office/drawing/2017/model3d" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:oel="http://schemas.microsoft.com/office/2019/extlst" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w10="urn:schemas-microsoft-com:office:word" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:w16cex="http://schemas.microsoft.com/office/word/2018/wordml/cex" xmlns:w16cid="http://schemas.microsoft.com/office/word/2016/wordml/cid" xmlns:w16="http://schemas.microsoft.com/office/word/2018/wordml" xmlns:w16du="http://schemas.microsoft.com/office/word/2023/wordml/word16du" xmlns:w16sdtdh="http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash" xmlns:w16sdtfl="http://schemas.microsoft.com/office/word/2024/wordml/sdtformatlock" xmlns:w16se="http://schemas.microsoft.com/office/word/2015/wordml/symex" xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup" xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 w15 w16se w16cid w16 w16cex w16sdtdh w16sdtfl w16du wp14">
+  <w:p w14:paraId="0953BD8E" w14:textId="77777777" w:rsidR="006102D3" w:rsidRDefault="006102D3" w:rsidP="00C4162B">
+    <w:pPr>
+      <w:pStyle w:val="Pieddepage"/>
+    </w:pPr>
+  </w:p>
+  <w:p w14:paraId="225DF967" w14:textId="75C7C97C" w:rsidR="000E5F67" w:rsidRPr="00D817AB" w:rsidRDefault="000E5F67" w:rsidP="00C4162B">
+    <w:pPr>
+      <w:pStyle w:val="Pieddepage"/>
+      <w:rPr>
+        <w:noProof/>
+        <w:color w:val="F8485E" w:themeColor="text2"/>
+        <w:sz w:val="16"/>
+        <w:szCs w:val="16"/>
+        <w:lang w:val="fr-FR"/>
+      </w:rPr>
+    </w:pPr>
+  </w:p>
+  <w:tbl>
+    <w:tblPr>
+      <w:tblStyle w:val="Grilledutableau"/>
+      <w:tblpPr w:vertAnchor="page" w:horzAnchor="page" w:tblpX="8839" w:tblpYSpec="bottom"/>
+      <w:tblW w:w="2835" w:type="dxa"/>
+      <w:tblLayout w:type="fixed"/>
+      <w:tblCellMar>
+        <w:top w:w="0" w:type="dxa"/>
+        <w:left w:w="0" w:type="dxa"/>
+        <w:bottom w:w="0" w:type="dxa"/>
+        <w:right w:w="0" w:type="dxa"/>
+      </w:tblCellMar>
+      <w:tblLook w:val="0600" w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/>
+    </w:tblPr>
+    <w:tblGrid>
+      <w:gridCol w:w="2268"/>
+      <w:gridCol w:w="567"/>
+    </w:tblGrid>
+    <w:tr w:rsidR="000E5F67" w14:paraId="0C5CAFC7" w14:textId="77777777" w:rsidTr="00143905">
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="2268" w:type="dxa"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="0A35A0BD" w14:textId="77777777" w:rsidR="000E5F67" w:rsidRDefault="000E5F67" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Pages"/>
+          </w:pPr>
+          <w:r w:rsidRPr="00FA2F17">
+            <w:t xml:space="preserve">Page </w:t>
+          </w:r>
+          <w:r>
+            <w:fldChar w:fldCharType="begin"/>
+          </w:r>
+          <w:r>
+            <w:instrText xml:space="preserve"> PAGE  \* Arabic  \* MERGEFORMAT </w:instrText>
+          </w:r>
+          <w:r>
+            <w:fldChar w:fldCharType="separate"/>
+          </w:r>
+          <w:r>
+            <w:rPr>
+              <w:noProof/>
+            </w:rPr>
+            <w:t>15</w:t>
+          </w:r>
+          <w:r>
+            <w:rPr>
+              <w:noProof/>
+            </w:rPr>
+            <w:fldChar w:fldCharType="end"/>
+          </w:r>
+          <w:r w:rsidRPr="00FA2F17">
+            <w:t>/</w:t>
+          </w:r>
+          <w:r>
+            <w:rPr>
+              <w:noProof/>
+            </w:rPr>
+            <w:fldChar w:fldCharType="begin"/>
+          </w:r>
+          <w:r>
+            <w:rPr>
+              <w:noProof/>
+            </w:rPr>
+            <w:instrText xml:space="preserve"> NUMPAGES   \* MERGEFORMAT </w:instrText>
+          </w:r>
+          <w:r>
+            <w:rPr>
+              <w:noProof/>
+            </w:rPr>
+            <w:fldChar w:fldCharType="separate"/>
+          </w:r>
+          <w:r>
+            <w:rPr>
+              <w:noProof/>
+            </w:rPr>
+            <w:t>16</w:t>
+          </w:r>
+          <w:r>
+            <w:rPr>
+              <w:noProof/>
+            </w:rPr>
+            <w:fldChar w:fldCharType="end"/>
+          </w:r>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="567" w:type="dxa"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="46642E9A" w14:textId="77777777" w:rsidR="000E5F67" w:rsidRDefault="000E5F67" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Pieddepage"/>
+            <w:rPr>
+              <w:lang w:val="fr-FR"/>
+            </w:rPr>
+          </w:pPr>
+        </w:p>
+      </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="000E5F67" w14:paraId="7B75B931" w14:textId="77777777" w:rsidTr="00143905">
+      <w:trPr>
+        <w:trHeight w:hRule="exact" w:val="567"/>
+      </w:trPr>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="2835" w:type="dxa"/>
+          <w:gridSpan w:val="2"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="5AD012FF" w14:textId="77777777" w:rsidR="000E5F67" w:rsidRDefault="000E5F67" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Pieddepage"/>
+            <w:rPr>
+              <w:lang w:val="fr-FR"/>
+            </w:rPr>
+          </w:pPr>
+        </w:p>
+      </w:tc>
+    </w:tr>
+  </w:tbl>
+  <w:tbl>
+    <w:tblPr>
+      <w:tblStyle w:val="Grilledutableau"/>
+      <w:tblpPr w:vertAnchor="page" w:horzAnchor="page" w:tblpYSpec="bottom"/>
+      <w:tblW w:w="5261" w:type="dxa"/>
+      <w:tblLayout w:type="fixed"/>
+      <w:tblCellMar>
+        <w:top w:w="0" w:type="dxa"/>
+        <w:left w:w="0" w:type="dxa"/>
+        <w:bottom w:w="0" w:type="dxa"/>
+        <w:right w:w="0" w:type="dxa"/>
+      </w:tblCellMar>
+      <w:tblLook w:val="0600" w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/>
+    </w:tblPr>
+    <w:tblGrid>
+      <w:gridCol w:w="409"/>
+      <w:gridCol w:w="2017"/>
+      <w:gridCol w:w="409"/>
+      <w:gridCol w:w="2426"/>
+    </w:tblGrid>
+    <w:tr w:rsidR="00143905" w14:paraId="5E7CCEC5" w14:textId="77777777" w:rsidTr="00BE1CA8">
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="409" w:type="dxa"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="54DF591B" w14:textId="77777777" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Copyrightfooter"/>
+            <w:framePr w:wrap="auto" w:vAnchor="margin" w:hAnchor="text" w:xAlign="left" w:yAlign="inline"/>
+            <w:suppressOverlap w:val="0"/>
+          </w:pPr>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="2426" w:type="dxa"/>
+          <w:gridSpan w:val="2"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="176A3AF3" w14:textId="77777777" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Copyrightfooter"/>
+            <w:framePr w:wrap="auto" w:vAnchor="margin" w:hAnchor="text" w:xAlign="left" w:yAlign="inline"/>
+            <w:suppressOverlap w:val="0"/>
+          </w:pPr>
+          <w:r>
+            <w:t>Avril 2026</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="2426" w:type="dxa"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="61644375" w14:textId="77777777" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Copyrightfooter"/>
+            <w:framePr w:wrap="auto" w:vAnchor="margin" w:hAnchor="text" w:xAlign="left" w:yAlign="inline"/>
+            <w:suppressOverlap w:val="0"/>
+          </w:pPr>
+        </w:p>
+      </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="00143905" w14:paraId="32333463" w14:textId="77777777" w:rsidTr="00BE1CA8">
+      <w:trPr>
+        <w:trHeight w:hRule="exact" w:val="567"/>
+      </w:trPr>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="2426" w:type="dxa"/>
+          <w:gridSpan w:val="2"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="751551A7" w14:textId="77777777" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Pieddepage"/>
+            <w:rPr>
+              <w:lang w:val="fr-FR"/>
+            </w:rPr>
+          </w:pPr>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="2835" w:type="dxa"/>
+          <w:gridSpan w:val="2"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="4DEA57B2" w14:textId="77777777" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Pieddepage"/>
+            <w:rPr>
+              <w:lang w:val="fr-FR"/>
+            </w:rPr>
+          </w:pPr>
+        </w:p>
+      </w:tc>
+    </w:tr>
+  </w:tbl>
+  <w:tbl>
+    <w:tblPr>
+      <w:tblStyle w:val="Grilledutableau"/>
+      <w:tblpPr w:vertAnchor="page" w:horzAnchor="page" w:tblpXSpec="center" w:tblpYSpec="bottom"/>
+      <w:tblW w:w="5954" w:type="dxa"/>
+      <w:tblLayout w:type="fixed"/>
+      <w:tblCellMar>
+        <w:top w:w="0" w:type="dxa"/>
+        <w:left w:w="0" w:type="dxa"/>
+        <w:bottom w:w="0" w:type="dxa"/>
+        <w:right w:w="0" w:type="dxa"/>
+      </w:tblCellMar>
+      <w:tblLook w:val="0600" w:firstRow="0" w:lastRow="0" w:firstColumn="0" w:lastColumn="0" w:noHBand="1" w:noVBand="1"/>
+    </w:tblPr>
+    <w:tblGrid>
+      <w:gridCol w:w="5954"/>
+    </w:tblGrid>
+    <w:tr w:rsidR="00143905" w14:paraId="1145549C" w14:textId="77777777" w:rsidTr="00BE1CA8">
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="5954" w:type="dxa"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="716D82F1" w14:textId="0F2034E3" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Datefooter"/>
+            <w:framePr w:wrap="auto" w:vAnchor="margin" w:hAnchor="text" w:xAlign="left" w:yAlign="inline"/>
+            <w:suppressOverlap w:val="0"/>
+          </w:pPr>
+          <w:r>
+            <w:fldChar w:fldCharType="begin"/>
+          </w:r>
+          <w:r>
+            <w:instrText xml:space="preserve"> STYLEREF  Date  \* MERGEFORMAT </w:instrText>
+          </w:r>
+          <w:r>
+            <w:fldChar w:fldCharType="end"/>
+          </w:r>
+        </w:p>
+      </w:tc>
+    </w:tr>
+    <w:tr w:rsidR="00143905" w14:paraId="3D8470DF" w14:textId="77777777" w:rsidTr="00BE1CA8">
+      <w:trPr>
+        <w:trHeight w:hRule="exact" w:val="567"/>
+      </w:trPr>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="5954" w:type="dxa"/>
+          <w:tcBorders>
+            <w:top w:val="nil"/>
+            <w:left w:val="nil"/>
+            <w:bottom w:val="nil"/>
+            <w:right w:val="nil"/>
+          </w:tcBorders>
+          <w:shd w:val="clear" w:color="auto" w:fill="auto"/>
+        </w:tcPr>
+        <w:p w14:paraId="2BCB9E4B" w14:textId="77777777" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+          <w:pPr>
+            <w:pStyle w:val="Pieddepage"/>
+            <w:rPr>
+              <w:lang w:val="fr-FR"/>
+            </w:rPr>
+          </w:pPr>
+        </w:p>
+      </w:tc>
+    </w:tr>
+  </w:tbl>
+  <w:p w14:paraId="1CEAFBBF" w14:textId="77777777" w:rsidR="00143905" w:rsidRDefault="00143905" w:rsidP="00143905">
+    <w:pPr>
+      <w:pStyle w:val="Pieddepage"/>
+      <w:rPr>
+        <w:lang w:val="fr-FR"/>
+      </w:rPr>
+    </w:pPr>
+  </w:p>
+  <w:p w14:paraId="6C9BB78A" w14:textId="411DC31E" w:rsidR="006102D3" w:rsidRPr="00D817AB" w:rsidRDefault="006102D3" w:rsidP="00C4162B">
+    <w:pPr>
+      <w:pStyle w:val="Pieddepage"/>
+      <w:rPr>
+        <w:noProof/>
+        <w:color w:val="F8485E" w:themeColor="text2"/>
+        <w:sz w:val="16"/>
+        <w:szCs w:val="16"/>
+        <w:lang w:val="fr-FR"/>
+      </w:rPr>
+    </w:pPr>
+  </w:p>
+</w:ftr>
