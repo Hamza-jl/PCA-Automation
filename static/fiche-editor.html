@@ -1857,12 +1857,13 @@ async function generate(){
     suivi: st.suivi,
     entity: st.entity,
     participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
-    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})=>
-      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})),
+    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})=>
+      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})),
     echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
     montee_en_charge: st.monteeEnCharge,
     collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
-    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires})=>({application,criticite,dmia,pmdt,commentaires})),
+    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})=>
+      ({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})),
     app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
     documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
     observations: st.observations
@@ -1979,12 +1980,13 @@ async function doSave(){
     suivi: st.suivi,
     entity: st.entity,
     participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
-    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})=>
-      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})),
+    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})=>
+      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})),
     echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
     montee_en_charge: st.monteeEnCharge,
     collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
-    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires})=>({application,criticite,dmia,pmdt,commentaires})),
+    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})=>
+      ({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})),
     app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
     documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
     observations: st.observations
@@ -2052,7 +2054,10 @@ function populateState(data){
     ressources_utilisees:a.ressources_utilisees||'',
     periode_critique:a.periode_critique||'', criticite:a.criticite||'',
     dmia_exprimee:a.dmia_exprimee||'', premieres_actions:a.premieres_actions||'',
-    impacts:a.impacts||emptyImpacts()
+    impacts:a.impacts||emptyImpacts(),
+    // Format "Etat des lieux" : colonne Domaine des grilles Domaine|Processus.
+    // Omis ici, il se perdait au chargement et la fiche se reecrivait sans lui.
+    domaine:a.domaine||''
   }));
   st.echanges         = (data.echanges||[]).map(e=>({...e, id:nxtId++}));
   st.collaborateurs   = (data.collaborateurs_cles||[]).map(c=>({...c, id:nxtId++}));
@@ -2346,12 +2351,13 @@ function buildSavePayload() {
     suivi: st.suivi,
     entity: st.entity,
     participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
-    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})=>
-      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts})),
+    activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})=>
+      ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})),
     echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
     montee_en_charge: st.monteeEnCharge,
     collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
-    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires})=>({application,criticite,dmia,pmdt,commentaires})),
+    applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})=>
+      ({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})),
     app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
     documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
     observations: st.observations
