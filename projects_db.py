@@ -824,6 +824,22 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
                 out.append(cell.text.strip())
         return out
 
+    def is_category_row(cells: list[str], table) -> bool:
+        """
+        Ligne de catégorie regroupant les suivantes sous un sous-thème.
+
+        Word la rend en fusionnant horizontalement toutes les cellules : après
+        déduplication il n'en reste qu'une, alors que le tableau en compte
+        plusieurs. L'ETL écartait déjà ces lignes ; l'éditeur, non — "Achat" et
+        "Logistique" entraient donc dans la liste des activités, et la fiche
+        régénérée recevait un tableau d'impacts pour chacune.
+        """
+        if len(table.columns) < 3:
+            return False
+        if len(cells) == 1:
+            return True
+        return len(cells) > 2 and len(set(c.strip() for c in cells)) == 1
+
     def is_junk(v: str) -> bool:
         return v.lower().strip() in ("", "xx", "x", "-", "--", "na", "n/a",
                                      "nd", "nc", "non applicable", "none")
@@ -881,8 +897,16 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
     # du texte libre.
     eal_notes: list[str] = []
 
+    # Légende précédant chaque tableau. Le nouveau format scinde les échanges
+    # en deux tableaux et n'indique "interne" ou "externe" que dans ce titre.
+    try:
+        from bia_etl import _table_captions
+        table_captions = _table_captions(doc)
+    except Exception:
+        table_captions = {}
+
     # ── iterate all tables ─────────────────────────────────────────────────────
-    for table in doc.tables:
+    for table_idx, table in enumerate(doc.tables):
         if not table.rows:
             continue
         r0 = row_cells(table.rows[0])
@@ -1117,7 +1141,7 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
                         for c in r0)):
             for row in table.rows[1:]:
                 cells = row_cells(row)
-                if not cells:
+                if not cells or is_category_row(cells, table):
                     continue
                 name = cells[0].strip()
                 if not name or name.lower() in ("activité", "activite", "xx", ""):
@@ -1226,22 +1250,41 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
             continue
 
         # ══ 6.  ÉCHANGES D'INFORMATION ════════════════════════════════════════
-        # Identified by: R0[0] contains "groupes" or "correspondants", 5 cols
+        # Les colonnes sont repérées par leur en-tête, via la définition
+        # partagée avec l'ETL et l'écriture. Les lire par position décalait
+        # toutes les valeurs : le tableau des externes du nouveau format
+        # ajoute Typologie et Alternative, si bien que la criticité se
+        # retrouvait dans T/R et les ressources SI dans la criticité.
         if (r0 and ("groupes" in r0[0].lower() or "correspondants" in r0[0].lower())
                 and len(table.columns) >= 4):
+            from bia_etl import locate_exchange_columns, exchange_default_ie
+            cols = locate_exchange_columns(r0)
+            ie_defaut = exchange_default_ie(r0_txt, table_captions.get(table_idx, ""))
+
+            def pick(cells: list[str], key: str) -> str:
+                i = cols.get(key)
+                return cells[i].strip() if i is not None and i < len(cells) else ""
+
             for row in table.rows[1:]:
                 cells = row_cells(row)
                 if not cells:
                     continue
-                groupes = cells[0].strip()
+                groupes = pick(cells, "correspondent")
                 if is_junk(groupes):
                     continue
+                # Ligne de catégorie fusionnée horizontalement : Word renvoie
+                # le même texte dans chaque cellule.
+                if len(cells) > 2 and len(set(c.strip() for c in cells)) == 1:
+                    continue
                 form["echanges"].append({
-                    "groupes":     groupes,
-                    "ie":          cells[1].strip() if len(cells) > 1 else "",
-                    "type_info":   cells[2].strip() if len(cells) > 2 else "",
-                    "tr":          cells[3].strip() if len(cells) > 3 else "",
-                    "ressources_si": cells[4].strip() if len(cells) > 4 else "",
+                    "groupes":       groupes,
+                    "ie":            pick(cells, "ie") or ie_defaut,
+                    "type_info":     pick(cells, "info"),
+                    "criticite":     pick(cells, "criticality"),
+                    "tr":            pick(cells, "tr"),
+                    "ressources_si": pick(cells, "resources"),
+                    "typologie":     pick(cells, "typology"),
+                    "alternative":   pick(cells, "fallback"),
                 })
             continue
 

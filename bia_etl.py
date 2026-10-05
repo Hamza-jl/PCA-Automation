@@ -155,9 +155,33 @@ class ProcessDependency:
 
 @dataclass
 class EquipmentNeed:
-    """§7 Matériels spécifiques et consommables (nouveau format de fiche)."""
+    """
+    §7 Matériels spécifiques et consommables (nouveau format de fiche).
+
+    ASTREE ajoute un second tableau de même forme — "Besoins en mobilité
+    (Navette…)" face à "Justification du besoin". Même structure, autre
+    nature : la catégorie les distingue plutôt que de dupliquer la liste,
+    si bien que les deux remontent partout où remontent les matériels.
+    """
     designation: str = ""
     justification: str = ""
+    category: str = "Matériel"
+
+
+@dataclass
+class CrisisReferent:
+    """
+    "Référents de crise" (ASTREE) : qui joindre, pour quel périmètre.
+
+    Distinct des collaborateurs clés — ceux-ci décrivent la tenue du poste
+    au quotidien, ceux-là la chaîne d'astreinte en situation de crise.
+    """
+    agent_id: str = ""
+    holder: str = ""
+    scope: str = ""
+    phone: str = ""
+    deputy: str = ""
+    deputy_phone: str = ""
 
 
 @dataclass
@@ -195,6 +219,8 @@ class BIAFiche:
     impact_weights: dict = field(default_factory=dict)
     # Format "État des lieux" : entretien de cadrage (Question / Réponse)
     context_answers: list = field(default_factory=list)
+    # Référents de crise (ASTREE)
+    crisis_referents: list = field(default_factory=list)
     # Nouveau format de fiche : sections absentes de l'ancien modèle
     dependencies: list = field(default_factory=list)
     equipment_needs: list = field(default_factory=list)
@@ -614,6 +640,90 @@ def _is_qr_table(table) -> bool:
     return len(h) >= 2 and h[0].startswith("question") and h[1].startswith("reponse")
 
 
+def locate_exchange_columns(headers: list[str]) -> dict:
+    """
+    Position de chaque colonne logique d'un tableau d'échanges, par en-tête.
+
+    Les trois formats n'ont ni le même nombre de colonnes ni le même ordre :
+    l'ancien porte une colonne I/E, le nouveau scinde internes et externes en
+    deux tableaux dont celui des externes ajoute Typologie et Alternative.
+    Lire par position donne donc des valeurs décalées — c'est exactement le
+    défaut qu'avait l'éditeur. Cette fonction est le seul endroit qui connaît
+    cette disposition ; lecture, écriture et éditeur s'y réfèrent tous.
+
+    Renvoie un dict {nom logique: index ou None}.
+    """
+    def find(*tests):
+        for i, h in enumerate(headers):
+            hn = h.strip().lower()
+            if any(t(hn, h) for t in tests):
+                return i
+        return None
+
+    cols = {
+        "correspondent": find(lambda n, h: "groupes" in n or "correspondant" in n),
+        "ie": find(lambda n, h: h.strip() in ("I/E", "I", "E")
+                   or ("interne" in n and "externe" in n)),
+        "info": find(lambda n, h: "type" in n and "inform" in n),
+        "tr": find(lambda n, h: (
+            h.strip() in ("T / R", "T/R")
+            or set(h.strip().upper().replace(" ", "")) == {"T", "/", "R"}
+            or "t/r" in n or "t / r" in n
+            or ("transmis" in n and "recu" in _strip_accents(n)))),
+        "resources": find(lambda n, h: "ressource" in n),
+        "fallback": find(lambda n, h: "alternative" in n
+                         or "defaillance" in _strip_accents(n)),
+    }
+    if cols["correspondent"] is None:
+        cols["correspondent"] = 0
+
+    # La criticité prime sur la typologie : le tableau des externes porte les
+    # deux, et "Typologie" apparaît d'abord — sans cette priorité, "Mono" se
+    # retrouvait enregistré comme niveau de criticité.
+    crit = find(lambda n, h: "critici" in n)
+    typo = find(lambda n, h: "typolog" in n)
+    if crit is None:
+        crit = typo
+    if typo == crit:
+        typo = None
+    cols["criticality"], cols["typology"] = crit, typo
+    return cols
+
+
+def exchange_default_ie(header_text: str, caption: str = "") -> str:
+    """
+    Interne ou externe pour un tableau sans colonne I/E.
+
+    Le nouveau format scinde les échanges en deux tableaux et ne porte
+    l'information que dans le titre de section qui les précède.
+    """
+    h = _strip_accents(header_text.lower())
+    c = _strip_accents((caption or "").lower())
+    for source in (h, c):
+        if "externe" in source:
+            return "E"
+        if "interne" in source:
+            return "I"
+    return "I"
+
+
+def _is_mobility_needs_table(table) -> bool:
+    """"Besoins en mobilité (Navette…)" | "Justification du besoin" (ASTREE)."""
+    if len(table.rows) < 2:
+        return False
+    joined = _strip_accents(" ".join(_row_texts(table.rows[0])).lower())
+    return "besoins en mobilite" in joined or (
+        "mobilite" in joined and "justification" in joined)
+
+
+def _is_crisis_referents_table(table) -> bool:
+    """"Id agent | Titulaire | Périmètre | Téléphone | Suppléant" (ASTREE)."""
+    if len(table.rows) < 2 or len(table.columns) < 4:
+        return False
+    joined = _strip_accents(" ".join(_row_texts(table.rows[0])).lower())
+    return "titulaire" in joined and ("perimetre" in joined or "suppleant" in joined)
+
+
 def _is_identification_table(table) -> bool:
     if len(table.rows) < 2:
         return False
@@ -726,6 +836,28 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                     fiche.dependencies.append(ProcessDependency(
                         activity=cells[0], upstream=cells[1], downstream=cells[2]))
 
+        elif _is_mobility_needs_table(table):
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) >= 2 and cells[0].strip():
+                    fiche.equipment_needs.append(EquipmentNeed(
+                        designation=cells[0].strip(),
+                        justification=cells[1].strip(),
+                        category="Mobilité"))
+
+        elif _is_crisis_referents_table(table):
+            for row in table.rows[1:]:
+                cells = _row_texts(row)
+                if len(cells) < 2 or _is_subheader_row(cells):
+                    continue
+                def at(i):
+                    return cells[i].strip() if i < len(cells) else ""
+                if not (at(1) or at(0)):
+                    continue
+                fiche.crisis_referents.append(CrisisReferent(
+                    agent_id=at(0), holder=at(1), scope=at(2),
+                    phone=at(3), deputy=at(4), deputy_phone=at(5)))
+
         elif _is_equipment_needs_table(table):
             for row in table.rows[1:]:
                 cells = _row_texts(row)
@@ -805,69 +937,21 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
             headers = _row_texts(table.rows[0])
             header_text = " ".join(headers).lower()
 
-            # ── Locate each logical column by header content, not position ────
-            # This handles every client format regardless of column order or
-            # whether optional columns (I/E, Criticité, Typologie) are present.
-            def _find_col(tests):
-                """Return index of first header matching any test, else None."""
-                for i, h in enumerate(headers):
-                    hn = h.strip().lower()
-                    if any(t(hn, h) for t in tests):
-                        return i
-                return None
+            # Disposition des colonnes : voir locate_exchange_columns, qui
+            # est la seule définition partagée par la lecture, l'écriture et
+            # l'éditeur.
+            _cols = locate_exchange_columns(headers)
+            ci_correspondent = _cols["correspondent"]
+            ci_ie            = _cols["ie"]
+            ci_info          = _cols["info"]
+            ci_crit          = _cols["criticality"]
+            ci_typo          = _cols["typology"]
+            ci_fallback      = _cols["fallback"]
+            ci_tr            = _cols["tr"]
+            ci_resources     = _cols["resources"]
 
-            ci_correspondent = _find_col([
-                lambda n, h: "groupes" in n or "correspondant" in n,
-            ]) or 0
-
-            ci_ie = _find_col([
-                lambda n, h: h.strip() in ("I/E", "I", "E") or
-                             ("interne" in n and "externe" in n),
-            ])
-            ci_info = _find_col([
-                lambda n, h: "type" in n and "inform" in n,
-            ])
-            # La criticité prime : le tableau "externes" du nouveau format
-            # porte les deux colonnes (Typologie *et* Niveau de criticité), et
-            # "typolog" apparaît en premier — sans cette priorité, "Mono" se
-            # retrouvait enregistré comme niveau de criticité.
-            ci_crit = _find_col([lambda n, h: "critici" in n])
-            if ci_crit is None:
-                ci_crit = _find_col([lambda n, h: "typolog" in n])
-            ci_typo = _find_col([lambda n, h: "typolog" in n])
-            if ci_typo == ci_crit:
-                ci_typo = None
-            ci_fallback = _find_col([
-                lambda n, h: "alternative" in n or "defaillance" in _strip_accents(n),
-            ])
-            ci_tr = _find_col([
-                lambda n, h: (
-                    h.strip() in ("T / R", "T/R") or
-                    (set(h.strip().upper().replace(" ", "")) == {"T", "/", "R"}) or
-                    # Handles "(T/R)\nTransmis/ Reçu" style headers
-                    "t/r" in n or "t / r" in n or
-                    ("transmis" in n and "recu" in _strip_accents(n))
-                ),
-            ])
-            ci_resources = _find_col([
-                lambda n, h: "ressource" in n,
-            ])
-
-            # Interne / externe : d'abord l'en-tête du tableau, puis le titre
-            # de section qui le précède. Le nouveau format scinde les échanges
-            # en deux tableaux sans colonne I/E — seul le titre "… avec les
-            # correspondants externes" porte l'information.
-            _caption_ctx = _strip_accents(_captions.get(_doc_pos, "").lower())
-            if "externe" in header_text:
-                default_ie = "E"
-            elif "interne" in header_text:
-                default_ie = "I"
-            elif "externe" in _caption_ctx:
-                default_ie = "E"
-            elif "interne" in _caption_ctx:
-                default_ie = "I"
-            else:
-                default_ie = "I"
+            default_ie = exchange_default_ie(
+                header_text, _captions.get(_doc_pos, ""))
 
             for row in table.rows[1:]:
                 cells = _row_texts(row)

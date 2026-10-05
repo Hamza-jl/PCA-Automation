@@ -380,27 +380,47 @@ def _fill_section4_criticite_full(doc: Document, activities: list[dict]) -> None
 def _fill_section52_impacts_full(doc: Document, activities: list[dict]) -> None:
     """§5.2 Évaluation des impacts – clone template table, fill scores."""
     body = doc.element.body
-    body_children = list(body)
 
-    # Locate the evaluation table (no "poids", has "image de marque" in row1)
-    impact_tbl = None
-    impact_idx = None
-    for i, child in enumerate(body_children):
+    def _is_eval_tbl(child) -> bool:
+        """Tableau d'évaluation des impacts (pas celui des poids)."""
         if child.tag != f"{{{_W}}}tbl":
-            continue
+            return False
         rows = child.findall(f"{{{_W}}}tr")
         if len(rows) < 2:
-            continue
+            return False
         row0_tcs = rows[0].findall(f"{{{_W}}}tc")
         row1_tcs = rows[1].findall(f"{{{_W}}}tc")
         if not row0_tcs or not row1_tcs:
-            continue
+            return False
         row1_c0 = _elem_text(row1_tcs[0]).lower()
         row0_all = " ".join(_elem_text(c) for c in row0_tcs).lower()
-        if "image de marque" in row1_c0 and "poids" not in row0_all:
-            impact_tbl = child
-            impact_idx = i
-            break
+        return "image de marque" in row1_c0 and "poids" not in row0_all
+
+    def _caption_of(child):
+        """Légende "Tableau N°… : <activité>" précédant un tableau, si présente."""
+        prev = child.getprevious()
+        if prev is not None and prev.tag == f"{{{_W}}}p":
+            txt = _elem_text(prev).lower()
+            if "tableau" in txt or "xx" in txt:
+                return prev
+        return None
+
+    # Une fiche déjà remplie porte DÉJÀ un tableau d'impacts par activité.
+    # On n'en garde qu'un comme gabarit et on supprime les autres : sans cela,
+    # régénérer une fiche depuis elle-même (ouvrir, modifier, régénérer)
+    # laissait les anciens tableaux en place en plus des nouveaux — une fiche
+    # de dix activités en ressortait avec dix-neuf tableaux d'impacts, et la
+    # synthèse y lisait autant d'activités fantômes.
+    evals = [c for c in list(body) if _is_eval_tbl(c)]
+    for surplus in evals[1:]:
+        cap = _caption_of(surplus)
+        if cap is not None:
+            body.remove(cap)
+        body.remove(surplus)
+
+    body_children = list(body)
+    impact_tbl = evals[0] if evals else None
+    impact_idx = body_children.index(impact_tbl) if impact_tbl is not None else None
 
     if impact_tbl is None:
         return
@@ -497,31 +517,83 @@ def _fill_section53_dmia(doc: Document, activities: list[dict]) -> None:
 
 
 def _fill_exchanges(doc: Document, echanges: list[dict]) -> None:
-    """§6 Analyse des échanges d'information."""
-    for table in doc.tables:
+    """
+    §6 Analyse des échanges d'information.
+
+    Deux corrections par rapport à la version précédente, qui écrivait tous
+    les échanges dans le premier tableau rencontré puis s'arrêtait :
+
+    1. Le nouveau format scinde internes et externes en deux tableaux. Tout
+       déverser dans le premier laissait le second avec ses lignes d'origine —
+       une fiche relue en comptait donc plus qu'elle n'en contenait.
+    2. Les valeurs étaient placées par position. Le tableau des externes
+       ajoute Typologie et Alternative : la criticité partait dans T/R et les
+       ressources SI dans la criticité. L'écriture suit maintenant les
+       en-têtes, via la même définition que la lecture.
+    """
+    from bia_etl import locate_exchange_columns, exchange_default_ie, _table_captions
+
+    try:
+        captions = _table_captions(doc)
+    except Exception:
+        captions = {}
+
+    tables: list[tuple] = []
+    for pos, table in enumerate(doc.tables):
         if not table.rows:
             continue
-        combined = " ".join(_cell_text(c) for c in table.rows[0].cells).lower()
-        if "groupes fonctionnels" in combined or (
+        headers = [_cell_text(c) for c in table.rows[0].cells]
+        combined = " ".join(headers).lower()
+        if not ("groupes fonctionnels" in combined or "correspondant" in combined or (
                 "interne" in combined and "externe" in combined
-                and "ressources si" in combined):
-            template_tr = (
-                deepcopy(table.rows[1]._tr) if len(table.rows) > 1 else None
-            )
-            _clear_data_rows(table, header_rows=1)
-            if template_tr is not None:
-                n_cols = len(table.rows[0].cells)
-                for ech in echanges:
-                    vals = [
-                        ech.get("groupes", ""),
-                        ech.get("ie", ""),
-                        ech.get("type_info", ""),
-                        ech.get("tr", ""),
-                        ech.get("ressources_si", ""),
-                    ]
-                    vals = (vals + [""] * n_cols)[:n_cols]
-                    table._tbl.append(_clone_row_with_values(template_tr, vals))
-            return
+                and "ressources si" in combined)):
+            continue
+        sens = exchange_default_ie(combined, captions.get(pos, ""))
+        # Dernier recours quand ni l'en-tête ni la légende ne le disent :
+        # Typologie de correspondants et Alternative en cas de défaillance du
+        # tiers n'existent que dans le tableau des échanges externes.
+        cols_probe = locate_exchange_columns(headers)
+        if cols_probe.get("typology") is not None or cols_probe.get("fallback") is not None:
+            sens = "E"
+        tables.append((table, headers, sens))
+    if not tables:
+        return
+
+    # Un seul tableau (ancien format, colonne I/E incluse) : il reçoit tout.
+    # Deux tableaux : chacun ne reçoit que les échanges de son sens.
+    sens_distincts = len({ie for _, _, ie in tables}) > 1
+
+    for table, headers, ie_table in tables:
+        if sens_distincts:
+            lot = [e for e in echanges
+                   if (e.get("ie") or "I").strip().upper().startswith(ie_table)]
+        else:
+            lot = list(echanges)
+
+        gabarit = deepcopy(table.rows[1]._tr) if len(table.rows) > 1 else None
+        _clear_data_rows(table, header_rows=1)
+        if gabarit is None:
+            continue
+
+        cols = locate_exchange_columns(headers)
+        n_cols = len(table.rows[0].cells)
+        champs = {
+            "correspondent": "groupes",
+            "ie":            "ie",
+            "info":          "type_info",
+            "criticality":   "criticite",
+            "typology":      "typologie",
+            "tr":            "tr",
+            "resources":     "ressources_si",
+            "fallback":      "alternative",
+        }
+        for ech in lot:
+            vals = [""] * n_cols
+            for cle_col, cle_form in champs.items():
+                idx = cols.get(cle_col)
+                if idx is not None and idx < n_cols:
+                    vals[idx] = ech.get(cle_form, "") or ""
+            table._tbl.append(_clone_row_with_values(gabarit, vals))
 
 
 def _fill_section71_montee_v2(

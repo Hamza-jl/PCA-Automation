@@ -803,8 +803,11 @@ textarea{resize:vertical;min-height:60px}
       <th style="min-width:200px">Groupes fonctionnels / Correspondants</th>
       <th style="width:60px">(I/E)</th>
       <th style="min-width:180px">Type d'information</th>
+      <th style="width:70px">Criticité</th>
       <th style="width:60px">(T/R)</th>
       <th style="min-width:180px">Ressources SI utilisées</th>
+      <th style="width:80px" title="Échanges externes uniquement">Typologie</th>
+      <th style="min-width:150px" title="Échanges externes uniquement">Alternative si défaillance</th>
       <th style="width:36px"></th>
     </tr></thead>
     <tbody id="sec6-body"></tbody>
@@ -1632,7 +1635,8 @@ function updActDmia(id,val){
 // §6 ÉCHANGES
 // ══════════════════════════════════════════════════════════════
 function addEchange(){
-  st.echanges.push({id:nxtId++,groupes:'',ie:'I',type_info:'',tr:'T',ressources_si:''});
+  st.echanges.push({id:nxtId++,groupes:'',ie:'I',type_info:'',criticite:'',tr:'T',
+                    ressources_si:'',typologie:'',alternative:''});
   renderEchanges();
 }
 function removeEchange(id){ st.echanges=st.echanges.filter(e=>e.id!==id); renderEchanges(); }
@@ -1642,12 +1646,15 @@ function renderEchanges(){
     <tr>
       <td><input type="text" value="${esc(e.groupes)}" placeholder="Correspondant…"
         oninput="st.echanges.find(x=>x.id===${e.id}).groupes=this.value"></td>
-      <td><select onchange="st.echanges.find(x=>x.id===${e.id}).ie=this.value" style="width:60px">
+      <td><select onchange="st.echanges.find(x=>x.id===${e.id}).ie=this.value; renderEchanges()" style="width:60px">
         <option value="I" ${e.ie==='I'?'selected':''}>I</option>
         <option value="E" ${e.ie==='E'?'selected':''}>E</option>
       </select></td>
       <td><input type="text" value="${esc(e.type_info)}" placeholder="Type d'info…"
         oninput="st.echanges.find(x=>x.id===${e.id}).type_info=this.value"></td>
+      <td><select onchange="st.echanges.find(x=>x.id===${e.id}).criticite=this.value" style="width:70px">
+        ${['','A','B','C','D'].map(v=>`<option value="${v}" ${v===(e.criticite||'')?'selected':''}>${v||'—'}</option>`).join('')}
+      </select></td>
       <td><select onchange="st.echanges.find(x=>x.id===${e.id}).tr=this.value" style="width:60px">
         <option value="T" ${e.tr==='T'?'selected':''}>T</option>
         <option value="R" ${e.tr==='R'?'selected':''}>R</option>
@@ -1655,6 +1662,13 @@ function renderEchanges(){
       </select></td>
       <td><input type="text" value="${esc(e.ressources_si)}" placeholder="Applications…"
         oninput="st.echanges.find(x=>x.id===${e.id}).ressources_si=this.value"></td>
+      <td><select onchange="st.echanges.find(x=>x.id===${e.id}).typologie=this.value" style="width:80px"
+        ${e.ie==='E'?'':'disabled title="Échanges externes uniquement"'}>
+        ${['','Mono','Multi'].map(v=>`<option value="${v}" ${v===(e.typologie||'')?'selected':''}>${v||'—'}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${esc(e.alternative||'')}" placeholder="Alternative…"
+        ${e.ie==='E'?'':'disabled title="Échanges externes uniquement"'}
+        oninput="st.echanges.find(x=>x.id===${e.id}).alternative=this.value"></td>
       <td><button class="btn-rm" onclick="removeEchange(${e.id})"><i class="fa-solid fa-trash"></i></button></td>
     </tr>`).join('');
 }
@@ -1859,7 +1873,8 @@ async function generate(){
     participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
     activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})=>
       ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})),
-    echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
+    echanges: st.echanges.map(({groupes,ie,type_info,criticite,tr,ressources_si,typologie,alternative})=>
+      ({groupes,ie,type_info,criticite,tr,ressources_si,typologie,alternative})),
     montee_en_charge: st.monteeEnCharge,
     collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
     applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})=>
@@ -1982,7 +1997,8 @@ async function doSave(){
     participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
     activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})=>
       ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})),
-    echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
+    echanges: st.echanges.map(({groupes,ie,type_info,criticite,tr,ressources_si,typologie,alternative})=>
+      ({groupes,ie,type_info,criticite,tr,ressources_si,typologie,alternative})),
     montee_en_charge: st.monteeEnCharge,
     collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
     applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})=>
@@ -2353,7 +2369,8 @@ function buildSavePayload() {
     participants: st.participants.map(({nom,fonction,present})=>({nom,fonction,present:present||'Présents'})),
     activities: st.activities.map(({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})=>
       ({name,description,ressources_utilisees,periode_critique,criticite,dmia_exprimee,premieres_actions,impacts,domaine})),
-    echanges: st.echanges.map(({groupes,ie,type_info,tr,ressources_si})=>({groupes,ie,type_info,tr,ressources_si})),
+    echanges: st.echanges.map(({groupes,ie,type_info,criticite,tr,ressources_si,typologie,alternative})=>
+      ({groupes,ie,type_info,criticite,tr,ressources_si,typologie,alternative})),
     montee_en_charge: st.monteeEnCharge,
     collaborateurs_cles: st.collaborateurs.map(({fonction,nom,prenom,suppleants})=>({fonction,nom,prenom,suppleants})),
     applications: st.applications.map(({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})=>
