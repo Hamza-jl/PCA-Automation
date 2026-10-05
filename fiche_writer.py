@@ -731,7 +731,12 @@ def _fill_etat_des_lieux(doc: Document, form_data: dict) -> bool:
             elif "application" in joined:
                 grids["applications"] = table
 
-    if identification is None and not grids:
+    # Ce sont les grilles "Domaine | Processus" qui définissent le format : le
+    # tableau d'identification ne suffit pas à le reconnaître, car la fiche BIA
+    # du nouveau format porte le même libellé "Date de l'entretien". S'y fier
+    # faisait sortir fill_fiche par ce chemin pour une fiche BNA, dont aucune
+    # section n'était alors écrite.
+    if not grids:
         return False
 
     # ── identification ───────────────────────────────────────────────────────
