@@ -1257,13 +1257,22 @@ def extract(docx_path: str | Path, llm_model: str | None = None, verbose: bool =
                 cells = _row_texts(row)
                 if not cells or _is_subheader_row(cells):
                     continue
-                # Need at least last_name OR first_name to be meaningful
                 last = cells[ci_nom] if 0 <= ci_nom < len(cells) else ""
                 first = cells[ci_prn] if 0 <= ci_prn < len(cells) else ""
-                if not (last or first):
+                fct = cells[ci_fct] if 0 <= ci_fct < len(cells) else ""
+                # La fonction suffit : une fiche réelle (ASTREE) désigne
+                # "Equipe polyvalente" sans nom ni prénom. Exiger un nom
+                # écartait cette ligne, et la synthèse perdait l'information
+                # alors que l'éditeur, lui, l'affichait.
+                if not (last or first or fct):
+                    continue
+                # Une fonction seule suffit, mais pas un simple marqueur de
+                # gabarit : les modèles laissent "xx" dans les lignes vides.
+                if not (last or first) and _strip_accents(fct.strip().lower()) in (
+                        "xx", "x", "-", "--", "na", "n/a", "nd", "nc"):
                     continue
                 fiche.key_people.append(KeyPerson(
-                    function=    cells[ci_fct]  if 0 <= ci_fct  < len(cells) else "",
+                    function=    fct,
                     last_name=   last,
                     first_name=  first,
                     position=    cells[ci_post] if 0 <= ci_post < len(cells) else "",
@@ -1845,7 +1854,18 @@ def transform_collaborateurs(fiche: BIAFiche) -> list[dict]:
     ]
 
 def transform_autres_eqt(fiche: BIAFiche) -> list[dict]:
-    return [
+    """
+    Feuille "Autres Eqt IT" de la synthèse.
+
+    L'ancien format porte un tableau d'équipements par horizon (H0, H+1, …) ;
+    le nouveau l'a remplacé par "Matériels spécifiques et consommables" —
+    désignation et justification, sans horizon — auquel ASTREE ajoute
+    "Besoins en mobilité". Faute de conversion, la feuille restait vide pour
+    toute fiche du nouveau format. Les deux alimentent désormais la même
+    feuille : les horizons restent vides, la justification part en
+    commentaire, précédée de la catégorie quand ce n'est pas du matériel.
+    """
+    rows = [
         {
             "Désignation": e.designation,
             "H0": e.h0, "H+1": e.h1, "H+2": e.h2, "H+4": e.h4,
@@ -1855,6 +1875,21 @@ def transform_autres_eqt(fiche: BIAFiche) -> list[dict]:
         }
         for e in fiche.other_equipment
     ]
+    for e in fiche.equipment_needs:
+        if not e.designation.strip():
+            continue
+        categorie = (e.category or "").strip()
+        commentaire = e.justification.strip()
+        if categorie and categorie.lower() != "matériel":
+            commentaire = f"{categorie} — {commentaire}" if commentaire else categorie
+        rows.append({
+            "Désignation": e.designation,
+            "H0": "", "H+1": "", "H+2": "", "H+4": "",
+            "J+1": "", "J+2": "", "J+3": "", "J+5": "",
+            "J+10": "", "J+15": "",
+            "Commentaires": commentaire,
+        })
+    return rows
 
 def transform_doc_critiques(fiche: BIAFiche) -> list[dict]:
     return [
@@ -1915,6 +1950,56 @@ def transform_redemarrages(fiche: BIAFiche) -> list[dict]:
     return rows
 
 
+def transform_dependances(fiche: BIAFiche) -> list[dict]:
+    """§6 Dépendances métiers inter-processus (formats BNA et ASTREE)."""
+    return [
+        {
+            "Entité": fiche.entity_name,
+            "Activité": d.activity,
+            "Processus en amont indispensables": d.upstream,
+            "Processus en aval impactés": d.downstream,
+        }
+        for d in fiche.dependencies
+        if (d.activity or d.upstream or d.downstream)
+    ]
+
+
+def transform_referents_crise(fiche: BIAFiche) -> list[dict]:
+    """Référents de crise (ASTREE) : la chaîne d'astreinte par périmètre."""
+    return [
+        {
+            "Entité": fiche.entity_name,
+            "Id agent": r.agent_id,
+            "Titulaire": r.holder,
+            "Périmètre": r.scope,
+            "Téléphone": r.phone,
+            "Suppléant": r.deputy,
+            "Téléphone suppléant": r.deputy_phone,
+        }
+        for r in fiche.crisis_referents
+        if (r.holder or r.scope or r.deputy)
+    ]
+
+
+def transform_etat_des_lieux(fiche: BIAFiche) -> list[dict]:
+    """
+    Entretien de cadrage "État des lieux" (MANSA) : Question / Réponse.
+
+    On ne retient que les questions effectivement renseignées — un modèle
+    vierge ne doit pas remplir la synthèse de lignes vides.
+    """
+    return [
+        {
+            "Entité": fiche.entity_name,
+            "Section": c.section,
+            "Question": " ".join(c.question.split()),
+            "Réponse": c.answer,
+        }
+        for c in fiche.context_answers
+        if c.answer.strip() and c.answer.strip().lower() not in ("na", "n/a", "-")
+    ]
+
+
 TRANSFORM_MAP = {
     "Activités":                       transform_activites,
     "Impact DMIA":                     transform_impact_dmia,
@@ -1926,6 +2011,13 @@ TRANSFORM_MAP = {
     "Collaborateurs Clés":             transform_collaborateurs,
     "Autres Eqt IT":                   transform_autres_eqt,
     "Doc critiques":                   transform_doc_critiques,
+    # Sections propres aux nouveaux formats. Ces feuilles n'existent dans
+    # aucun classeur client : load() les crée, mais seulement si la fiche
+    # porte réellement la section. Une fiche de l'ancien format n'en produit
+    # donc aucune et les classeurs existants restent inchangés.
+    "Dépendances":                     transform_dependances,
+    "Référents de crise":              transform_referents_crise,
+    "État des lieux":                  transform_etat_des_lieux,
 }
 
 
@@ -2370,6 +2462,13 @@ def _strip_accents(s: str) -> str:
 _HDR_KEYWORDS = frozenset({
     "structure", "niveau", "direction", "departement", "service",
     "division", "unite", "activite", "dmia", "application", "processus",
+    # En-têtes des feuilles propres aux nouveaux formats (Dépendances,
+    # Référents de crise, État des lieux). Sans elles, _find_hdr_row ne
+    # reconnaissait pas la ligne d'en-tête de ces feuilles, retombait sur la
+    # première ligne, et _remove_empty_rows_cols remontait tout de trois
+    # lignes — l'en-tête ne se trouvait plus là où la fiche suivante allait
+    # le chercher.
+    "entite", "titulaire", "perimetre", "suppleant", "question", "reponse",
 })
 
 def _find_hdr_row(ws, max_search: int = 10) -> int:
@@ -3771,6 +3870,23 @@ def extract_fiche_equipment(fiche_path: str | Path) -> dict:
                         pass
             items.append({"name": name, "horizons": horizons})
 
+    # "Besoins en mobilité (Navette / Voiture …)" — ASTREE. Son en-tête ne
+    # contient pas "Désignation", si bien que la recherche ci-dessus ne le
+    # voyait pas : le besoin en coursier n'entrait jamais dans l'index du
+    # matériel. Pas de colonne d'horizon dans ce tableau.
+    deja = {it["name"].strip().lower() for it in items}
+    for table in doc.tables:
+        if not _is_mobility_needs_table(table):
+            continue
+        for row in table.rows[1:]:
+            cells = [c.text.strip() for c in row.cells]
+            if not cells or not cells[0] or cells[0] in ("-", ""):
+                continue
+            if cells[0].strip().lower() in deja:
+                continue
+            deja.add(cells[0].strip().lower())
+            items.append({"name": cells[0], "horizons": {}})
+
     return {
         "entity":     entity or Path(fiche_path).stem,
         "department": department or entity,
@@ -4016,8 +4132,14 @@ _FLAT_SHEETS: dict[str, dict] = {
             "Lot 2": ("FF8C00", "FFFFFF"),   # orange        / white
             "Lot 3": ("00B050", "FFFFFF"),   # green         / white
         }
-    }
+    },
+    "Dépendances":        {},
+    "Référents de crise": {},
+    "État des lieux":     {},
 }
+
+# Feuilles que load() peut créer à la volée quand la fiche porte la section.
+_CREATABLE_SHEETS = ("Dépendances", "Référents de crise", "État des lieux")
 
 def _write_flat_rows(ws, data_rows: list[dict], colour_rules: dict) -> None:
     """Write `data_rows` into a flat (non-entity-keyed) sheet, globally sorted
@@ -4599,8 +4721,22 @@ def load(synthesis_path: str | Path, fiche: BIAFiche, dry_run: bool = False,
                 ws = wb[sn]
                 break
         if ws is None:
-            if verbose: print(f"  [WARN] Sheet '{sheet_name}' not found, skipping.")
-            continue
+            # Les feuilles des sections propres aux nouveaux formats n'existent
+            # dans aucun classeur client. On les crée, mais uniquement si la
+            # fiche porte la section : sans cela, chaque synthèse de l'ancien
+            # format gagnerait trois feuilles vides.
+            if sheet_name.strip() in _CREATABLE_SHEETS and not dry_run:
+                apercu = transform_fn(fiche)
+                if apercu:
+                    ws = wb.create_sheet(title=sheet_name.strip())
+                    for ci, entete in enumerate(apercu[0].keys(), start=1):
+                        ws.cell(row=HEADER_ROW, column=ci, value=entete)
+                    if verbose:
+                        print(f"  [INFO] Sheet '{sheet_name}' created "
+                              f"({len(apercu)} row(s) to write).")
+            if ws is None:
+                if verbose: print(f"  [WARN] Sheet '{sheet_name}' not found, skipping.")
+                continue
 
         # For Impact DMIA: rename column headers to match the fiche's scenario labels
         # before computing col_map so the fuzzy matcher finds them correctly.

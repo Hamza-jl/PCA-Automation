@@ -244,6 +244,9 @@ def fill_fiche(template_path: Path, form_data: dict, output_path: Path) -> None:
     if echanges:
         _fill_exchanges(doc, echanges)
 
+    # Sections des formats BNA / ASTREE
+    _fill_nouvelles_sections(doc, form_data)
+
     # §7.1 Montée en charge — 7 shared rows
     _fill_section71_montee_v2(doc, montee, activities)
 
@@ -873,6 +876,66 @@ def _fill_etat_des_lieux(doc: Document, form_data: dict) -> bool:
         remplir(grids["applications"], lignes)
 
     return True
+
+
+def _fill_nouvelles_sections(doc: Document, form_data: dict) -> None:
+    """
+    Sections propres aux formats BNA et ASTREE : dépendances inter-processus,
+    référents de crise, matériels et besoins en mobilité.
+
+    Elles étaient lues mais jamais réécrites : une fiche ASTREE ouverte dans
+    l'éditeur conservait ces tableaux intacts — faute d'y toucher — mais rien
+    de ce que le consultant y modifiait ne repartait dans le document.
+
+    Les tableaux absents sont ignorés : une fiche de l'ancien format n'en a
+    aucun et ressort donc inchangée.
+    """
+    deps   = form_data.get("dependances", [])
+    refs   = form_data.get("referents_crise", [])
+    mats   = form_data.get("materiels", [])
+
+    def norm(t: str) -> str:
+        return _strip_accents_fw(t.lower())
+
+    def remplir(table, lignes: list[list[str]]) -> None:
+        gabarit = deepcopy(table.rows[1]._tr) if len(table.rows) > 1 else None
+        _clear_data_rows(table, header_rows=1)
+        if gabarit is None:
+            return
+        n = len(table.rows[0].cells)
+        for vals in lignes:
+            table._tbl.append(_clone_row_with_values(gabarit, (vals + [""] * n)[:n]))
+
+    for table in doc.tables:
+        if not table.rows:
+            continue
+        h = norm(" ".join(_cell_text(c) for c in table.rows[0].cells))
+        nb = len(table.rows[0].cells)
+
+        if "amont" in h and "aval" in h:
+            if deps:
+                remplir(table, [[d.get("activite",""), d.get("amont",""),
+                                 d.get("aval","")] for d in deps])
+
+        elif "titulaire" in h and ("perimetre" in h or "suppleant" in h):
+            if refs:
+                remplir(table, [[r.get("id_agent",""), r.get("titulaire",""),
+                                 r.get("perimetre",""), r.get("telephone",""),
+                                 r.get("suppleant",""), r.get("telephone_suppleant","")]
+                                for r in refs])
+
+        elif nb == 2 and "justification" in h:
+            # Deux tableaux de même forme : matériels d'un côté, mobilité de
+            # l'autre. Chacun ne reçoit que les lignes de sa catégorie.
+            est_mobilite = "mobilite" in h
+            voulue = "Mobilité" if est_mobilite else "Matériel"
+            if not (est_mobilite or "designation" in h):
+                continue
+            lot = [m for m in mats
+                   if (m.get("categorie") or "Matériel") == voulue]
+            if lot:
+                remplir(table, [[m.get("designation",""), m.get("justification","")]
+                                for m in lot])
 
 
 def _fill_observations(doc: Document, observations: str) -> None:

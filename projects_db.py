@@ -866,6 +866,10 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
         "applications":      [],
         "app_availability":  [],
         "documents":         [],
+        # Sections des nouveaux formats (BNA, ASTREE)
+        "dependances":       [],
+        "materiels":         [],
+        "referents_crise":   [],
         "observations":      "",
     }
 
@@ -1247,6 +1251,63 @@ def extract_full_form_from_fiche(fiche_path: Path) -> dict:
                         "premieres_actions":    actions,
                         "impacts":              {lbl: {"A": "", "B": ""} for lbl in IMPACT_LABELS},
                     })
+            continue
+
+        # ══ 5bis. SECTIONS DES NOUVEAUX FORMATS (BNA, ASTREE) ════════════════
+        # Ces tableaux n'existent pas dans l'ancien modèle. Ils étaient lus par
+        # l'ETL mais absents de l'éditeur : on pouvait tout modifier dans une
+        # fiche ASTREE sauf eux, sans que rien ne l'explique.
+        _r0n = [_eal_norm(c) for c in r0]
+        _r0j = " ".join(_r0n)
+
+        # Dépendances métiers inter-processus (§6)
+        if "amont" in _r0j and "aval" in _r0j:
+            for row in table.rows[1:]:
+                cells = row_cells(row)
+                if len(cells) < 3 or is_category_row(cells, table):
+                    continue
+                if not any(c.strip() for c in cells[:3]):
+                    continue
+                form["dependances"].append({
+                    "activite": cells[0].strip(),
+                    "amont":    cells[1].strip(),
+                    "aval":     cells[2].strip(),
+                })
+            continue
+
+        # Référents de crise
+        if "titulaire" in _r0j and ("perimetre" in _r0j or "suppleant" in _r0j):
+            for row in table.rows[1:]:
+                cells = row_cells(row)
+                if len(cells) < 2 or is_category_row(cells, table):
+                    continue
+                def _rc(i):
+                    return cells[i].strip() if i < len(cells) else ""
+                if not (_rc(0) or _rc(1) or _rc(2)):
+                    continue
+                form["referents_crise"].append({
+                    "id_agent":  _rc(0), "titulaire": _rc(1),
+                    "perimetre": _rc(2), "telephone": _rc(3),
+                    "suppleant": _rc(4), "telephone_suppleant": _rc(5),
+                })
+            continue
+
+        # Matériels spécifiques (§7) et besoins en mobilité
+        _est_materiel = ("designation" in _r0j
+                         and ("materiel" in _r0j or "consommable" in _r0j)
+                         and "justification" in _r0j)
+        _est_mobilite = "mobilite" in _r0j and "justification" in _r0j
+        if (_est_materiel or _est_mobilite) and len(r0) == 2:
+            categorie = "Mobilité" if _est_mobilite else "Matériel"
+            for row in table.rows[1:]:
+                cells = row_cells(row)
+                if len(cells) < 1 or not cells[0].strip():
+                    continue
+                form["materiels"].append({
+                    "designation":   cells[0].strip(),
+                    "justification": cells[1].strip() if len(cells) > 1 else "",
+                    "categorie":     categorie,
+                })
             continue
 
         # ══ 6.  ÉCHANGES D'INFORMATION ════════════════════════════════════════

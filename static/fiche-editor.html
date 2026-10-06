@@ -406,6 +406,7 @@ textarea{resize:vertical;min-height:60px}
     <div class="sb-lbl" style="margin-top:4px">Ressources</div>
     <a class="sb-a" href="#s-sec6"><i class="fa-solid fa-arrows-left-right fa-fw"></i>§6 Échanges d'information</a>
     <a class="sb-a" href="#s-sec7"><i class="fa-solid fa-chart-line fa-fw"></i>§7 Besoins de redémarrage</a>
+    <a class="sb-a" href="#s-nouv"><i class="fa-solid fa-diagram-project fa-fw"></i>Dépendances &amp; référents</a>
     <a class="sb-a" href="#s-obs"><i class="fa-solid fa-comment fa-fw"></i>Observations</a>
   </div>
   <div class="sb-bot">
@@ -955,6 +956,66 @@ textarea{resize:vertical;min-height:60px}
 <br>
 <button class="btn-add" onclick="addDoc()"><i class="fa-solid fa-plus"></i> Ajouter un document</button>
 
+</section>
+
+<!-- ══ SECTIONS DES FORMATS BNA / ASTREE ══ -->
+<section id="s-nouv">
+<div class="sec-h1"><span class="num">+</span> Dépendances, référents de crise et matériels</div>
+<div class="instr">
+  Ces trois tableaux n'existent que dans les fiches récentes (BNA, ASTREE).
+  Sur une fiche de l'ancien modèle ils restent vides et ne sont pas écrits.
+</div>
+
+<div class="tbl-cap">Dépendances métiers inter-processus</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="min-width:170px">Activité</th>
+      <th style="min-width:200px">Processus en amont indispensables</th>
+      <th style="min-width:200px">Processus en aval impactés</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="sdep-body"></tbody>
+  </table>
+</div>
+<br>
+<button class="btn-add" onclick="addDependance()"><i class="fa-solid fa-plus"></i> Ajouter une dépendance</button>
+<br><br>
+
+<div class="tbl-cap">Référents de crise</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="width:90px">Id agent</th>
+      <th style="min-width:150px">Titulaire</th>
+      <th style="min-width:150px">Périmètre</th>
+      <th style="width:120px">Téléphone</th>
+      <th style="min-width:150px">Suppléant</th>
+      <th style="width:120px">Téléphone suppléant</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="sref-body"></tbody>
+  </table>
+</div>
+<br>
+<button class="btn-add" onclick="addReferent()"><i class="fa-solid fa-plus"></i> Ajouter un référent</button>
+<br><br>
+
+<div class="tbl-cap">Matériels spécifiques et besoins en mobilité</div>
+<div class="tbl-scroll">
+  <table class="bia-tbl">
+    <thead><tr>
+      <th style="width:120px">Catégorie</th>
+      <th style="min-width:220px">Désignation</th>
+      <th style="min-width:220px">Justification du besoin</th>
+      <th style="width:36px"></th>
+    </tr></thead>
+    <tbody id="smat-body"></tbody>
+  </table>
+</div>
+<br>
+<button class="btn-add" onclick="addMateriel()"><i class="fa-solid fa-plus"></i> Ajouter un matériel</button>
+<br><br>
 </section>
 
 <!-- ══ OBSERVATIONS ══ -->
@@ -1640,6 +1701,71 @@ function addEchange(){
   renderEchanges();
 }
 function removeEchange(id){ st.echanges=st.echanges.filter(e=>e.id!==id); renderEchanges(); }
+// ══ Dependances / referents de crise / materiels (formats BNA, ASTREE) ══
+function addDependance(){
+  st.dependances.push({id:nxtId++,activite:'',amont:'',aval:''}); renderDependances();
+}
+function removeDependance(id){ st.dependances=st.dependances.filter(x=>x.id!==id); renderDependances(); }
+function renderDependances(){
+  const tb=document.getElementById('sdep-body'); if(!tb) return;
+  const f=(id)=>`st.dependances.find(x=>x.id===${id})`;
+  tb.innerHTML=st.dependances.map(d=>`
+    <tr>
+      <td><input type="text" value="${esc(d.activite||'')}" placeholder="Activité…"
+        oninput="${f(d.id)}.activite=this.value"></td>
+      <td><textarea rows="2" placeholder="Processus en amont…"
+        oninput="${f(d.id)}.amont=this.value">${esc(d.amont||'')}</textarea></td>
+      <td><textarea rows="2" placeholder="Processus en aval…"
+        oninput="${f(d.id)}.aval=this.value">${esc(d.aval||'')}</textarea></td>
+      <td><button class="btn-rm" onclick="removeDependance(${d.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+function addReferent(){
+  st.referentsCrise.push({id:nxtId++,id_agent:'',titulaire:'',perimetre:'',
+                          telephone:'',suppleant:'',telephone_suppleant:''});
+  renderReferents();
+}
+function removeReferent(id){ st.referentsCrise=st.referentsCrise.filter(x=>x.id!==id); renderReferents(); }
+function renderReferents(){
+  const tb=document.getElementById('sref-body'); if(!tb) return;
+  const f=(id)=>`st.referentsCrise.find(x=>x.id===${id})`;
+  const champ=(r,cle,ph)=>`<td><input type="text" value="${esc(r[cle]||'')}" placeholder="${ph}"
+        oninput="${f(r.id)}.${cle}=this.value"></td>`;
+  tb.innerHTML=st.referentsCrise.map(r=>`
+    <tr>
+      ${champ(r,'id_agent','Id…')}
+      ${champ(r,'titulaire','Titulaire…')}
+      ${champ(r,'perimetre','Périmètre…')}
+      ${champ(r,'telephone','Téléphone…')}
+      <td><textarea rows="2" placeholder="Suppléant(s)…"
+        oninput="${f(r.id)}.suppleant=this.value">${esc(r.suppleant||'')}</textarea></td>
+      ${champ(r,'telephone_suppleant','Téléphone…')}
+      <td><button class="btn-rm" onclick="removeReferent(${r.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
+function addMateriel(){
+  st.materiels.push({id:nxtId++,designation:'',justification:'',categorie:'Matériel'});
+  renderMateriels();
+}
+function removeMateriel(id){ st.materiels=st.materiels.filter(x=>x.id!==id); renderMateriels(); }
+function renderMateriels(){
+  const tb=document.getElementById('smat-body'); if(!tb) return;
+  const f=(id)=>`st.materiels.find(x=>x.id===${id})`;
+  tb.innerHTML=st.materiels.map(m=>`
+    <tr>
+      <td><select onchange="${f(m.id)}.categorie=this.value">
+        ${['Matériel','Mobilité'].map(v=>`<option value="${v}" ${v===(m.categorie||'Matériel')?'selected':''}>${v}</option>`).join('')}
+      </select></td>
+      <td><input type="text" value="${esc(m.designation||'')}" placeholder="Désignation…"
+        oninput="${f(m.id)}.designation=this.value"></td>
+      <td><input type="text" value="${esc(m.justification||'')}" placeholder="Justification du besoin…"
+        oninput="${f(m.id)}.justification=this.value"></td>
+      <td><button class="btn-rm" onclick="removeMateriel(${m.id})"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+
 function renderEchanges(){
   const tbody=document.getElementById('sec6-body');
   tbody.innerHTML=st.echanges.map(e=>`
@@ -1881,6 +2007,10 @@ async function generate(){
       ({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})),
     app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
     documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
+    dependances: st.dependances.map(({activite,amont,aval})=>({activite,amont,aval})),
+    referents_crise: st.referentsCrise.map(({id_agent,titulaire,perimetre,telephone,suppleant,telephone_suppleant})=>
+      ({id_agent,titulaire,perimetre,telephone,suppleant,telephone_suppleant})),
+    materiels: st.materiels.map(({designation,justification,categorie})=>({designation,justification,categorie})),
     observations: st.observations
   };
   fd.append('form_data', JSON.stringify(payload));
@@ -1942,7 +2072,7 @@ document.addEventListener('mousemove',e=>{
 });
 
 // Sidebar active link on scroll
-const secIds=['s-template','s-toc','s-suivi','s-termi','s-objectif','s-identite','s-sec4','s-sec5','s-sec6','s-sec7','s-obs'];
+const secIds=['s-template','s-toc','s-suivi','s-termi','s-objectif','s-identite','s-sec4','s-sec5','s-sec6','s-sec7','s-nouv','s-obs'];
 const io=new IntersectionObserver(entries=>{
   entries.forEach(en=>{
     if(en.isIntersecting)
@@ -2005,6 +2135,10 @@ async function doSave(){
       ({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})),
     app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
     documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
+    dependances: st.dependances.map(({activite,amont,aval})=>({activite,amont,aval})),
+    referents_crise: st.referentsCrise.map(({id_agent,titulaire,perimetre,telephone,suppleant,telephone_suppleant})=>
+      ({id_agent,titulaire,perimetre,telephone,suppleant,telephone_suppleant})),
+    materiels: st.materiels.map(({designation,justification,categorie})=>({designation,justification,categorie})),
     observations: st.observations
   };
 
@@ -2076,6 +2210,9 @@ function populateState(data){
     domaine:a.domaine||''
   }));
   st.echanges         = (data.echanges||[]).map(e=>({...e, id:nxtId++}));
+  st.dependances      = (data.dependances||[]).map(d=>({...d, id:nxtId++}));
+  st.referentsCrise   = (data.referents_crise||[]).map(r=>({...r, id:nxtId++}));
+  st.materiels        = (data.materiels||[]).map(m=>({...m, id:nxtId++}));
   st.collaborateurs   = (data.collaborateurs_cles||[]).map(c=>({...c, id:nxtId++}));
   st.applications     = (data.applications||[]).map(a=>({...a, id:nxtId++}));
   st.appAvailability  = (data.app_availability||[]).map(a=>({...a, id:nxtId++}));
@@ -2085,7 +2222,7 @@ function populateState(data){
   // Re-render dynamic sections
   renderParticipants(); renderActs(); renderSec4(); renderSec52(); renderSec53();
   renderEchanges(); renderMontee(); renderCollabs(); renderApps(); renderAppAvail();
-  renderDocs(); renderTOT();
+  renderDocs(); renderDependances(); renderReferents(); renderMateriels(); renderTOT();
 
   // Populate simple input fields
   const fmap = {
@@ -2265,6 +2402,9 @@ function doNewFiche() {
   st.participants  = [];
   st.activities    = [];
   st.echanges      = [];
+  st.dependances   = [];
+  st.referentsCrise= [];
+  st.materiels     = [];
   st.collaborateurs= [];
   st.applications  = [];
   st.appAvailability=[];
@@ -2283,7 +2423,7 @@ function doNewFiche() {
   // Re-render all sections
   renderParticipants(); renderActs(); renderSec4(); renderSec52(); renderSec53();
   renderEchanges(); renderMontee(); renderCollabs(); renderApps(); renderAppAvail();
-  renderDocs(); renderTOT();
+  renderDocs(); renderDependances(); renderReferents(); renderMateriels(); renderTOT();
 
   // Reset save-modal fields
   document.getElementById('sm-client').value   = '';
@@ -2377,6 +2517,10 @@ function buildSavePayload() {
       ({application,criticite,dmia,pmdt,commentaires,domaine,activity,couverture,contournement})),
     app_availability: st.appAvailability.map(a=>{ const r={designation:a.designation}; AVAIL_COLS.forEach(c=>r[c]=a[c]||''); return r; }),
     documents: st.documents.map(({document,stockage,duplication})=>({document,stockage,duplication})),
+    dependances: st.dependances.map(({activite,amont,aval})=>({activite,amont,aval})),
+    referents_crise: st.referentsCrise.map(({id_agent,titulaire,perimetre,telephone,suppleant,telephone_suppleant})=>
+      ({id_agent,titulaire,perimetre,telephone,suppleant,telephone_suppleant})),
+    materiels: st.materiels.map(({designation,justification,categorie})=>({designation,justification,categorie})),
     observations: st.observations
   };
 }
