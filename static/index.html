@@ -4375,8 +4375,13 @@ window.navigatePage = function(pageId, group, pageName, childId) {
   if (page) page.classList.add('active');
   // Update stepper
   updateStepper(pageId);
-  // Chargements différés propres à certaines pages
-  if (pageId === 'page-risques-assessment' && typeof raInit === 'function') raInit();
+  // Chargements différés propres à certaines pages.
+  // Ces initialisations vivaient dans le onclick du menu latéral ; elles sont
+  // ici pour se déclencher quelle que soit la porte d'entrée — menu, carte
+  // d'accueil ou routage par ?page=.
+  if (pageId === 'page-risques-assessment'   && typeof raInit  === 'function') raInit();
+  if (pageId === 'page-collecte-specifiques' && typeof qzsInit === 'function') qzsInit();
+  if (pageId === 'page-collecte-reponses'    && typeof qzrInit === 'function') qzrInit();
   // Update breadcrumb
   const grpEl  = document.getElementById('tb-group');
   const pageEl = document.getElementById('tb-page');
