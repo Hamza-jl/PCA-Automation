@@ -2576,6 +2576,126 @@ async def ra_photo(assessment_id: int, photo_id: int, vignette: int = 0):
                     headers={"Cache-Control": "private, max-age=3600"})
 
 
+@app.get("/api/risk-assessment/{assessment_id}/prefill/preview")
+async def ra_prefill_preview(assessment_id: int, qid: int):
+    """
+    Questions du questionnaire `qid` que le relevé permet de renseigner.
+
+    Renvoie l'appariement seul, sans rédaction : c'est instantané, et cela
+    permet à l'interface d'annoncer le volume avant de lancer le modèle.
+    """
+    import assessment_prefill as _pf
+    import risk_components as _rc
+    import questionnaires_db as _q
+
+    export = _pdb.get_assessment_export(assessment_id)
+    if not export:
+        raise HTTPException(404, "Relevé introuvable.")
+    quest = _q.load_questionnaire(qid)
+    if not quest:
+        raise HTTPException(404, "Questionnaire introuvable.")
+
+    cols = quest["columns"]
+    col_ref = _q.find_column(cols, "ref.") or _q.find_column(cols, "ref")
+    col_q   = (_q.find_column(cols, "questions") or _q.find_column(cols, "question"))
+    if not col_ref or not col_q:
+        raise HTTPException(
+            422,
+            "Ce questionnaire n'a pas de colonne « Ref. » et « Questions ». "
+            "Le rattachement des observations repose sur la référence de "
+            "rubrique (SAB.01, ENV.03…) ; sans elle, l'appariement ne serait "
+            "qu'une ressemblance de mots.",
+        )
+
+    batiment = (export.get("evaluation") or {}).get("type_batiment", "")
+    catalogue = _rc.components_for(batiment) or []
+    obs = _pf.observations_du_releve(export, catalogue)
+    props = _pf.apparier(quest["rows"], obs, col_ref, col_q,
+                         _q.find_column(cols, "catégorie") or "")
+
+    sans_rubrique = [o.composant for o in obs if not o.rubrique]
+    return {
+        "questionnaire": {"id": qid, "nom": quest.get("name", ""),
+                          "qtype": quest.get("qtype", ""),
+                          "total_questions": len(quest["rows"])},
+        "observations": len(obs),
+        "questions_couvertes": len(props),
+        "composants_sans_rubrique": sorted(set(sans_rubrique)),
+        "apercu": [{"ref": x.ref, "question": x.question,
+                    "observations": len(x.observations)} for x in props[:40]],
+    }
+
+
+@app.post("/api/risk-assessment/{assessment_id}/prefill")
+async def ra_prefill(assessment_id: int, request: Request):
+    """
+    Rédige une proposition de réponse par question couverte par le relevé.
+
+    Rien n'est écrit dans le questionnaire : l'appel renvoie des propositions
+    que le consultant valide, corrige ou écarte. Une réponse de questionnaire
+    part devant un comité des risques, et la signature reste la sienne.
+    """
+    import assessment_prefill as _pf
+    import risk_components as _rc
+    import questionnaires_db as _q
+
+    body  = await request.json()
+    qid   = int(body.get("qid") or 0)
+    model = (body.get("model") or "qwen2.5:7b").strip()
+    refs  = body.get("refs") or []          # limiter à certaines rubriques
+    limite = int(body.get("limite") or 0)   # 0 = toutes
+
+    export = _pdb.get_assessment_export(assessment_id)
+    if not export:
+        raise HTTPException(404, "Relevé introuvable.")
+    quest = _q.load_questionnaire(qid)
+    if not quest:
+        raise HTTPException(404, "Questionnaire introuvable.")
+
+    cols = quest["columns"]
+    col_ref = _q.find_column(cols, "ref.") or _q.find_column(cols, "ref")
+    col_q   = (_q.find_column(cols, "questions") or _q.find_column(cols, "question"))
+    if not col_ref or not col_q:
+        raise HTTPException(422, "Questionnaire sans colonne « Ref. » / « Questions ».")
+
+    batiment  = (export.get("evaluation") or {}).get("type_batiment", "")
+    catalogue = _rc.components_for(batiment) or []
+    obs   = _pf.observations_du_releve(export, catalogue)
+    props = _pf.apparier(quest["rows"], obs, col_ref, col_q,
+                         _q.find_column(cols, "catégorie") or "")
+
+    if refs:
+        voulues = {str(r).upper() for r in refs}
+        props = [x for x in props if _pf.ref_rubrique(x.ref) in voulues]
+    if limite > 0:
+        props = props[:limite]
+
+    dispo = _pf.ollama_disponible(model)
+    rendus = []
+    for prop in props:
+        if dispo:
+            try:
+                _pf.rediger_par_modele(prop, model)
+            except Exception:
+                # Un modèle qui flanche ne doit pas vider la liste : on
+                # retombe sur le constat brut, qui reste utilisable.
+                _pf.rediger_par_regle(prop)
+        else:
+            _pf.rediger_par_regle(prop)
+        rendus.append(prop.to_dict())
+
+    return {
+        "modele": model if dispo else "",
+        "ia_disponible": dispo,
+        "colonnes": {"ref": col_ref, "question": col_q,
+                     "reponse": _q.find_column(cols, "réponses")
+                                or _q.find_column(cols, "réponse") or "",
+                     "commentaire": _q.find_column(cols, "commentaires")
+                                or _q.find_column(cols, "commentaire") or ""},
+        "propositions": rendus,
+    }
+
+
 @app.get("/api/risk-assessment/{assessment_id}/export")
 async def ra_export(assessment_id: int):
     """Export structuré de l'évaluation, destiné à l'agent de synthèse."""

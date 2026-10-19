@@ -3587,10 +3587,102 @@
       </div>
       <div id="ra-log-body"></div>
     </div>
+
+    <!-- ══ Pre-remplissage d'un questionnaire depuis le releve ══ -->
+    <div class="app-card ra-step" id="ra-card-prefill" style="display:none;">
+      <div class="app-card-title">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Pr&eacute;-remplir un questionnaire</span>
+      </div>
+
+      <p style="font-size:13px;line-height:1.6;color:var(--ink-soft);margin:0 0 16px">
+        Les observations du rel&eacute;v&eacute; sont rattach&eacute;es aux questions par leur
+        rubrique (SAB, INC, ENV&hellip;). L&rsquo;IA locale r&eacute;dige une proposition par
+        question couverte&nbsp;; <strong>rien n&rsquo;est &eacute;crit tant que vous n&rsquo;avez pas
+        valid&eacute;</strong>.
+      </p>
+
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
+        <div style="flex:1 1 260px;min-width:220px">
+          <label class="ra-lbl">Questionnaire &agrave; pr&eacute;-remplir</label>
+          <select id="pf-quest"><option value="">&mdash; Chargement&hellip; &mdash;</option></select>
+        </div>
+        <div style="flex:0 1 210px;min-width:180px">
+          <label class="ra-lbl">Mod&egrave;le local</label>
+          <select id="pf-model">
+            <option value="qwen2.5:7b">qwen2.5:7b (recommand&eacute;)</option>
+            <option value="qwen3:8b">qwen3:8b</option>
+            <option value="mistral:7b-instruct-q4_K_M">mistral:7b</option>
+            <option value="qwen2.5:3b">qwen2.5:3b (plus rapide)</option>
+          </select>
+        </div>
+        <button class="risk-gen-btn" id="pf-run">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> R&eacute;diger les propositions
+        </button>
+      </div>
+
+      <div class="ra-status" id="pf-status"></div>
+      <div id="pf-results" style="margin-top:14px"></div>
+
+      <div id="pf-apply-bar" style="display:none;gap:10px;align-items:center;
+           margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)">
+        <button class="risk-gen-btn" id="pf-apply">
+          <i class="fa-solid fa-check"></i> Appliquer les r&eacute;ponses retenues
+        </button>
+        <span id="pf-apply-count" style="font-size:12.5px;color:var(--ink-soft)"></span>
+      </div>
+    </div>
   </div>
   <!-- /page-risques-assessment -->
 
   <style>
+    /* ── Propositions de pre-remplissage ───────────────────────────── */
+    .pf-item {
+      border: 1px solid var(--line-soft); border-radius: 16px;
+      background: #fff; padding: 16px; margin-bottom: 12px;
+      transition: border-color .25s, opacity .25s;
+    }
+    .pf-item.rejete { opacity: .42; }
+    .pf-item.retenu { border-color: rgba(90,184,145,.55); }
+    .pf-head { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px }
+    .pf-ref {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .06em;
+      color: var(--poppy); background: var(--poppy-film);
+      padding: 3px 9px; border-radius: 999px; flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .pf-q { flex:1; font-size:13.5px; font-weight:600; line-height:1.42; color:var(--grey) }
+    /* La force du rattachement est montree : une proposition faible doit
+       etre relue de plus pres, pas validee au fil de la liste. */
+    .pf-score {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; padding: 3px 8px; border-radius: 999px;
+      flex-shrink: 0; white-space: nowrap;
+    }
+    .pf-score.fort   { background: rgba(90,184,145,.14);  color: #2c7d59 }
+    .pf-score.moyen  { background: rgba(252,195,84,.18);  color: #8a6410 }
+    .pf-score.faible { background: rgba(60,60,58,.08);    color: var(--ink-mute) }
+    .pf-grid { display:grid; grid-template-columns: 190px 1fr; gap:12px; margin-bottom:10px }
+    .pf-grid input, .pf-grid textarea { width:100% }
+    #ra-card-prefill select { width:100% }
+    .pf-grid label { font-size:10px; font-weight:700; letter-spacing:.14em;
+                     text-transform:uppercase; color:var(--ink-mute); display:block; margin-bottom:5px }
+    .pf-src {
+      font-size: 12px; line-height: 1.5; color: var(--ink-soft);
+      background: rgba(239,234,220,.42); border-radius: 10px; padding: 9px 11px;
+    }
+    .pf-src b { color: var(--grey); font-weight: 600 }
+    .pf-actions { display:flex; gap:8px; margin-top:10px }
+    .pf-tog {
+      font-family:"Montserrat",sans-serif; font-size:11.5px; font-weight:600;
+      border:none; border-radius:999px; padding:7px 15px; cursor:pointer;
+      background:#fff; color:var(--ink-soft);
+      box-shadow: inset 0 0 0 1px var(--line); transition: all .2s;
+    }
+    .pf-tog.on { background:var(--mint); color:#fff; box-shadow:none }
+    .pf-tog.off.on { background:var(--grey); color:#fff }
+    @media (max-width:760px) { .pf-grid { grid-template-columns:1fr } }
+
     .risk-tab {
       padding:.55rem 1.1rem;font-size:.75rem;font-weight:600;border:none;background:transparent;
       cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;
@@ -12109,6 +12201,9 @@ async function raStart() {
     raStatus('ra-setup-status', '');
     raEl('ra-card-setup').style.display = 'none';
     raEl('ra-card-floors').style.display = '';
+    // Le pre-remplissage n'a de sens qu'une fois le releve ouvert.
+    const _pf = raEl('ra-card-prefill');
+    if (_pf) { _pf.style.display = ''; pfChargerQuestionnaires(); }
     raRenderContext();
     raRenderFloors();
   } catch (e) {
@@ -12433,6 +12528,195 @@ async function raRenameFloor() {
   } catch (e) { /* le libellé reste inchangé */ }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   PRE-REMPLISSAGE D'UN QUESTIONNAIRE DEPUIS LE RELEVE
+   Les propositions sont affichees avec les observations qui les fondent et
+   la force du rattachement. Rien n'est ecrit sans validation explicite.
+   ═══════════════════════════════════════════════════════════════════════ */
+const PF = { propositions: [], colonnes: null, qid: null };
+
+async function pfChargerQuestionnaires() {
+  const sel = document.getElementById('pf-quest');
+  if (!sel) return;
+  try {
+    const r = await fetch('/api/questionnaires/list');
+    const liste = await r.json();
+    const items = Array.isArray(liste) ? liste : (liste.items || []);
+    if (!items.length) {
+      sel.innerHTML = '<option value="">Aucun questionnaire enregistre</option>';
+      return;
+    }
+    sel.innerHTML = items.map(q =>
+      `<option value="${q.id}">${(q.name || q.qtype)} — ${q.client || 'modele'}</option>`
+    ).join('');
+    pfApercu();
+  } catch (e) {
+    sel.innerHTML = '<option value="">Erreur de chargement</option>';
+  }
+}
+
+async function pfApercu() {
+  const sel = document.getElementById('pf-quest');
+  const st  = document.getElementById('pf-status');
+  if (!sel || !sel.value || !RA.assessment) return;
+  st.textContent = 'Analyse du relevé…';
+  try {
+    const r = await fetch(`/api/risk-assessment/${RA.assessment.id}/prefill/preview?qid=${sel.value}`);
+    const d = await r.json();
+    if (d.detail) { st.textContent = d.detail; return; }
+    let msg = `${d.observations} observation(s) · ${d.questions_couvertes} question(s) `
+            + `sur ${d.questionnaire.total_questions} peuvent être pré-remplies.`;
+    if ((d.composants_sans_rubrique || []).length) {
+      msg += ` Composants non rattachables : ${d.composants_sans_rubrique.join(', ')}.`;
+    }
+    st.textContent = msg;
+  } catch (e) { st.textContent = 'Erreur : ' + e.message; }
+}
+
+async function pfRediger() {
+  const sel  = document.getElementById('pf-quest');
+  const btn  = document.getElementById('pf-run');
+  const st   = document.getElementById('pf-status');
+  const zone = document.getElementById('pf-results');
+  if (!sel.value || !RA.assessment) return;
+
+  btn.disabled = true;
+  const avant = btn.innerHTML;
+  btn.innerHTML = '<span class="spin"></span> Rédaction en cours…';
+  st.textContent = 'Le modèle local rédige une proposition par question. '
+                 + 'Comptez quelques secondes par question.';
+  zone.innerHTML = '';
+
+  try {
+    const r = await fetch(`/api/risk-assessment/${RA.assessment.id}/prefill`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ qid: +sel.value,
+                             model: document.getElementById('pf-model').value }),
+    });
+    const d = await r.json();
+    if (d.detail) throw new Error(d.detail);
+
+    PF.propositions = d.propositions || [];
+    PF.colonnes = d.colonnes;
+    PF.qid = +sel.value;
+    PF.propositions.forEach(p => { p._retenu = true; });
+
+    if (!d.ia_disponible) {
+      st.textContent = "Ollama n'est pas joignable : les propositions reprennent "
+                     + "le constat brut, sans rédaction.";
+    } else {
+      st.textContent = `${PF.propositions.length} proposition(s) rédigée(s) par ${d.modele}. `
+                     + `Décochez celles que vous ne retenez pas, corrigez les autres.`;
+    }
+    pfRendu();
+  } catch (e) {
+    st.textContent = 'Erreur : ' + e.message;
+  } finally {
+    btn.disabled = false; btn.innerHTML = avant;
+  }
+}
+
+function pfRendu() {
+  const zone = document.getElementById('pf-results');
+  const bar  = document.getElementById('pf-apply-bar');
+  if (!PF.propositions.length) {
+    zone.innerHTML = '<div class="empty">Aucune question du questionnaire ne '
+                   + 'correspond aux observations de ce relevé.</div>';
+    bar.style.display = 'none';
+    return;
+  }
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  zone.innerHTML = PF.propositions.map((p, i) => {
+    const niveau = p.score >= 5 ? 'fort' : (p.score >= 3 ? 'moyen' : 'faible');
+    const libelle = { fort:'rattachement sûr', moyen:'à relire', faible:'rattachement faible' }[niveau];
+    const src = (p.observations || []).map(o =>
+      `<div><b>${esc(o.niveau)} · ${esc(o.composant)}</b> — ${esc(o.texte)}`
+      + (o.etat || o.risque
+          ? ` <i>(${[o.etat, o.risque].filter(Boolean).map(esc).join(' ; ')})</i>` : '')
+      + `</div>`).join('');
+    return `
+    <div class="pf-item ${p._retenu ? 'retenu' : 'rejete'}" id="pf-i-${i}">
+      <div class="pf-head">
+        <span class="pf-ref">${esc(p.ref)}</span>
+        <span class="pf-q">${esc(p.question)}</span>
+        <span class="pf-score ${niveau}">${libelle}</span>
+      </div>
+      <div class="pf-grid">
+        <div>
+          <label>Réponse</label>
+          <input type="text" value="${esc(p.reponse)}" placeholder="—"
+                 oninput="PF.propositions[${i}].reponse=this.value">
+        </div>
+        <div>
+          <label>Commentaire</label>
+          <textarea rows="2"
+                 oninput="PF.propositions[${i}].commentaire=this.value">${esc(p.commentaire)}</textarea>
+        </div>
+      </div>
+      <label style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+                    color:var(--ink-mute);display:block;margin-bottom:5px">
+        Observations retenues</label>
+      <div class="pf-src">${src || '—'}</div>
+      <div class="pf-actions">
+        <button class="pf-tog ${p._retenu ? 'on' : ''}" onclick="pfBasculer(${i})">
+          <i class="fa-solid fa-check"></i> ${p._retenu ? 'Retenue' : 'Retenir'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  bar.style.display = 'flex';
+  pfCompte();
+}
+
+function pfBasculer(i) {
+  PF.propositions[i]._retenu = !PF.propositions[i]._retenu;
+  pfRendu();
+}
+
+function pfCompte() {
+  const n = PF.propositions.filter(p => p._retenu && (p.reponse || p.commentaire)).length;
+  const el = document.getElementById('pf-apply-count');
+  if (el) el.textContent = `${n} réponse(s) seront écrites dans le questionnaire.`;
+}
+
+async function pfAppliquer() {
+  const st  = document.getElementById('pf-status');
+  const btn = document.getElementById('pf-apply');
+  const retenues = PF.propositions.filter(p => p._retenu && (p.reponse || p.commentaire));
+  if (!retenues.length) { st.textContent = 'Aucune réponse retenue.'; return; }
+
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/questionnaires/load/' + PF.qid);
+    const q = await r.json();
+    const rows = q.rows;
+    const cRep = PF.colonnes.reponse, cCom = PF.colonnes.commentaire;
+
+    let ecrites = 0;
+    retenues.forEach(p => {
+      const row = rows[p.ligne];
+      if (!row) return;
+      if (cRep && p.reponse)     { row[cRep] = p.reponse; }
+      if (cCom && p.commentaire) { row[cCom] = p.commentaire; }
+      ecrites++;
+    });
+
+    const s = await fetch('/api/questionnaires/save/' + PF.qid, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ columns: q.columns, rows }),
+    });
+    if (!s.ok) throw new Error('HTTP ' + s.status);
+    st.textContent = `${ecrites} réponse(s) écrites dans « ${q.name || q.qtype} ». `
+                   + `Retrouvez-les dans Gestion des risques › Questionnaires spécifiques.`;
+    document.getElementById('pf-apply-bar').style.display = 'none';
+  } catch (e) {
+    st.textContent = 'Erreur à l\u2019enregistrement : ' + e.message;
+  } finally { btn.disabled = false; }
+}
+
 async function raExport() {
   try {
     const res = await fetch('/api/risk-assessment/' + RA.assessment.id + '/export');
@@ -12488,6 +12772,12 @@ function raReset() {
   raEl('ra-start-btn') .addEventListener('click', raStart);
   raEl('ra-rename-btn').addEventListener('click', raRenameFloor);
   raEl('ra-export-btn').addEventListener('click', raExport);
+  const _pfq = document.getElementById('pf-quest');
+  if (_pfq) _pfq.addEventListener('change', pfApercu);
+  const _pfr = document.getElementById('pf-run');
+  if (_pfr) _pfr.addEventListener('click', pfRediger);
+  const _pfa = document.getElementById('pf-apply');
+  if (_pfa) _pfa.addEventListener('click', pfAppliquer);
   raEl('ra-new-btn')   .addEventListener('click', raReset);
   raEl('ra-save-btn')  .addEventListener('click', raSaveNote);
   raEl('ra-cancel-btn').addEventListener('click', () => {

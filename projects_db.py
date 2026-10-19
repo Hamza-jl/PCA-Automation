@@ -94,6 +94,10 @@ def init_db() -> None:
                 floor_id           INTEGER NOT NULL REFERENCES assessment_floors(id) ON DELETE CASCADE,
                 component          TEXT    NOT NULL,
                 note_text          TEXT    NOT NULL,
+                -- L'état constaté et le niveau de risque n'étaient conservés
+                -- que sur les photos : une observation sans photo les perdait.
+                condition          TEXT    DEFAULT 'non_renseigne',
+                risk_level         TEXT    DEFAULT 'non_renseigne',
                 created_at         TEXT    DEFAULT (datetime('now')),
                 updated_at         TEXT    DEFAULT (datetime('now')),
                 status             TEXT    DEFAULT 'draft'
@@ -145,6 +149,10 @@ def init_db() -> None:
 
 # ── storage helpers ────────────────────────────────────────────────────────────
 
+
+    # Migrations de colonnes : sûres à rejouer, elles se taisent si la
+    # colonne existe déjà.
+    _ensure_note_cols()
 def project_dir(sector: str, client: str, file_type: str) -> Path:
     d = PROJECTS_DIR / _slug(sector) / _slug(client) / file_type
     d.mkdir(parents=True, exist_ok=True)
@@ -546,6 +554,25 @@ def get_lower_dmia_alerts(
 
 
 # ── fiche-editor save / load ───────────────────────────────────────────────────
+
+def _ensure_note_cols() -> None:
+    """
+    Migration : état constaté et niveau de risque portés par l'observation.
+
+    Ils n'existaient que sur les photos. Une observation sans photo perdait
+    les deux, alors que ce sont justement les champs qui servent à pré-remplir
+    les questionnaires.
+    """
+    for col in ("condition", "risk_level"):
+        try:
+            with _conn() as con:
+                con.execute(
+                    f"ALTER TABLE assessment_notes ADD COLUMN {col} TEXT "
+                    f"DEFAULT 'non_renseigne'"
+                )
+        except Exception:
+            pass  # colonne déjà présente
+
 
 def _ensure_form_col() -> None:
     """One-time migration: add form_data_path column when it doesn't yet exist."""
@@ -1906,9 +1933,10 @@ def create_note(floor_id: int, component: str, note_text: str,
     """Crée une note rattachée à un composant d'un étage."""
     with _conn() as con:
         cursor = con.execute("""
-            INSERT INTO assessment_notes (floor_id, component, note_text, status)
-            VALUES (?, ?, ?, 'saisie')
-        """, (floor_id, component, note_text))
+            INSERT INTO assessment_notes
+                   (floor_id, component, note_text, condition, risk_level, status)
+            VALUES (?, ?, ?, ?, ?, 'saisie')
+        """, (floor_id, component, note_text, condition, risk_level))
         note_id = cursor.lastrowid
         _refresh_notes_count(con, floor_id)
         con.commit()
@@ -2053,9 +2081,17 @@ def get_assessment_export(assessment_id: int) -> Optional[dict]:
                 total_photos += len(photos)
 
                 entry = par_composant.setdefault(note_row['component'], [])
+                # L'état et le risque portés par l'observation elle-même : ils
+                # servent au pré-remplissage des questionnaires, y compris
+                # pour une observation sans photo.
+                _cols = note_row.keys()
                 entry.append({
                     'note_id':    note_row['id'],
                     'texte':      note_row['note_text'],
+                    'etat':       (note_row['condition']
+                                   if 'condition' in _cols else '') or '',
+                    'niveau_risque': (note_row['risk_level']
+                                      if 'risk_level' in _cols else '') or '',
                     'cree_le':    note_row['created_at'],
                     'photos': [{
                         'photo_id':      p['id'],
