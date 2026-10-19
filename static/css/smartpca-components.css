@@ -1,0 +1,624 @@
+/* ============================================================================
+   SmartPCA — composants internes
+   ----------------------------------------------------------------------------
+   Chargée APRÈS la feuille propre à chaque page, pour reprendre ses
+   composants sans toucher à son balisage ni à son JavaScript.
+
+   Deux temps :
+     1. les jetons hérités (--accent, --surface, --text…) sont remappés sur la
+        charte Devoteam — à eux seuls ils reprennent une grande partie des
+        écrans ;
+     2. les primitives — boutons, cartes, champs, tableaux — sont redessinées
+        pour rejoindre le reste de l'application.
+   ========================================================================== */
+
+/* ── 1. Remappage des jetons hérités ──────────────────────────────────────── */
+
+body.dv {
+  --bg:        transparent;
+  --surface:   #ffffff;
+  --panel:     rgba(255, 255, 255, 0.72);
+  --border:    var(--line);
+  --text:      var(--grey);
+  --muted:     var(--ink-mute);
+
+  --accent:    var(--poppy);
+  --accent-d:  var(--poppy-ink);
+  --accent-bg: var(--poppy-film);
+
+  /* Les couleurs d'appoint rejoignent les accents de la charte. */
+  --blue: var(--lagoon);   --blue-bg: rgba(74, 140, 202, 0.08);
+  --blue-border: rgba(74, 140, 202, 0.22);
+  --bank: var(--lagoon);   --bank-bg: rgba(74, 140, 202, 0.08);
+  --bank-border: rgba(74, 140, 202, 0.22);
+  --green: var(--mint);    --green-bg: rgba(90, 184, 145, 0.10);
+  --ins: var(--mint);      --ins-bg: rgba(90, 184, 145, 0.10);
+  --ins-border: rgba(90, 184, 145, 0.22);
+  --info-bg: rgba(74, 140, 202, 0.08);
+  --info-border: rgba(74, 140, 202, 0.22);
+  --info-text: #2b5f91;
+
+  --r:  16px;
+  --sh: var(--sh-card);
+}
+
+body.dv { color: var(--grey); }
+
+/* ── 2. Surfaces ──────────────────────────────────────────────────────────── */
+
+body.dv #panel-left,
+body.dv #panel-right,
+body.dv #browser,
+body.dv #sb {
+  background: rgba(255, 255, 255, 0.60);
+  border-color: var(--line-soft);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+body.dv .card,
+body.dv .sec-card,
+body.dv .mode-card,
+body.dv .act-card,
+body.dv #confirm-box,
+body.dv #save-modal,
+body.dv #alert-panel {
+  background: var(--white);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--sh-card);
+}
+
+/* Les cartes cliquables se soulèvent : la carte dit qu'elle est un bouton. */
+body.dv .sec-card,
+body.dv .mode-card {
+  transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease),
+              border-color 0.3s;
+  cursor: pointer;
+}
+body.dv .sec-card:hover,
+body.dv .mode-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--sh-raise);
+  border-color: rgba(248, 72, 94, 0.28);
+}
+
+body.dv .card-hd,
+body.dv .cl-hd,
+body.dv .br-hd,
+body.dv .client-hd,
+body.dv .act-hd,
+body.dv .alert-hd {
+  border-bottom: 1px solid var(--line-soft);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--grey);
+}
+
+/* ── 3. Boutons ───────────────────────────────────────────────────────────── */
+
+body.dv .btn-sm,
+body.dv .btn-open,
+body.dv .btn-gen,
+body.dv .btn-save,
+body.dv .btn-sm-ok,
+body.dv .btn-upload,
+body.dv .btn-del-confirm {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease),
+              background 0.25s;
+}
+
+/* Action principale : Red Poppy, employé avec parcimonie. */
+body.dv .btn-open,
+body.dv .btn-gen,
+body.dv .btn-save,
+body.dv .btn-sm-ok,
+body.dv .btn-upload,
+body.dv .btn-del-confirm {
+  background: var(--poppy);
+  color: var(--white);
+  box-shadow: 0 11px 20px -8px rgba(248, 72, 94, 0.52),
+              0 3px 7px -2px rgba(248, 72, 94, 0.26),
+              inset 0 1px 0 rgba(255, 255, 255, 0.26),
+              inset 0 -2px 4px rgba(170, 20, 40, 0.28);
+}
+body.dv .btn-open:hover,
+body.dv .btn-gen:hover,
+body.dv .btn-save:hover,
+body.dv .btn-sm-ok:hover,
+body.dv .btn-upload:hover,
+body.dv .btn-del-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 17px 28px -10px rgba(248, 72, 94, 0.58),
+              0 5px 10px -3px rgba(248, 72, 94, 0.28),
+              inset 0 1px 0 rgba(255, 255, 255, 0.26),
+              inset 0 -2px 4px rgba(170, 20, 40, 0.28);
+}
+
+/* Action secondaire : blanc cerclé, elle ne dispute rien à la principale. */
+body.dv .btn-sm,
+body.dv .btn-cancel,
+body.dv .btn-sm-cancel,
+body.dv .btn-add,
+body.dv .btn-suggest {
+  background: var(--white);
+  color: var(--grey);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 16px -9px rgba(60, 50, 40, 0.28),
+              inset 0 0 0 1px var(--line);
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+body.dv .btn-sm:hover,
+body.dv .btn-cancel:hover,
+body.dv .btn-sm-cancel:hover,
+body.dv .btn-add:hover,
+body.dv .btn-suggest:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 13px 22px -10px rgba(60, 50, 40, 0.32),
+              inset 0 0 0 1px rgba(248, 72, 94, 0.34);
+}
+
+/* Suppression : l'icône seule, qui ne rougit qu'au survol. */
+body.dv .btn-rm,
+body.dv .pc-del {
+  background: none;
+  border: none;
+  color: var(--ink-mute);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+body.dv .btn-rm:hover,
+body.dv .pc-del:hover {
+  color: var(--poppy);
+  background: var(--poppy-film);
+}
+
+/* ── 4. Champs de saisie ──────────────────────────────────────────────────── */
+
+body.dv input[type="text"],
+body.dv input[type="search"],
+body.dv input[type="number"],
+body.dv input[type="date"],
+body.dv select,
+body.dv textarea,
+body.dv .filter-sel,
+body.dv .br-search input,
+body.dv .dmia-search-wrap input {
+  font-family: "Montserrat", sans-serif;
+  font-size: 13px;
+  color: var(--grey);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 13px;
+  transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
+}
+body.dv input[type="text"]::placeholder,
+body.dv input[type="search"]::placeholder,
+body.dv textarea::placeholder {
+  color: rgba(60, 60, 58, 0.36);
+}
+body.dv input[type="text"]:focus,
+body.dv input[type="search"]:focus,
+body.dv input[type="number"]:focus,
+body.dv select:focus,
+body.dv textarea:focus,
+body.dv .filter-sel:focus {
+  outline: none;
+  border-color: rgba(248, 72, 94, 0.55);
+  box-shadow: 0 0 0 3.5px var(--poppy-glow);
+}
+
+/* ── 5. Tableaux ──────────────────────────────────────────────────────────── */
+
+body.dv .bia-tbl,
+body.dv #montee-tbl {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+body.dv .bia-tbl thead th,
+body.dv #montee-tbl thead th {
+  background: rgba(239, 234, 220, 0.55);
+  color: var(--ink-soft);
+  font-family: "Montserrat", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+}
+body.dv .bia-tbl tbody td,
+body.dv #montee-tbl tbody td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13px;
+  color: var(--grey);
+  vertical-align: middle;
+}
+body.dv .bia-tbl tbody tr:last-child td { border-bottom: none; }
+body.dv .bia-tbl tbody tr { transition: background 0.18s; }
+body.dv .bia-tbl tbody tr:hover { background: rgba(239, 234, 220, 0.38); }
+
+/* Dans un tableau, le champ se fond : la grille porte déjà la structure. */
+body.dv .bia-tbl input[type="text"],
+body.dv .bia-tbl select,
+body.dv .bia-tbl textarea {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-size: 12.5px;
+}
+body.dv .bia-tbl input[type="text"]:hover,
+body.dv .bia-tbl select:hover,
+body.dv .bia-tbl textarea:hover { border-color: var(--line); background: var(--white); }
+body.dv .bia-tbl input[type="text"]:focus,
+body.dv .bia-tbl select:focus,
+body.dv .bia-tbl textarea:focus { background: var(--white); }
+
+/* ── 6. Lignes de liste : projets, fichiers, clients ──────────────────────── */
+
+body.dv .pc-name,
+body.dv .file-row,
+body.dv .cl-node,
+body.dv .dmia-row,
+body.dv .client-grp {
+  border-radius: 14px;
+  transition: background 0.2s, transform 0.25s var(--ease), box-shadow 0.25s;
+}
+body.dv .file-row:hover,
+body.dv .dmia-row:hover {
+  background: var(--poppy-film);
+  transform: translateX(3px);
+}
+
+/* Carte de projet : le survol la décolle légèrement. */
+body.dv .pc-icon {
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+body.dv .pc-date,
+body.dv .file-date,
+body.dv .pc-meta {
+  font-size: 11px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 7. Pastilles et badges ───────────────────────────────────────────────── */
+
+body.dv .ft-badge,
+body.dv .act-chip,
+body.dv .client-cnt,
+body.dv .cl-cnt,
+body.dv .dmia-freq,
+body.dv .dmia-val {
+  border-radius: var(--radius-pill);
+  font-family: "Montserrat", sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 3px 10px;
+}
+body.dv .dmia-val {
+  background: var(--poppy-film);
+  color: var(--poppy-ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+body.dv .ft-docx    { background: rgba(74, 140, 202, 0.10); color: #2b5f91; }
+body.dv .ft-editor  { background: rgba(90, 184, 145, 0.12); color: #2c7d59; }
+
+/* ── 8. Panneaux flottants ────────────────────────────────────────────────── */
+
+body.dv #toast {
+  border-radius: 14px;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  box-shadow: 0 20px 38px -14px rgba(30, 24, 20, 0.42),
+              0 7px 14px -5px rgba(30, 24, 20, 0.2);
+}
+body.dv #confirm-overlay,
+body.dv #save-modal-overlay {
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  background: rgba(40, 32, 28, 0.34);
+}
+body.dv #confirm-box,
+body.dv #save-modal {
+  border-radius: var(--radius-lg);
+  box-shadow: 0 34px 64px -22px rgba(30, 24, 20, 0.42),
+              0 12px 24px -10px rgba(30, 24, 20, 0.2);
+}
+
+body.dv #sync-hint-banner,
+body.dv #tip {
+  border-radius: 14px;
+  border: 1px solid var(--line-soft);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ── 9. Navigation latérale de l'éditeur (sommaire du document) ───────────── */
+
+body.dv .sb-a {
+  border-radius: 10px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  transition: background 0.2s, color 0.2s, transform 0.2s var(--ease);
+}
+body.dv .sb-a:hover {
+  background: var(--poppy-film);
+  color: var(--grey);
+  transform: translateX(3px);
+}
+body.dv .sb-a.active {
+  background: var(--poppy-film);
+  color: var(--grey);
+  font-weight: 600;
+}
+body.dv .sb-lbl {
+  font-family: "Montserrat", sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+}
+
+/* ── 10. Titres de page ───────────────────────────────────────────────────── */
+
+body.dv .doc-title,
+body.dv .tb-title,
+body.dv #topbar .title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--grey);
+}
+body.dv .doc-sub,
+body.dv .sec-desc,
+body.dv .mode-body {
+  color: var(--ink-soft);
+  line-height: 1.56;
+}
+
+/* Les zones de dépôt annoncent qu'on peut y glisser un fichier. */
+body.dv .drop,
+body.dv .dropzone,
+body.dv [class*="drop"] input[type="file"] + * {
+  border-radius: var(--radius);
+}
+
+/* ── 11. État vide ────────────────────────────────────────────────────────── */
+
+body.dv .empty,
+body.dv .br-empty {
+  color: var(--ink-mute);
+  font-size: 13px;
+  text-align: center;
+  padding: 26px 18px;
+}
+
+/* ── 12. Cartes de projet (base de projets) ───────────────────────────────── */
+
+body.dv .proj-card {
+  background: var(--white);
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  box-shadow: 0 10px 20px -12px rgba(60, 50, 40, 0.20),
+              inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease),
+              border-color 0.3s;
+}
+body.dv .proj-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 34px -16px rgba(60, 50, 40, 0.28),
+              0 7px 14px -6px rgba(60, 50, 40, 0.12);
+  border-color: rgba(248, 72, 94, 0.26);
+}
+body.dv .proj-grid { gap: 14px; }
+
+body.dv .client-grp {
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+body.dv .client-hd {
+  background: rgba(239, 234, 220, 0.5);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--grey);
+}
+body.dv .client-cnt {
+  background: var(--white);
+  color: var(--ink-mute);
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+/* L'icône de document porte la couleur du type : fiche ou synthèse. */
+body.dv .pc-icon.fiche    { background: rgba(74, 140, 202, 0.12); color: #2b5f91; }
+body.dv .pc-icon.synthese { background: rgba(90, 184, 145, 0.14); color: #2c7d59; }
+body.dv .pc-name { font-weight: 600; font-size: 13px; line-height: 1.38; color: var(--grey); }
+
+/* ── 13. Navigateur de fiches (sélecteur) ─────────────────────────────────── */
+
+body.dv .cl-node {
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+}
+body.dv .cl-hd { background: rgba(239, 234, 220, 0.46); font-size: 12.5px; }
+body.dv .file-row {
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+}
+body.dv .file-row:last-child { border-bottom: none; }
+body.dv .file-name { font-size: 12.5px; font-weight: 500; color: var(--grey); }
+
+body.dv .mode-ic, body.dv .sec-icon {
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* ── 14. Cartes d'activité (éditeur) ──────────────────────────────────────── */
+
+body.dv .act-card { border-radius: 18px; }
+body.dv .act-hd { background: rgba(239, 234, 220, 0.4); }
+body.dv .act-chip {
+  background: var(--poppy-film);
+  color: var(--poppy-ink);
+}
+body.dv .act-dot { box-shadow: 0 0 0 3px rgba(248, 72, 94, 0.12); }
+
+/* ── 15. Alertes ──────────────────────────────────────────────────────────── */
+
+body.dv .alert-item {
+  border-radius: 12px;
+  border: 1px solid var(--line-soft);
+  background: var(--white);
+  transition: border-color 0.25s, transform 0.25s var(--ease);
+}
+body.dv .alert-item:hover {
+  border-color: rgba(248, 72, 94, 0.3);
+  transform: translateX(3px);
+}
+
+/* ── 16. Une seule action principale par écran ────────────────────────────── */
+/* La charte veut le Red Poppy employé avec parcimonie. Deux boutons rouges
+   côte à côte se disputent l'attention : « Générer le .docx » reste l'appel
+   à l'action, « Sauvegarder dans la base » passe en Dark Grey. */
+
+body.dv .btn-save {
+  background: var(--grey);
+  color: #faf8f4;
+  box-shadow: 0 11px 20px -8px rgba(60, 60, 58, 0.5),
+              0 3px 7px -2px rgba(60, 60, 58, 0.26),
+              inset 0 1px 0 rgba(255, 255, 255, 0.14),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.32);
+}
+body.dv .btn-save:hover {
+  background: #2e2e2c;
+  box-shadow: 0 17px 28px -10px rgba(60, 60, 58, 0.55),
+              0 5px 10px -3px rgba(60, 60, 58, 0.28),
+              inset 0 1px 0 rgba(255, 255, 255, 0.14),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.32);
+}
+
+/* ── 17. Lisibilité des cellules ──────────────────────────────────────────── */
+/* Les libellés d'activité et les listes de processus tiennent sur plusieurs
+   lignes : les tronquer obligeait à cliquer dans chaque cellule pour lire. */
+
+body.dv .bia-tbl td { white-space: normal; word-break: break-word; }
+body.dv .bia-tbl textarea {
+  min-height: 62px;
+  line-height: 1.45;
+  resize: vertical;
+}
+body.dv .bia-tbl input[type="text"] { text-overflow: ellipsis; }
+
+/* ── 18. Primitives de l'application principale ───────────────────────────── */
+
+/* Appel à l'action : la pilule, comme partout ailleurs. */
+body.dv .btn-gold,
+body.dv .risk-gen-btn {
+  background: var(--poppy);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  box-shadow: 0 11px 20px -8px rgba(248, 72, 94, 0.52),
+              0 3px 7px -2px rgba(248, 72, 94, 0.26),
+              inset 0 1px 0 rgba(255, 255, 255, 0.26),
+              inset 0 -2px 4px rgba(170, 20, 40, 0.28);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+body.dv .btn-gold:hover,
+body.dv .risk-gen-btn:hover { transform: translateY(-2px); }
+
+body.dv .btn-ghost,
+body.dv .qz-btn-ghost,
+body.dv .ra-btn-ghost,
+body.dv .gf-tab-btn,
+body.dv .zoom-add-btn {
+  background: var(--white);
+  color: var(--grey);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  box-shadow: 0 8px 16px -9px rgba(60, 50, 40, 0.28),
+              inset 0 0 0 1px var(--line);
+  transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+}
+body.dv .btn-ghost:hover,
+body.dv .qz-btn-ghost:hover,
+body.dv .ra-btn-ghost:hover,
+body.dv .gf-tab-btn:hover,
+body.dv .zoom-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 13px 22px -10px rgba(60, 50, 40, 0.32),
+              inset 0 0 0 1px rgba(248, 72, 94, 0.34);
+}
+
+/* Carte de tableau de bord en tête d'étape. */
+body.dv .tdb-card {
+  background: rgba(255, 255, 255, 0.64);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--sh-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Zone de dépôt : elle doit dire qu'on peut y glisser un fichier. */
+body.dv .drop-zone {
+  border: 1.5px dashed rgba(60, 60, 58, 0.22);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.5);
+  transition: border-color 0.28s, background 0.28s, transform 0.28s var(--ease);
+}
+body.dv .drop-zone:hover,
+body.dv .drop-zone.dragover {
+  border-color: rgba(248, 72, 94, 0.5);
+  background: var(--poppy-film);
+}
+body.dv .drop-zone-title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--grey);
+}
+body.dv .drop-zone-sub,
+body.dv .drop-zone-instruction { color: var(--ink-mute); }
+
+/* En-tête de page. */
+body.dv .pg-title { font-family: "Montserrat", sans-serif; font-weight: 700;
+                    letter-spacing: -0.032em; color: var(--grey); }
+body.dv .pg-title strong { font-weight: 800; color: var(--poppy); }
+body.dv .pg-desc  { color: var(--ink-soft); line-height: 1.62; }
+body.dv .pg-label { color: var(--poppy); font-weight: 700; letter-spacing: 0.2em; }
