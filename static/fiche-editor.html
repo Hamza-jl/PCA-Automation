@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="/static/css/smartpca.css" />
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -370,8 +371,98 @@ textarea{resize:vertical;min-height:60px}
   .full{grid-column:1}
 }
 </style>
+  <style>
+    body.dv { background: radial-gradient(120% 72% at 50% 0%,
+              #faf8f4 0%, var(--beige) 52%, #e6e1d3 100%) !important; }
+    /* La barre d'outils propre a la page se range sous la barre commune. */
+    #topbar { top: var(--nav-h) !important;
+              background: rgba(250,248,244,0.72) !important;
+              backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+              border-bottom: 1px solid var(--line-soft) !important; }
+    #sb   { top: calc(52px + var(--nav-h)) !important; }
+    #main { margin-top: calc(52px + var(--nav-h)) !important; }
+  </style>
 </head>
-<body>
+<body class="dv">
+<div class="dv-grain"></div>
+
+<!-- Barre de navigation commune. Sur ces pages autonomes, les entrees de
+     l'application renvoient vers / avec ?page=, que index.html interprete. -->
+<nav class="dv-nav" role="navigation" aria-label="Navigation principale">
+  <a class="dv-brand" href="/">
+    <img src="/static/devoteam_mark.png" alt="Devoteam" />
+    <span>
+      <span class="dv-brand-name">Smart<em>PCA</em></span>
+      <span class="dv-brand-sub">Devoteam</span>
+    </span>
+  </a>
+
+  <ul class="dv-menu" id="dvMenu">
+    <li><a class="dv-menu-btn" href="/">Accueil</a></li>
+
+    <li>
+      <button class="dv-menu-btn" data-drop="d-synthese" aria-expanded="false" aria-haspopup="true">
+        <span class="dot" style="background:var(--poppy)"></span>Synth&egrave;se BIA
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dv-drop" id="d-synthese">
+        <div class="dv-drop-head">Phase 01 &middot; Consolidation</div>
+        <a class="dv-drop-item" href="/?page=page-generer-fiches"><span class="dv-drop-num">00</span><span class="dv-drop-label">G&eacute;n&eacute;rer les fiches BIA</span></a>
+        <a class="dv-drop-item" href="/?page=page-charger-fiches"><span class="dv-drop-num">01</span><span class="dv-drop-label">Charger les fiches BIA</span></a>
+        <a class="dv-drop-item" href="/?page=page-generer-synthese"><span class="dv-drop-num">02</span><span class="dv-drop-label">G&eacute;n&eacute;rer la synth&egrave;se BIA</span></a>
+        <a class="dv-drop-item" href="/?page=page-sync"><span class="dv-drop-num">03</span><span class="dv-drop-label">Synchronisation bidirectionnelle</span></a>
+        <a class="dv-drop-item" href="/?page=page-organigramme"><span class="dv-drop-num">04</span><span class="dv-drop-label">G&eacute;n&eacute;ration de l&rsquo;organigramme</span></a>
+      </div>
+    </li>
+
+    <li>
+      <button class="dv-menu-btn" data-drop="d-rapport" aria-expanded="false" aria-haspopup="true">
+        <span class="dot" style="background:var(--lagoon)"></span>Rapport BIA
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dv-drop" id="d-rapport">
+        <div class="dv-drop-head">Phase 01 &middot; Restitution</div>
+        <a class="dv-drop-item" href="/?page=page-rapport"><span class="dv-drop-num">05</span><span class="dv-drop-label">Tableau de bord BIA</span></a>
+        <a class="dv-drop-item" href="/?page=page-montee-en-charge"><span class="dv-drop-num">06</span><span class="dv-drop-label">Mont&eacute;e en charge</span></a>
+      </div>
+    </li>
+
+    <li>
+      <button class="dv-menu-btn" data-drop="d-risques" aria-expanded="false" aria-haspopup="true">
+        <span class="dot" style="background:var(--fire)"></span>Gestion des risques
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dv-drop" id="d-risques">
+        <div class="dv-drop-head">Phase 01 &middot; Risques</div>
+        <a class="dv-drop-item" href="/?page=page-collecte-specifiques"><span class="dv-drop-num">07</span><span class="dv-drop-label">Questionnaires sp&eacute;cifiques</span></a>
+        <a class="dv-drop-item" href="/?page=page-collecte-reponses"><span class="dv-drop-num">08</span><span class="dv-drop-label">R&eacute;ponses</span></a>
+        <a class="dv-drop-item" href="/?page=page-risques"><span class="dv-drop-num">09</span><span class="dv-drop-label">Cartographie des risques</span></a>
+        <a class="dv-drop-item" href="/?page=page-risques-assessment"><span class="dv-drop-num">10</span><span class="dv-drop-label">Analyse des risques</span></a>
+      </div>
+    </li>
+
+    <li>
+      <button class="dv-menu-btn" data-drop="d-ressources" aria-expanded="false" aria-haspopup="true">
+        <span class="dot" style="background:var(--mint)"></span>Ressources
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="dv-drop" id="d-ressources">
+        <div class="dv-drop-head">Capitalisation</div>
+        <a class="dv-drop-item __self_projects" href="/projects"><span class="dv-drop-num"><i class="fa-solid fa-database"></i></span><span class="dv-drop-label">Base de projets</span></a>
+        <a class="dv-drop-item __self_editor" href="/fiche-selector"><span class="dv-drop-num"><i class="fa-solid fa-file-pen"></i></span><span class="dv-drop-label">&Eacute;diteur de fiches</span></a>
+      </div>
+    </li>
+  </ul>
+
+  <span class="dv-nav-spacer"></span>
+  <a class="dv-pill" href="/?page=page-charger-fiches">
+    <i class="fa-solid fa-bolt" style="font-size:11px"></i> Nouvelle synth&egrave;se
+  </a>
+  <button class="dv-burger" id="dvBurger" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
 
 <div id="topbar">
   <a href="#" id="tb-back" onclick="handleNavBack(event)"><i class="fa-solid fa-arrow-left"></i> Sélection</a>
@@ -2686,6 +2777,53 @@ updBtn();
 loadProjectFromUrl().finally(() => {
   setTimeout(() => _markClean(), 300);
 });
+</script>
+
+<script>
+/* Pilote de la barre haute, version pages autonomes. */
+(function () {
+  var nav = document.querySelector('.dv-nav');
+  if (!nav) return;
+  var menu = document.getElementById('dvMenu');
+  var burger = document.getElementById('dvBurger');
+
+  function closeDrops() {
+    nav.querySelectorAll('.dv-drop').forEach(function (d) { d.classList.remove('open'); });
+    nav.querySelectorAll('.dv-menu-btn[data-drop]').forEach(function (b) {
+      b.setAttribute('aria-expanded', 'false');
+    });
+  }
+  nav.querySelectorAll('.dv-menu-btn[data-drop]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var drop = document.getElementById(btn.dataset.drop);
+      if (!drop) return;
+      var willOpen = !drop.classList.contains('open');
+      closeDrops();
+      if (willOpen) { drop.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    });
+  });
+  document.addEventListener('click', function (e) { if (!nav.contains(e.target)) closeDrops(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrops(); });
+  if (burger && menu) {
+    burger.addEventListener('click', function () {
+      var open = menu.classList.toggle('open');
+      burger.classList.toggle('open', open);
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open) closeDrops();
+    });
+  }
+  /* L'entree correspondant a la page courante est marquee. */
+  var here = location.pathname;
+  nav.querySelectorAll('.dv-drop-item').forEach(function (a) {
+    if (a.getAttribute('href') === here) {
+      a.classList.add('active');
+      var drop = a.closest('.dv-drop');
+      var btn = drop && nav.querySelector('.dv-menu-btn[data-drop="' + drop.id + '"]');
+      if (btn) btn.classList.add('is-current');
+    }
+  });
+})();
 </script>
 </body>
 </html>

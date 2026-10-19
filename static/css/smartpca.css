@@ -1,0 +1,808 @@
+/* ============================================================================
+   SmartPCA — système de design Devoteam
+   ----------------------------------------------------------------------------
+   Une seule feuille pour toutes les pages de l'application : barre de
+   navigation, boutons, cartes, formulaires, tableaux.
+
+   Les couleurs viennent de la charte Devoteam. Trois règles y sont
+   explicites et tenues ici :
+     - le Red Poppy s'emploie avec parcimonie, sur les appels à l'action ;
+     - le texte n'est jamais en noir pur, mais en Dark Grey ;
+     - les couleurs secondaires servent de fond ou de graphisme, jamais de
+       texte. Les accents sont réservés au codage par couleur des sections
+       et à la visualisation de données.
+   ========================================================================== */
+
+:root {
+  /* ── Primaires ─────────────────────────────────────────────────────────── */
+  --poppy:        #f8485e;
+  --poppy-ink:    #d92c42;   /* assombri pour le texte sur fond clair */
+  --grey:         #3c3c3a;
+  --white:        #ffffff;
+
+  /* ── Secondaires : fonds et graphismes uniquement ──────────────────────── */
+  --poppy-light:   #fca2ae;
+  --poppy-lighter: #fddade;
+  --aqua:          #d7ebe7;
+  --beige:         #efeadc;
+  --light-grey:    #efeeee;
+
+  /* ── Accents : codage de section, graphiques ───────────────────────────── */
+  --fire:   #fcc354;
+  --mint:   #5ab891;
+  --lagoon: #4a8cca;
+  --candy:  #ec86a3;
+  --violet: #63238c;
+
+  /* ── Dérivés ───────────────────────────────────────────────────────────── */
+  --ink:        var(--grey);
+  --ink-soft:   rgba(60, 60, 58, 0.72);
+  --ink-mute:   rgba(60, 60, 58, 0.48);
+  --line:       rgba(60, 60, 58, 0.10);
+  --line-soft:  rgba(60, 60, 58, 0.06);
+  --poppy-glow: rgba(248, 72, 94, 0.14);
+  --poppy-film: rgba(248, 72, 94, 0.07);
+
+  --nav-h: 64px;
+  --radius:      22px;
+  --radius-lg:   28px;
+  --radius-pill: 999px;
+
+  /* Ombres en couches : la profondeur vient de l'empilement, pas d'un flou */
+  --sh-card:  0 18px 34px -16px rgba(60, 50, 40, 0.20),
+              0 6px 14px -6px rgba(60, 50, 40, 0.10),
+              inset 0 1px 0 rgba(255, 255, 255, 0.70);
+  --sh-raise: 0 28px 52px -20px rgba(60, 50, 40, 0.28),
+              0 10px 20px -8px rgba(60, 50, 40, 0.14),
+              inset 0 1px 0 rgba(255, 255, 255, 0.70);
+  --sh-pill:  0 12px 22px -8px rgba(60, 40, 40, 0.38),
+              0 4px 8px -2px rgba(60, 40, 40, 0.18),
+              inset 0 1px 0 rgba(255, 255, 255, 0.18),
+              inset 0 -2px 4px rgba(0, 0, 0, 0.22);
+  --ease: cubic-bezier(0.6, 0, 0.2, 1);
+}
+
+/* ============================================================================
+   Base
+   ========================================================================== */
+
+html, body {
+  background: var(--light-grey);
+  color: var(--ink);
+  font-family: "Montserrat", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.dv {
+  background: radial-gradient(120% 72% at 50% 0%,
+              #faf8f4 0%, var(--beige) 52%, #e6e1d3 100%);
+  min-height: 100vh;
+}
+
+/* Grain : réchauffe les aplats et évite l'aspect « dégradé plastique ». */
+.dv-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+::selection { background: var(--poppy-glow); color: var(--ink); }
+
+:where(a, button, [role="button"], input, select, textarea):focus-visible {
+  outline: 2px solid var(--poppy);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ============================================================================
+   Barre de navigation — logo, menus déroulants, action
+   ========================================================================== */
+
+.dv-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  height: var(--nav-h);
+  padding: 0 clamp(16px, 2.5vw, 34px);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(250, 248, 244, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.dv-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.dv-brand img {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: block;
+  box-shadow: 0 6px 14px -5px rgba(248, 72, 94, 0.55);
+}
+.dv-brand-name {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  line-height: 1;
+}
+.dv-brand-name em {
+  font-style: normal;
+  color: var(--poppy);
+}
+.dv-brand-sub {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-top: 3px;
+}
+
+/* ── Menus ─────────────────────────────────────────────────────────────── */
+
+.dv-menu {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+  list-style: none;
+  padding: 0;
+}
+.dv-menu > li { position: relative; }
+
+.dv-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink-soft);
+  padding: 9px 13px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.22s, background 0.22s;
+}
+.dv-menu-btn:hover,
+.dv-menu-btn[aria-expanded="true"] {
+  color: var(--ink);
+  background: rgba(60, 60, 58, 0.05);
+}
+.dv-menu-btn .chev {
+  width: 9px; height: 9px;
+  transition: transform 0.3s var(--ease);
+  opacity: 0.55;
+}
+.dv-menu-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+/* Pastille de couleur : chaque groupe porte son accent. */
+.dv-menu-btn .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dv-menu-btn.is-current {
+  color: var(--ink);
+  background: var(--poppy-film);
+}
+
+/* ── Panneau déroulant ─────────────────────────────────────────────────── */
+
+.dv-drop {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 0;
+  min-width: 278px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  padding: 7px;
+  box-shadow: 0 26px 48px -18px rgba(60, 50, 40, 0.30),
+              0 10px 20px -8px rgba(60, 50, 40, 0.14);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.985);
+  transform-origin: top left;
+  transition: opacity 0.26s var(--ease),
+              transform 0.26s var(--ease),
+              visibility 0.26s;
+}
+.dv-drop.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.dv-drop-head {
+  padding: 8px 11px 9px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.dv-drop-head::before {
+  content: "";
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.dv-drop-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 10px 11px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-align: left;
+  text-decoration: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.2s var(--ease);
+}
+.dv-drop-item:hover {
+  background: var(--poppy-film);
+  color: var(--ink);
+  transform: translateX(3px);
+}
+.dv-drop-item.active {
+  background: var(--poppy-film);
+  color: var(--ink);
+  font-weight: 600;
+}
+.dv-drop-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+  min-width: 17px;
+  flex-shrink: 0;
+}
+.dv-drop-item.active .dv-drop-num { color: var(--poppy); }
+.dv-drop-label { flex: 1; line-height: 1.3; }
+.dv-drop-ext { font-size: 9px; opacity: 0.4; flex-shrink: 0; }
+
+.dv-nav-spacer { flex: 1; }
+
+/* ── Pilule d'action ───────────────────────────────────────────────────── */
+
+.dv-pill {
+  background: var(--poppy);
+  color: var(--white);
+  border: none;
+  padding: 11px 23px;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 12px 22px -8px rgba(248, 72, 94, 0.55),
+              0 4px 8px -2px rgba(248, 72, 94, 0.28),
+              inset 0 1px 0 rgba(255, 255, 255, 0.28),
+              inset 0 -2px 4px rgba(170, 20, 40, 0.30);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.dv-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px -10px rgba(248, 72, 94, 0.6),
+              0 6px 12px -3px rgba(248, 72, 94, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.28),
+              inset 0 -2px 4px rgba(170, 20, 40, 0.30);
+}
+.dv-pill:active { transform: translateY(0); }
+
+.dv-pill.ghost {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 10px 20px -10px rgba(60, 50, 40, 0.3),
+              0 3px 7px -2px rgba(60, 50, 40, 0.12),
+              inset 0 0 0 1px var(--line);
+}
+.dv-pill.ghost:hover {
+  box-shadow: 0 16px 26px -12px rgba(60, 50, 40, 0.34),
+              0 5px 10px -3px rgba(60, 50, 40, 0.14),
+              inset 0 0 0 1px rgba(248, 72, 94, 0.35);
+}
+
+.dv-pill.dark {
+  background: var(--grey);
+  color: #faf8f4;
+  box-shadow: var(--sh-pill);
+}
+
+/* ── Burger (mobile) ───────────────────────────────────────────────────── */
+
+.dv-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.dv-burger span {
+  display: block;
+  width: 19px; height: 1.6px;
+  background: var(--ink-soft);
+  border-radius: 2px;
+  transition: transform 0.3s var(--ease), opacity 0.3s;
+}
+.dv-burger.open span:nth-child(1) { transform: translateY(6.6px) rotate(45deg); }
+.dv-burger.open span:nth-child(2) { opacity: 0; }
+.dv-burger.open span:nth-child(3) { transform: translateY(-6.6px) rotate(-45deg); }
+
+/* ============================================================================
+   Hero d'accueil
+   ========================================================================== */
+
+.dv-hero {
+  padding: calc(var(--nav-h) + 62px) 34px 30px;
+  text-align: center;
+  position: relative;
+}
+
+.dv-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 22px;
+}
+.dv-eyebrow::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--poppy);
+  box-shadow: 0 0 0 3.5px var(--poppy-glow);
+}
+
+.dv-headline {
+  font-weight: 800;
+  font-size: clamp(38px, 6.6vw, 104px);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  max-width: 1180px;
+  margin: 0 auto;
+  text-wrap: balance;
+}
+.dv-headline .ln {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.6vw, 24px);
+  flex-wrap: wrap;
+  padding: 2px 0;
+}
+.dv-headline .w {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.dv-headline .w > span {
+  display: inline-block;
+  transform: translateY(105%);
+}
+
+/* Pilule « local » dans le titre — l'argument qui ouvre les portes. */
+.dv-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  background: var(--poppy);
+  border-radius: var(--radius-pill);
+  padding: 7px 11px 7px 20px;
+  transform: scale(0);
+  box-shadow: 0 16px 28px -12px rgba(248, 72, 94, 0.55),
+              0 6px 12px -3px rgba(248, 72, 94, 0.25),
+              inset 0 2px 0 rgba(255, 255, 255, 0.30),
+              inset 0 -2px 5px rgba(170, 20, 40, 0.32);
+  will-change: transform;
+}
+.dv-hero-pill .t {
+  font-size: clamp(10px, 1.08vw, 16px);
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: -0.012em;
+  color: var(--white);
+  text-align: left;
+}
+.dv-hero-pill .orb {
+  width: clamp(34px, 4.1vw, 62px);
+  height: clamp(34px, 4.1vw, 62px);
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  background: radial-gradient(circle at 34% 30%,
+              #ffffff 0%, #ffd3d9 36%, #f8485e 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55),
+              inset 0 -3px 6px rgba(150, 18, 36, 0.35),
+              0 5px 11px -3px rgba(150, 18, 36, 0.4);
+}
+.dv-hero-pill .orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 70% 72%,
+              rgba(150, 18, 36, 0.22), transparent 54%);
+}
+
+/* Pastille image du titre — le dégradé de marque */
+.dv-hero-blob {
+  display: inline-block;
+  width: clamp(86px, 11vw, 186px);
+  height: clamp(46px, 5.9vw, 98px);
+  border-radius: var(--radius-pill);
+  position: relative;
+  overflow: hidden;
+  transform: scale(0);
+  will-change: transform;
+  background: linear-gradient(128deg,
+              var(--fire) 0%, var(--poppy) 38%,
+              var(--candy) 68%, var(--lagoon) 100%);
+  box-shadow: 0 18px 30px -12px rgba(120, 40, 60, 0.42),
+              0 6px 13px -4px rgba(120, 40, 60, 0.2),
+              inset 0 2px 0 rgba(255, 255, 255, 0.3),
+              inset 0 -3px 7px rgba(110, 25, 45, 0.25);
+}
+.dv-hero-blob::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(96deg, transparent 0 7px,
+              rgba(0, 0, 0, 0.055) 7px 8px),
+              linear-gradient(158deg, rgba(255,255,255,0.22) 0%,
+              transparent 32%, transparent 70%, rgba(80,20,35,0.2) 100%);
+}
+
+.dv-hero-sub {
+  max-width: 620px;
+  margin: 30px auto 0;
+  font-size: 15.5px;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+.dv-hero-cta {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+/* ============================================================================
+   Cartes et blocs de contenu
+   ========================================================================== */
+
+.dv-wrap    { max-width: 1280px; margin: 0 auto; padding: 0 34px; }
+.dv-section { padding: 62px 0; position: relative; }
+
+.dv-sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 38px;
+  flex-wrap: wrap;
+  margin-bottom: 38px;
+}
+.dv-sec-head h2 {
+  font-weight: 700;
+  font-size: clamp(27px, 3.4vw, 46px);
+  line-height: 1.04;
+  letter-spacing: -0.032em;
+  color: var(--ink);
+  max-width: 640px;
+  text-wrap: balance;
+}
+.dv-sec-head h2 em {
+  font-style: normal;
+  color: var(--poppy);
+}
+.dv-sec-head > p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 340px;
+}
+
+.dv-grid   { display: grid; gap: 20px; }
+.dv-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.dv-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.dv-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+.dv-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 26px;
+  box-shadow: var(--sh-card);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease);
+}
+.dv-card.hoverable { cursor: pointer; }
+.dv-card.hoverable:hover {
+  transform: translateY(-7px);
+  box-shadow: var(--sh-raise);
+}
+.dv-card h3 {
+  font-weight: 700;
+  font-size: 18.5px;
+  letter-spacing: -0.024em;
+  color: var(--ink);
+  line-height: 1.22;
+}
+.dv-card p {
+  font-size: 13.5px;
+  line-height: 1.58;
+  color: var(--ink-soft);
+  flex: 1;
+}
+
+/* Icône pastille — chaque module porte son accent, d'où les modificateurs. */
+.dv-ic {
+  width: 54px; height: 54px;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 19px;
+  box-shadow: 0 11px 20px -7px rgba(60, 40, 40, 0.3),
+              inset 0 2px 0 rgba(255, 255, 255, 0.3),
+              inset 0 -2px 5px rgba(0, 0, 0, 0.17);
+}
+.dv-ic::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(156deg, rgba(255,255,255,0.24) 0%, transparent 36%);
+}
+.dv-ic.poppy  { background: radial-gradient(circle at 32% 28%, #ff8e9c 0%, var(--poppy) 58%, #b4172e 100%); }
+.dv-ic.fire   { background: radial-gradient(circle at 32% 28%, #ffe4a8 0%, var(--fire) 58%, #c08a16 100%); }
+.dv-ic.mint   { background: radial-gradient(circle at 32% 28%, #a8e0c6 0%, var(--mint) 58%, #2c7d59 100%); }
+.dv-ic.lagoon { background: radial-gradient(circle at 32% 28%, #9ec8ec 0%, var(--lagoon) 58%, #215a8e 100%); }
+.dv-ic.candy  { background: radial-gradient(circle at 32% 28%, #ffbed2 0%, var(--candy) 58%, #b84a6b 100%); }
+.dv-ic.violet { background: radial-gradient(circle at 32% 28%, #b78fd4 0%, var(--violet) 58%, #3c1256 100%); }
+.dv-ic.grey   { background: radial-gradient(circle at 32% 28%, #7d7d79 0%, var(--grey) 58%, #1d1d1c 100%); }
+
+.dv-link {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: gap 0.3s var(--ease), color 0.3s;
+}
+.dv-link:hover { gap: 12px; color: var(--poppy); }
+
+/* ── Statistiques ──────────────────────────────────────────────────────── */
+
+.dv-stat .n {
+  font-weight: 800;
+  font-size: clamp(30px, 3.4vw, 46px);
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.dv-stat .n small {
+  font-size: 0.5em;
+  font-weight: 700;
+  color: var(--poppy);
+}
+.dv-stat p {
+  font-size: 12.5px;
+  line-height: 1.48;
+  color: var(--ink-soft);
+  margin-top: 7px;
+}
+
+/* ── Bandeau sombre ────────────────────────────────────────────────────── */
+
+.dv-slab {
+  background: var(--grey);
+  border-radius: 34px;
+  padding: 62px 52px;
+  color: #f6f3ef;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 38px 74px -30px rgba(30, 24, 20, 0.5),
+              0 14px 28px -12px rgba(30, 24, 20, 0.26),
+              inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+.dv-slab::before,
+.dv-slab::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(34px);
+  pointer-events: none;
+}
+.dv-slab::before {
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, rgba(248,72,94,0.26), transparent 66%);
+  top: -190px; left: -110px;
+}
+.dv-slab::after {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(252,195,84,0.16), transparent 66%);
+  bottom: -170px; right: -80px;
+}
+.dv-slab > * { position: relative; z-index: 1; }
+.dv-slab h2 {
+  font-weight: 800;
+  font-size: clamp(27px, 3.6vw, 50px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.dv-slab h2 em {
+  font-style: italic;
+  font-weight: 700;
+  background: linear-gradient(126deg, var(--poppy-light), var(--fire));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.dv-slab p { color: rgba(255, 255, 255, 0.66); }
+
+/* ============================================================================
+   Page intérieure : en-tête et contenu
+   ========================================================================== */
+
+.dv-page-head { margin-bottom: 26px; }
+.dv-page-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--poppy);
+  background: var(--poppy-film);
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 13px;
+}
+.dv-page-title {
+  font-weight: 700;
+  font-size: clamp(23px, 2.9vw, 36px);
+  letter-spacing: -0.032em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.dv-page-title strong { font-weight: 800; color: var(--poppy); }
+.dv-page-desc {
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  max-width: 760px;
+  margin-top: 11px;
+}
+
+/* ============================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 1080px) {
+  .dv-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .dv-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .dv-burger { display: flex; }
+  .dv-nav-spacer { flex: 1; }
+
+  .dv-menu {
+    position: fixed;
+    top: var(--nav-h);
+    left: 0; right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    margin: 0;
+    padding: 14px;
+    background: rgba(250, 248, 244, 0.985);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.38s var(--ease);
+  }
+  .dv-menu.open { transform: translateX(0); }
+  .dv-menu-btn { width: 100%; justify-content: flex-start; font-size: 14.5px; padding: 13px; }
+
+  /* En pile, le panneau s'insère dans le flux plutôt que de flotter. */
+  .dv-drop {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    min-width: 0;
+    padding: 0 0 7px 13px;
+    display: none;
+  }
+  .dv-drop.open { display: block; }
+
+  .dv-grid-3, .dv-grid-4, .dv-grid-2 { grid-template-columns: 1fr; }
+  .dv-slab { padding: 40px 24px; border-radius: 26px; }
+  .dv-wrap { padding: 0 18px; }
+  .dv-hero { padding: calc(var(--nav-h) + 38px) 18px 22px; }
+  .dv-brand-sub { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .dv-headline .w > span { transform: none !important; }
+  .dv-hero-pill, .dv-hero-blob { transform: scale(1) !important; }
+}
