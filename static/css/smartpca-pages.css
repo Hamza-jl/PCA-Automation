@@ -1,0 +1,251 @@
+/* ============================================================================
+   SmartPCA — pages intérieures
+   ----------------------------------------------------------------------------
+   Les écrans de travail gardaient leur langage d'origine : titres en graisse
+   fine, cartes à petit rayon, libellés minuscules. L'accueil, lui, parle en
+   Montserrat gras, en cartes largement arrondies et en ombres empilées.
+   Cette feuille aligne les seconds sur le premier.
+
+   Elle est chargée en dernier et ne touche ni au balisage ni au JavaScript :
+   les classes existantes — .pg-title, .app-card, .tdb-card — sont reprises
+   telles quelles.
+   ========================================================================== */
+
+/* ── Respiration générale ────────────────────────────────────────────────── */
+
+body.dv .app-page {
+  padding: 40px clamp(20px, 3.4vw, 46px) 72px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+/* ── En-tête de page ─────────────────────────────────────────────────────── */
+
+body.dv .pg-header { margin-bottom: 34px; }
+
+/* Le filet qui suivait le libellé est remplacé par la pastille de l'accueil :
+   même signal, même vocabulaire d'un bout à l'autre de l'application. */
+body.dv .pg-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  background: none;
+  padding: 0;
+  margin-bottom: 16px;
+}
+body.dv .pg-label::after { display: none; }
+body.dv .pg-label::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--poppy);
+  box-shadow: 0 0 0 3.5px var(--poppy-glow);
+  flex-shrink: 0;
+}
+body.dv .pg-label i { color: var(--poppy); font-size: 11px; }
+
+body.dv .pg-title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: clamp(27px, 3.4vw, 44px);
+  line-height: 1.04;
+  letter-spacing: -0.038em;
+  color: var(--ink);
+  margin-bottom: 0;
+  text-wrap: balance;
+}
+body.dv .pg-title strong { font-weight: 800; color: var(--poppy); }
+
+body.dv .pg-desc {
+  font-size: 14.5px;
+  line-height: 1.64;
+  color: var(--ink-soft);
+  max-width: 700px;
+  margin-top: 14px;
+}
+
+/* ── Cartes de travail ───────────────────────────────────────────────────── */
+
+body.dv .app-card {
+  background: var(--white);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  padding: 26px 28px;
+  box-shadow: var(--sh-card);
+}
+body.dv .app-card + .app-card { margin-top: 20px; }
+
+body.dv .app-card-title {
+  font-family: "Montserrat", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  text-transform: none;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+/* L'icône reprend la pastille de l'accueil plutôt qu'un glyphe nu. */
+body.dv .app-card-title i {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--white);
+  background: radial-gradient(circle at 32% 28%, #ff8e9c 0%, var(--poppy) 58%, #b4172e 100%);
+  box-shadow: 0 7px 14px -6px rgba(248, 72, 94, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+}
+
+/* ── Bandeau de tête d'étape ─────────────────────────────────────────────── */
+
+body.dv .tdb-card {
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  padding: 24px 26px;
+  margin-bottom: 28px;
+  box-shadow: var(--sh-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  gap: 18px;
+}
+body.dv .tdb-icon-wrap {
+  width: 52px; height: 52px;
+  border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: var(--white);
+  background: radial-gradient(circle at 32% 28%, #ff8e9c 0%, var(--poppy) 58%, #b4172e 100%);
+  box-shadow: 0 11px 20px -7px rgba(248, 72, 94, 0.45),
+              inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}
+body.dv .tdb-title {
+  font-family: "Montserrat", sans-serif;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+body.dv .tdb-desc,
+body.dv .tdb-card p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+body.dv .tdb-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(60, 60, 58, 0.06);
+  color: var(--ink-soft);
+  margin-top: 12px;
+  margin-right: 7px;
+}
+body.dv .tdb-tag.ok {
+  background: rgba(90, 184, 145, 0.14);
+  color: #2c7d59;
+}
+
+/* ── Fil d'Ariane ────────────────────────────────────────────────────────── */
+
+body.dv .tb-crumb-group { font-size: 11.5px; color: var(--ink-mute); font-weight: 500; }
+body.dv .tb-crumb-page  { font-size: 11.5px; color: var(--ink); font-weight: 600; }
+
+/* ── Étapes du parcours ──────────────────────────────────────────────────── */
+
+body.dv #wf-stepper { padding: 0 clamp(20px, 3.4vw, 46px); }
+body.dv .wfs-item {
+  font-family: "Montserrat", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+/* ── Titres de section internes ──────────────────────────────────────────── */
+
+body.dv .sec-h1 {
+  font-family: "Montserrat", sans-serif;
+  font-size: clamp(19px, 2.3vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+body.dv .sec-h1 .num {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  background: var(--poppy);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  box-shadow: 0 7px 14px -7px rgba(248, 72, 94, 0.55);
+}
+
+/* ── Encadrés d'explication ──────────────────────────────────────────────── */
+
+body.dv .instr {
+  font-size: 13px;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  background: rgba(239, 234, 220, 0.46);
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 15px 18px;
+  margin-bottom: 18px;
+}
+body.dv .instr ul { margin: 8px 0 0 18px; }
+body.dv .instr li { margin-bottom: 5px; }
+
+body.dv .tbl-cap {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  font-style: normal;
+  text-transform: none;
+  margin-bottom: 8px;
+}
+
+/* ── Écrans vides ────────────────────────────────────────────────────────── */
+
+body.dv .placeholder-page,
+body.dv .app-page .empty {
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+  padding: 46px 28px;
+  color: var(--ink-mute);
+  font-size: 13.5px;
+}
+
+@media (max-width: 760px) {
+  body.dv .app-page { padding: 26px 18px 56px; }
+  body.dv .app-card { padding: 20px; border-radius: 20px; }
+  body.dv .tdb-card { padding: 18px; }
+}
