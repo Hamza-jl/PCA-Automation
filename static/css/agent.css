@@ -1,0 +1,220 @@
+/* ============================================================================
+   SmartPCA — l'assistant
+   Bulle, fenêtre de discussion, visite guidée.
+   ========================================================================== */
+
+.dv-ag-bulle {
+  position: fixed;
+  right: 22px; bottom: 22px;
+  z-index: 9500;
+  width: 56px; height: 56px;
+  border: none; border-radius: 50%;
+  background: var(--poppy);
+  color: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 16px 30px -10px rgba(248, 72, 94, 0.6),
+              0 6px 12px -3px rgba(248, 72, 94, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.28),
+              inset 0 -2px 5px rgba(170, 20, 40, 0.3);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.dv-ag-bulle svg { width: 24px; height: 24px; }
+.dv-ag-bulle:hover { transform: translateY(-3px) scale(1.04); }
+.dv-ag-bulle.actif { transform: scale(0.92); }
+
+/* La pastille signale que l'assistant reconnaît la page affichée. */
+.dv-ag-pastille {
+  position: absolute; top: 3px; right: 3px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--mint);
+  border: 2px solid #faf8f4;
+}
+
+.dv-ag-panneau {
+  position: fixed;
+  right: 22px; bottom: 90px;
+  z-index: 9500;
+  width: min(372px, calc(100vw - 32px));
+  height: min(520px, calc(100vh - 140px));
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--line-soft);
+  border-radius: 20px;
+  box-shadow: 0 30px 60px -22px rgba(60, 50, 40, 0.38),
+              0 12px 24px -10px rgba(60, 50, 40, 0.18);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  opacity: 0; visibility: hidden;
+  transform: translateY(14px) scale(0.97);
+  transform-origin: bottom right;
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease), visibility 0.3s;
+}
+.dv-ag-panneau.open { opacity: 1; visibility: visible; transform: none; }
+
+.dv-ag-tete {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  background: rgba(239, 234, 220, 0.42);
+  flex-shrink: 0;
+}
+.dv-ag-tete img { width: 28px; height: 28px; border-radius: 8px; }
+.dv-ag-tete-txt { flex: 1; line-height: 1.25; min-width: 0; }
+.dv-ag-tete-txt strong {
+  display: block; font-size: 13.5px; font-weight: 700;
+  letter-spacing: -0.02em; color: var(--grey);
+}
+.dv-ag-tete-txt span {
+  display: block; font-size: 10.5px; color: var(--ink-mute);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dv-ag-fermer {
+  background: none; border: none; cursor: pointer; padding: 6px;
+  border-radius: 8px; color: var(--ink-mute); display: flex;
+}
+.dv-ag-fermer svg { width: 15px; height: 15px; }
+.dv-ag-fermer:hover { background: rgba(60, 60, 58, 0.07); color: var(--grey); }
+
+.dv-ag-fil {
+  flex: 1; overflow-y: auto; padding: 14px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+
+.dv-ag-msg {
+  max-width: 86%;
+  padding: 9px 13px;
+  border-radius: 15px;
+  font-size: 13px;
+  line-height: 1.52;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.dv-ag-msg.ag {
+  background: rgba(239, 234, 220, 0.6); color: var(--grey);
+  align-self: flex-start; border-bottom-left-radius: 5px;
+}
+.dv-ag-msg.moi {
+  background: var(--poppy); color: var(--white);
+  align-self: flex-end; border-bottom-right-radius: 5px;
+}
+.dv-ag-msg.erreur { background: var(--poppy-film); color: var(--poppy-ink); }
+
+.dv-ag-points { display: inline-flex; gap: 4px; align-items: center; height: 16px; }
+.dv-ag-points i {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink-mute); animation: dvAgSaut 1.1s infinite;
+}
+.dv-ag-points i:nth-child(2) { animation-delay: 0.15s; }
+.dv-ag-points i:nth-child(3) { animation-delay: 0.30s; }
+@keyframes dvAgSaut {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30%           { opacity: 1;   transform: translateY(-4px); }
+}
+
+.dv-ag-fichiers { display: flex; flex-direction: column; gap: 6px; align-self: stretch; }
+.dv-ag-fichier {
+  text-align: left; background: var(--white); border: 1px solid var(--line-soft);
+  border-radius: 12px; padding: 9px 11px; cursor: pointer; font-family: inherit;
+  transition: border-color 0.2s, transform 0.2s var(--ease);
+}
+.dv-ag-fichier:hover { border-color: rgba(248, 72, 94, 0.4); transform: translateX(3px); }
+.dv-ag-fichier .n {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--grey); line-height: 1.35;
+}
+.dv-ag-fichier .m {
+  display: block; font-size: 10.5px; color: var(--ink-mute); margin-top: 2px;
+}
+
+.dv-ag-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; }
+.dv-ag-sug {
+  font-family: inherit; font-size: 11.5px; font-weight: 500;
+  background: var(--white); color: var(--ink-soft);
+  border: none; border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: color 0.2s, box-shadow 0.2s;
+}
+.dv-ag-sug:hover { color: var(--grey); box-shadow: inset 0 0 0 1px rgba(248, 72, 94, 0.4); }
+
+.dv-ag-saisie {
+  display: flex; gap: 8px; padding: 11px 13px;
+  border-top: 1px solid var(--line-soft); flex-shrink: 0;
+}
+.dv-ag-saisie input {
+  flex: 1; font-family: inherit; font-size: 13px; color: var(--grey);
+  border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px;
+  background: var(--white); transition: border-color 0.2s, box-shadow 0.2s;
+}
+.dv-ag-saisie input:focus {
+  outline: none; border-color: rgba(248, 72, 94, 0.5);
+  box-shadow: 0 0 0 3px var(--poppy-glow);
+}
+.dv-ag-saisie button {
+  width: 38px; height: 38px; border: none; border-radius: 50%; flex-shrink: 0;
+  background: var(--poppy); color: var(--white); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 16px -7px rgba(248, 72, 94, 0.6);
+  transition: transform 0.3s var(--ease);
+}
+.dv-ag-saisie button svg { width: 15px; height: 15px; }
+.dv-ag-saisie button:hover { transform: scale(1.07); }
+
+/* ── Visite guidée ──────────────────────────────────────────────────────── */
+/* On entoure l'élément commenté plutôt que de voiler la page : une surcouche
+   sombre rendrait illisible ce que l'on est précisément en train d'expliquer.
+   L'ombre portée géante assombrit tout sauf la découpe. */
+.dv-ag-surlignage {
+  position: fixed;
+  z-index: 9600;
+  border-radius: 14px;
+  pointer-events: none;
+  border: 2px solid var(--poppy);
+  box-shadow: 0 0 0 9999px rgba(40, 32, 28, 0.42),
+              0 0 0 5px var(--poppy-glow);
+  animation: dvAgEntre 0.34s var(--ease);
+}
+@keyframes dvAgEntre { from { opacity: 0; transform: scale(0.97); } }
+
+.dv-ag-carte {
+  position: fixed;
+  z-index: 9700;
+  width: min(300px, calc(100vw - 28px));
+  background: var(--white);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 26px 48px -18px rgba(30, 24, 20, 0.45),
+              0 10px 20px -8px rgba(30, 24, 20, 0.22);
+  animation: dvAgEntre 0.34s var(--ease);
+}
+.dv-ag-carte-num {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+  color: var(--poppy); margin-bottom: 7px; font-variant-numeric: tabular-nums;
+}
+.dv-ag-carte h4 {
+  font-size: 14.5px; font-weight: 700; letter-spacing: -0.022em;
+  color: var(--grey); margin-bottom: 6px; line-height: 1.3;
+}
+.dv-ag-carte p { font-size: 12.5px; line-height: 1.55; color: var(--ink-soft); }
+.dv-ag-carte-btns { display: flex; gap: 8px; margin-top: 13px; justify-content: flex-end; }
+.dv-ag-skip, .dv-ag-next {
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  border: none; border-radius: 999px; padding: 7px 15px; cursor: pointer;
+}
+.dv-ag-skip { background: none; color: var(--ink-mute); }
+.dv-ag-skip:hover { color: var(--grey); }
+.dv-ag-next {
+  background: var(--poppy); color: var(--white);
+  box-shadow: 0 8px 16px -7px rgba(248, 72, 94, 0.55);
+}
+
+@media (max-width: 600px) {
+  .dv-ag-panneau { right: 12px; left: 12px; width: auto; bottom: 82px; }
+  .dv-ag-bulle { right: 14px; bottom: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dv-ag-surlignage, .dv-ag-carte { animation: none; }
+  .dv-ag-points i { animation: none; opacity: 0.6; }
+}

@@ -2696,6 +2696,42 @@ async def ra_prefill(assessment_id: int, request: Request):
     }
 
 
+@app.post("/api/agent/chat")
+async def agent_chat(request: Request):
+    """
+    L'assistant : une question, une reponse, et le cas echeant une action.
+
+    Les actions — naviguer, ouvrir un fichier, lancer une visite guidee —
+    sont decidees par le code et non par le modele : elles doivent aboutir
+    a tous les coups.
+    """
+    import agent as _ag
+    body = await request.json()
+    message = (body.get("message") or "").strip()
+    page = (body.get("page") or "").strip()
+    modele = (body.get("model") or _ag.MODELE_DEFAUT).strip()
+    try:
+        return _ag.repondre(message, page, modele)
+    except Exception as exc:
+        raise HTTPException(500, "Assistant indisponible : %s" % exc)
+
+
+@app.get("/api/agent/page-info")
+async def agent_page_info(page: str = ""):
+    """Fiche descriptive d'une page, pour l'aide contextuelle."""
+    import agent_kb as _kb
+    fiche = _kb.tout_le_catalogue().get(page)
+    if not fiche:
+        raise HTTPException(404, "Page inconnue.")
+    return {
+        "titre": fiche["titre"],
+        "resume": fiche.get("resume", ""),
+        "a_quoi_ca_sert": fiche.get("a_quoi_ca_sert", ""),
+        "comment": fiche.get("comment", ""),
+        "etapes_demo": len(fiche.get("demo", []) or []),
+    }
+
+
 @app.get("/api/risk-assessment/{assessment_id}/export")
 async def ra_export(assessment_id: int):
     """Export structuré de l'évaluation, destiné à l'agent de synthèse."""
